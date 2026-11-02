@@ -80,6 +80,14 @@ public:
         if(output&&(!core_.MuseOutputDataChecked(l,raw_output_)||!Current(l)))return Fail();
         consumed=count;Wipe();return true;
     }
+    bool HasLease()const{return bool(lease_);}
+    bool ResetDsp(const AudioLease& l,Directions selected){
+        if(!Match(l)||(!selected.microphone&&!selected.output))return false;
+        Wipe();
+        if((selected.microphone&&(!selected_.microphone||!capture_||esp_ae_rate_cvt_reset(capture_)!=ESP_AE_ERR_OK))||
+           (selected.output&&(!selected_.output||!playback_||esp_ae_rate_cvt_reset(playback_)!=ESP_AE_ERR_OK)))return Fail();
+        return Match(l); // DSP cleanup after revoke does not renew native rights.
+    }
     bool Close(const AudioLease& l){
         if(!Match(l))return false;
         ready_=false;Wipe();CloseDsp();lease_={};selected_={};return true;
