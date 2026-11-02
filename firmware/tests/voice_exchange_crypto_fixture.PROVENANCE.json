@@ -1,0 +1,9 @@
+{
+  "upstream": "https://github.com/facebookincubator/muse-gadget-sdk",
+  "sdk_commit": "729d0c8b3113c0cdbd7efb3b8aad8a313839a1bd",
+  "source_path": "esp32/tests/noise_session_inplace_harness.cpp",
+  "source_sha256": "3b4e8231c9203909c9a57dde5e946bc5de0296b8a5a69c5ac45481854291a9fe",
+  "copied_scope": "Apache-2.0 license, NonceTagCrypto and Establish; EXPECT replaced by assert; includes/namespace adapted",
+  "fixture_sha256": "ca1b1349818cf31d9efa9a4280737df3e21a7f2f0fea8e261afc9054566f34f5",
+  "limits": "Test-only stand-in, not cryptographic proof; no real sockets/credentials/native permissions"
+}

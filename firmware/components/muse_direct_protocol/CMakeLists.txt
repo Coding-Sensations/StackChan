@@ -12,7 +12,7 @@ if(NOT STACKCHAN_PROFILE_MUSE_VOICE_PROTOCOL MATCHES "^[01]$")
 endif()
 set(muse_voice_protocol_sources "")
 if(STACKCHAN_PROFILE_MUSE_VOICE_PROTOCOL STREQUAL "1")
-    list(APPEND muse_voice_protocol_sources "voice/api.cc" "voice/muse_voice_call_core.c")
+    list(APPEND muse_voice_protocol_sources "voice/api.cc" "voice/muse_voice_call_core.c" "voice/service_exchange.cc" "voice/exchange_api.cc")
 endif()
 
 # Isolated protocol-only port. No SDK app, board, BLE, NVS, Wi-Fi, OTA or UI.
@@ -31,5 +31,5 @@ target_compile_features(${COMPONENT_LIB} PUBLIC cxx_std_17)
 target_link_libraries(${COMPONENT_LIB} INTERFACE "-Wl,-u,stackchan_muse_direct_pairing")
 
 if(STACKCHAN_PROFILE_MUSE_VOICE_PROTOCOL STREQUAL "1")
-    target_link_libraries(${COMPONENT_LIB} INTERFACE "-Wl,-u,stackchan_muse_voice_protocol_api")
+    target_link_libraries(${COMPONENT_LIB} INTERFACE "-Wl,-u,stackchan_muse_voice_protocol_api" "-Wl,-u,stackchan_muse_voice_exchange_api")
 endif()
