@@ -37,7 +37,7 @@ class Owner{
  companion::muse::VoiceLease lease_;State state_=State::Dormant;
  uint64_t generation_=0,ticket_=0,last_ticket_=0;int64_t now_=0,expires_=0;
  Directions selected_{};
- bool spent_=false,leased_=false,bound_=false,talking_=false;
+ bool spent_=false,leased_=false,bound_=false,talking_=false,preparing_=false;
  bool input_attempted_=false,output_attempted_=false,input_closed_=true,output_closed_=true;
  std::array<int16_t,320> capture_{};std::array<int16_t,1282> playback_{};
  static void Zero(void* p,size_t n){auto v=static_cast<volatile unsigned char*>(p);while(n--)*v++=0;}
@@ -97,7 +97,10 @@ public:
  State Status()const{return state_;}
  bool Prepare(uint64_t g,int64_t expires,int64_t now){return Prepare(g,expires,now,{true,true});}
  bool Prepare(uint64_t g,int64_t expires,int64_t now,Directions selected){
-  if((!selected.microphone&&!selected.output)||spent_||!g||now<0||expires<=now||expires-now>120000000)return false;
+  if(preparing_||(!selected.microphone&&!selected.output)||spent_||!g||now<0||expires<=now||expires-now>120000000)return false;
+  // Clock/permission ports may synchronously call back. A nested preparation
+  // must not replace generation/state before the original lease is latched.
+  struct Preparing{bool& flag;explicit Preparing(bool& f):flag(f){flag=true;}~Preparing(){flag=false;}} preparing(preparing_);
   selected_=selected;generation_=g;now_=now;expires_=expires;state_=State::Prepared;
   if(clock_){muse_native_review::Stamp sample{};if(!clock_->Sample(sample)||sample.mono_us<now||sample.mono_us>=expires){state_=State::Dormant;generation_=0;return false;}now_=sample.mono_us;}
   if(!lease_.Reserve(g,[this]{return Context();},[this]{return permit_.Microphone(generation_,now_);},[this]{return permit_.Output(generation_,now_);},selected_)){state_=State::Dormant;generation_=0;return false;}

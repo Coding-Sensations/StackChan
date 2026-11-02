@@ -86,5 +86,12 @@ int main(){
  {
   Reset();auto core=Make();Native native(core);SyntheticFlush codec(native);TestClock clock;TestPermit permit;voice_prep::Protocol protocol;Live(protocol);voice_codec_prep::Owner owner(protocol,codec,permit,clock);assert(owner.Prepare(7,10000000,0)&&owner.Start(7,0)&&owner.Talking(7,1,true,0));permit.hold_until=2000;assert(!codec.captured(7,2001,Op::Input));assert(owner.Stop(7,0));
  }
+ {
+  Reset();auto core=Make();Native native(core);TestClock clock;TestPermit permit;voice_prep::Protocol protocol;Live(protocol);voice_codec_prep::Owner owner(protocol,native,permit,clock);
+  clock.now=10000001;assert(!owner.Prepare(7,10000000,0)&&CurrentAudioOwner()==AudioOwner::None);clock.now=1000;
+  bool nested=true;clock.during=[&]{nested=owner.Prepare(8,10000000,0);};
+  assert(owner.Prepare(7,10000000,0)&&!nested&&owner.Status()==voice_codec_prep::State::Prepared);
+  assert(owner.Stop(7,0)&&CurrentAudioOwner()==AudioOwner::None&&!opens&&!reads&&!writes);
+ }
  std::puts("PASS actual Core/DSP resource composition, bounded carry/split IO, fresh gate, retained cleanup; no physical flush/authority claim");
 }
