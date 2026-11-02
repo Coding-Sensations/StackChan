@@ -168,3 +168,6 @@ add_test(NAME voice_session_owner_test COMMAND ${Python3_EXECUTABLE}
 
 add_test(NAME voice_device_consent_test COMMAND ${Python3_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/test_voice_device_consent.py)
+
+add_test(NAME voice_device_runtime_test COMMAND ${Python3_EXECUTABLE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_voice_device_runtime.py)
