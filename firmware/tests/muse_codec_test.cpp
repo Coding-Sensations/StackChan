@@ -27,7 +27,7 @@ static int esp_codec_dev_set_out_vol(void*,int){return 0;}
 static int esp_codec_dev_read(void*,void* out,size_t size){++reads;std::fill_n(static_cast<int16_t*>(out),size/2,42);Hook();return read_result;}
 static int esp_codec_dev_write(void*,void*,size_t){++writes;Hook();return write_result;}
 static int i2s_channel_disable(void*){++disables;Hook();return disable_result;}
-CoreS3AudioCodec::CoreS3AudioCodec(void*,int input,int output,gpio_num_t,gpio_num_t,gpio_num_t,gpio_num_t,gpio_num_t,uint8_t,uint8_t,bool reference){input_sample_rate_=input;output_sample_rate_=output;input_reference_=reference;direct_callback_ready_=true;input_dev_=reinterpret_cast<void*>(1);output_dev_=reinterpret_cast<void*>(2);}
+CoreS3AudioCodec::CoreS3AudioCodec(void*,int input,int output,gpio_num_t,gpio_num_t,gpio_num_t,gpio_num_t,gpio_num_t,uint8_t,uint8_t,bool reference){input_sample_rate_=input;output_sample_rate_=output;input_reference_=reference;input_channels_=reference?2:1;direct_callback_ready_=true;input_dev_=reinterpret_cast<void*>(1);output_dev_=reinterpret_cast<void*>(2);}
 CoreS3AudioCodec::~CoreS3AudioCodec()=default;
 ACTUAL_METHODS
 using namespace companion;
@@ -36,6 +36,19 @@ static void Reset(){open_result=close_result=disable_result=read_result=write_re
 static void Cleanup(CoreS3AudioCodec& codec,AudioLease& lease){assert(codec.MuseStopInputChecked(lease));assert(codec.MuseStopOutputChecked(lease));assert(codec.MuseCodecRelease(lease));assert(CommonAudioAuthority().Holds(lease));assert(ReleaseAudio(lease,true));}
 static CoreS3AudioCodec Make(){return {nullptr,24000,24000,0,0,0,0,0,0,0,true};}
 int main(){
+ for(auto rates:{std::pair<int,int>{16000,24000},{24000,16000},{48000,48000}}){
+  Reset();CoreS3AudioCodec codec{nullptr,rates.first,rates.second,0,0,0,0,0,0,0,true};auto lease=Take();assert(!codec.MuseCodecAcquire(lease));assert(!opens&&!closes&&!disables);assert(CommonAudioAuthority().Current(lease));assert(ReleaseAudio(lease,true));
+ }
+ for(int direction=0;direction<3;++direction){
+  Reset();auto codec=Make();auto lease=Take();assert(codec.MuseCodecAcquire(lease));
+  if(direction==2)assert(codec.MuseEnableOutputChecked(lease,true));
+  during=[&]{RevokeAudio(lease);};
+  if(direction==0)assert(!codec.MuseEnableInputChecked(lease,true));
+  else if(direction==1)assert(!codec.MuseEnableOutputChecked(lease,true));
+  else {std::vector<int16_t> data(960,3);assert(!codec.MuseOutputDataChecked(lease,data));}
+  assert(!CommonAudioAuthority().Current(lease)&&CommonAudioAuthority().Holds(lease));Cleanup(codec,lease);
+ }
+
  {
   Reset();auto codec=Make();AudioLease none;assert(!codec.MuseCodecAcquire(none));AudioOwnerAuthority foreign;AudioLease other;assert(foreign.Acquire(AudioOwner::Muse,AudioPurpose::MusePushToTalk,7,other));assert(!codec.MuseCodecAcquire(other));assert(!opens&&!disables&&!closes);
  }

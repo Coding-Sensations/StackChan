@@ -537,6 +537,8 @@ bool CoreS3AudioCodec::MuseMatch(const companion::AudioLease& lease)const{
 bool CoreS3AudioCodec::MuseCodecAcquire(const companion::AudioLease& lease){
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);RefreshHardwareBinding();
     if(!direct_callback_ready_||direct_generation_||input_enabled_||output_enabled_||
+       input_sample_rate_!=24000||output_sample_rate_!=24000||
+       input_channels_!=(input_reference_?2:1)||output_channels_!=1||
        lease.owner()!=companion::AudioOwner::Muse||lease.purpose()!=companion::AudioPurpose::MusePushToTalk||
        !lease.epoch()||!companion::CommonAudioAuthority().Current(lease))return false;
     direct_common_lease_=lease;direct_generation_=lease.generation();muse_bound_=true;muse_retired_=false;
