@@ -491,21 +491,24 @@ bool CoreS3AudioCodec::DirectStopChecked(uint64_t generation, bool output) {
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);
     if (!generation || generation != direct_generation_) return false;
     bool& stopped = output ? direct_output_stopped_ : direct_input_stopped_;
+    bool& closed = output ? direct_output_closed_ : direct_input_closed_;
     if (!stopped) {
         auto status = i2s_channel_disable(output ? tx_handle_ : rx_handle_);
         // INVALID_STATE is not a fresh proof; retain until an actual owner knows.
         if (status != ESP_OK) { companion::RevokeAudio(direct_common_lease_); return false; }
         stopped = true;
     }
-    auto status = esp_codec_dev_close(output ? output_dev_ : input_dev_);
-    if (status != ESP_CODEC_DEV_OK) { companion::RevokeAudio(direct_common_lease_); return false; }
+    if (!closed) {
+        auto status = esp_codec_dev_close(output ? output_dev_ : input_dev_);
+        if (status != ESP_CODEC_DEV_OK) { companion::RevokeAudio(direct_common_lease_); return false; }
+        closed = true;
+    }
     if (output) {
-        direct_output_closed_ = true;
         AudioCodec::EnableOutput(false);
         portENTER_CRITICAL(&direct_mux_);
         direct_fence_.Cancel(direct_fence_generation_); direct_draining_ = false;
         portEXIT_CRITICAL(&direct_mux_);
-    } else {direct_input_closed_ = true;AudioCodec::EnableInput(false);}
+    } else AudioCodec::EnableInput(false);
     return true;
 }
 bool CoreS3AudioCodec::DirectUsbStopInputChecked(uint64_t generation) { std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);return !IsMuseBinding()&&DirectStopChecked(generation, false); }
@@ -542,7 +545,7 @@ bool CoreS3AudioCodec::MuseCodecAcquire(const companion::AudioLease& lease){
        lease.owner()!=companion::AudioOwner::Muse||lease.purpose()!=companion::AudioPurpose::MusePushToTalk||
        !lease.epoch()||!companion::CommonAudioAuthority().Current(lease))return false;
     direct_common_lease_=lease;direct_generation_=lease.generation();muse_bound_=true;muse_retired_=false;
-    muse_drain_ticket_=muse_last_drain_ticket_=0;direct_input_stopped_=direct_output_stopped_=false;direct_input_closed_=direct_output_closed_=false;
+    muse_drain_ticket_=muse_last_drain_ticket_=0;
     portENTER_CRITICAL(&direct_mux_);direct_draining_=false;portEXIT_CRITICAL(&direct_mux_);return true;
 }
 bool CoreS3AudioCodec::MuseEnableInputChecked(const companion::AudioLease& lease,bool enable){

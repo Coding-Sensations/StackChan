@@ -97,5 +97,15 @@ int main(){
   auto muse=Take(AudioOwner::Muse,AudioPurpose::MusePushToTalk,81);assert(codec.MuseCodecAcquire(muse));Cleanup(codec,muse);
   assert(codec.DirectUsbCodecAcquire(4));assert(codec.DirectUsbStopInputChecked(4)&&codec.DirectUsbStopOutputChecked(4)&&codec.DirectUsbCodecRelease(4));
  }
+ {
+  Reset();auto codec=Make();auto first=Take(AudioOwner::Muse,AudioPurpose::MusePushToTalk,82);assert(codec.MuseCodecAcquire(first));Cleanup(codec,first);
+  const auto stops=disables,closed=closes;
+  auto second=Take(AudioOwner::Muse,AudioPurpose::MusePushToTalk,83);assert(codec.MuseCodecAcquire(second));
+  assert(codec.MuseStopInputChecked(second)&&codec.MuseStopOutputChecked(second)&&codec.MuseCodecRelease(second));
+  assert(disables==stops&&closes==closed);assert(ReleaseAudio(second,true));
+  auto third=Take(AudioOwner::Muse,AudioPurpose::MusePushToTalk,84);assert(codec.MuseCodecAcquire(third));
+  assert(codec.MuseEnableInputChecked(third,true));assert(codec.MuseStopInputChecked(third)&&codec.MuseStopOutputChecked(third)&&codec.MuseCodecRelease(third));
+  assert(disables==stops+1&&closes==closed+1);assert(ReleaseAudio(third,true));
+ }
  std::puts("PASS actual CoreS3 Muse original-lease binding, wrong-owner exclusion, retained failures, DMA ticket and Stock/Mira/DirectUsb custody regression; synthetic drivers only");
 }
