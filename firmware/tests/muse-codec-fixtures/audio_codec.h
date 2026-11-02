@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <vector>
 using gpio_num_t=int;using i2s_chan_handle_t=void*;using portMUX_TYPE=int;
+enum {I2S_DIR_TX=1,I2S_DIR_RX=2,I2S_COMM_MODE_STD=1};
+struct i2s_chan_info_t{int dir=I2S_DIR_TX,mode=I2S_COMM_MODE_STD;bool is_enabled=false;uint32_t total_dma_buf_size=5760;};
 struct i2s_event_data_t{void* dma_buf;size_t size;};
 #define portMUX_INITIALIZER_UNLOCKED 0
 #define portENTER_CRITICAL(p) ((void)(p))
@@ -16,6 +18,7 @@ protected:
  i2s_chan_handle_t tx_handle_=reinterpret_cast<void*>(2),rx_handle_=reinterpret_cast<void*>(1);
  virtual int Read(int16_t*,int)=0;virtual int Write(const int16_t*,int)=0;
 public:
+ int input_sample_rate()const{return input_sample_rate_;}int output_sample_rate()const{return output_sample_rate_;}int input_channels()const{return input_channels_;}int output_channels()const{return output_channels_;}
  virtual ~AudioCodec()=default;
  virtual void SetOutputVolume(int v){output_volume_=v;}
  virtual void EnableInput(bool b){input_enabled_=b;}virtual void EnableOutput(bool b){output_enabled_=b;}

@@ -10,3 +10,5 @@ esp_ae_err_t esp_ae_rate_cvt_open(esp_ae_rate_cvt_cfg_t*,void**);
 void esp_ae_rate_cvt_close(void*);
 esp_ae_err_t esp_ae_rate_cvt_get_max_out_sample_num(void*,uint32_t,uint32_t*);
 esp_ae_err_t esp_ae_rate_cvt_process(void*,void*,uint32_t,void*,uint32_t*);
+
+esp_ae_err_t esp_ae_rate_cvt_reset(void*);

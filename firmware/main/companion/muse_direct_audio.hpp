@@ -17,7 +17,17 @@ public:
         if(!AcquireAudio(AudioOwner::Muse,AudioPurpose::MusePushToTalk,epoch,lease_))return false;
         selected_=selected;current_=std::move(current);microphone_=std::move(microphone);speaker_=std::move(speaker);return true;
     }
-    bool Current(){const bool okay=lease_&&CommonAudioAuthority().Current(lease_)&&current_&&current_()&&(!selected_.microphone||(microphone_&&microphone_()))&&(!selected_.output||(speaker_&&speaker_()));if(!okay&&lease_)RevokeAudio(lease_);return okay;}
+    bool Current(){
+        const auto captured=lease_;const auto selected=selected_;
+        // Keep callback storage alive if a callout stops/replaces this lease.
+        const auto current=current_,microphone=microphone_,speaker=speaker_;
+        const bool okay=captured&&CommonAudioAuthority().Current(captured)&&current&&current()&&
+            (!selected.microphone||(microphone&&microphone()))&&(!selected.output||(speaker&&speaker()))&&
+            lease_.generation()==captured.generation()&&lease_.epoch()==captured.epoch()&&CommonAudioAuthority().Current(captured);
+        if(!okay&&captured){RevokeAudio(captured);}
+        return okay;
+    }
+    AudioLease ResourceLease()const{return lease_;} // opaque custody, never native consent
     bool Stop(bool directions_closed_and_worker_joined){if(!lease_)return true;RevokeAudio(lease_);if(!ReleaseAudio(lease_,directions_closed_and_worker_joined))return false;current_={};microphone_={};speaker_={};selected_={};return true;}
 };
 }

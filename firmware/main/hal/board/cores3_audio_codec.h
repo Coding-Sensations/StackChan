@@ -34,7 +34,8 @@ private:
     bool ScopedDrainBegin(uint64_t);
     DirectUsbDrain ScopedDrainState(uint64_t);
 #if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
-    bool muse_bound_=false,muse_retired_=false;
+    bool muse_bound_=false,muse_retired_=false,muse_discarding_=false;
+    uint64_t muse_last_discard_ticket_=0;
     uint64_t muse_drain_ticket_=0,muse_last_drain_ticket_=0;
     bool MuseMatch(const companion::AudioLease&)const;
 #endif
@@ -52,7 +53,7 @@ private:
         // on an unavailable/unknown close receipt.
         if(muse_bound_&&muse_retired_&&!companion::CommonAudioAuthority().Holds(direct_common_lease_)){
             direct_generation_=0;direct_common_lease_={};muse_bound_=muse_retired_=false;
-            muse_drain_ticket_=muse_last_drain_ticket_=0;
+            muse_drain_ticket_=muse_last_drain_ticket_=muse_last_discard_ticket_=0;
         }
 #endif
     }
@@ -92,6 +93,8 @@ public:
 
 #if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
     enum class MuseDrain { Unavailable, Pending, Sent, Failed };
+    enum class MuseDiscard { Unavailable, Failed, StoppedDmaCleared };
+    static constexpr size_t MuseDiscardByteLimit=16384;
     static constexpr size_t MuseRawSampleLimit=2048;
     // Resource/hardware binding only: not microphone/output consent. The
     // caller retains the exact original Muse lease through checked cleanup.
@@ -102,6 +105,8 @@ public:
     bool MuseOutputDataChecked(const companion::AudioLease&,std::vector<int16_t>&);
     bool MuseDrainBegin(const companion::AudioLease&,uint64_t ticket);
     MuseDrain MuseDrainState(const companion::AudioLease&,uint64_t ticket);
+    // Digital stopped-DMA overwrite only, not acoustic completion or consent.
+    MuseDiscard MuseDiscardOutputChecked(const companion::AudioLease&,uint64_t ticket);
     bool MuseStopInputChecked(const companion::AudioLease&);
     bool MuseStopOutputChecked(const companion::AudioLease&);
     bool MuseCodecRelease(const companion::AudioLease&);
