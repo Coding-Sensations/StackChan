@@ -159,3 +159,6 @@ add_test(NAME voice_core_codec_test COMMAND ${Python3_EXECUTABLE}
 
 add_test(NAME muse_dma_discard_test COMMAND ${Python3_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/test_muse_dma_discard.py)
+
+add_test(NAME voice_review_permit_test COMMAND ${Python3_EXECUTABLE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_voice_review_permit.py)
