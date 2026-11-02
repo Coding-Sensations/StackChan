@@ -557,17 +557,17 @@ bool CoreS3AudioCodec::MuseCodecAcquire(const companion::AudioLease& lease){
        lease.owner()!=companion::AudioOwner::Muse||lease.purpose()!=companion::AudioPurpose::MusePushToTalk||
        !lease.epoch()||!companion::CommonAudioAuthority().Current(lease))return false;
     direct_common_lease_=lease;direct_generation_=lease.generation();muse_bound_=true;muse_retired_=false;
-    muse_drain_ticket_=muse_last_drain_ticket_=0;
+    muse_drain_ticket_=muse_last_drain_ticket_=muse_last_discard_ticket_=0;
     portENTER_CRITICAL(&direct_mux_);direct_draining_=false;portEXIT_CRITICAL(&direct_mux_);return true;
 }
 bool CoreS3AudioCodec::MuseEnableInputChecked(const companion::AudioLease& lease,bool enable){
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);
-    if(!MuseMatch(lease)||muse_retired_)return false;
+    if(!MuseMatch(lease)||muse_retired_||muse_discarding_)return false;
     const bool okay=ScopedEnableInputChecked(direct_generation_,enable)&&(!enable||companion::CommonAudioAuthority().Current(lease));if(!okay)companion::RevokeAudio(lease);return okay;
 }
 bool CoreS3AudioCodec::MuseEnableOutputChecked(const companion::AudioLease& lease,bool enable){
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);
-    if(!MuseMatch(lease)||muse_retired_)return false;
+    if(!MuseMatch(lease)||muse_retired_||muse_discarding_)return false;
     const bool okay=ScopedEnableOutputChecked(direct_generation_,enable)&&(!enable||companion::CommonAudioAuthority().Current(lease));if(!okay)companion::RevokeAudio(lease);return okay;
 }
 bool CoreS3AudioCodec::MuseInputDataChecked(const companion::AudioLease& lease,std::vector<int16_t>& data){
@@ -598,6 +598,35 @@ CoreS3AudioCodec::MuseDrain CoreS3AudioCodec::MuseDrainState(const companion::Au
         default:return MuseDrain::Unavailable;
     }
 }
+CoreS3AudioCodec::MuseDiscard CoreS3AudioCodec::MuseDiscardOutputChecked(const companion::AudioLease& lease,uint64_t ticket){
+    std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);
+    // Both directions: input format setup can restart paired TX for its clock.
+    const auto stopped=[&]{return MuseMatch(lease)&&!muse_retired_&&direct_input_stopped_&&direct_output_stopped_&&
+        direct_input_closed_&&direct_output_closed_&&!input_enabled_&&!output_enabled_;};
+    if(muse_discarding_||!ticket||ticket<=muse_last_discard_ticket_||!stopped())return MuseDiscard::Unavailable;
+    struct Busy{bool& flag;explicit Busy(bool& f):flag(f){flag=true;}~Busy(){flag=false;}} busy(muse_discarding_);
+    muse_last_discard_ticket_=ticket; // every attempted request is single-use, including failures
+    const auto failed=[&]{companion::RevokeAudio(lease);return MuseDiscard::Failed;};
+    i2s_chan_info_t info{};
+    const auto info_status=i2s_channel_get_info(tx_handle_,&info);
+    if(info_status==ESP_OK&&info.is_enabled)direct_output_stopped_=false; // contradictory hardware evidence needs a fresh stop
+    if(info_status!=ESP_OK||!stopped()||info.dir!=I2S_DIR_TX||info.mode!=I2S_COMM_MODE_STD||
+       info.is_enabled||!info.total_dma_buf_size||info.total_dma_buf_size%4||info.total_dma_buf_size>MuseDiscardByteLimit)return failed();
+    // Pinned IDF disable resets preload to descriptor0. Checked stops must
+    // precede this operation; success means every reported DMA byte overwritten.
+    const std::array<unsigned char,256> zeros{};
+    for(size_t offset=0;offset<info.total_dma_buf_size;){
+        const size_t count=std::min(zeros.size(),size_t(info.total_dma_buf_size)-offset);size_t loaded=0;
+        if(!stopped()||i2s_channel_preload_data(tx_handle_,zeros.data(),count,&loaded)!=ESP_OK||loaded!=count||!stopped())return failed();
+        offset+=count;
+    }
+    i2s_chan_info_t after{};
+    const auto after_status=i2s_channel_get_info(tx_handle_,&after);
+    if(after_status==ESP_OK&&after.is_enabled)direct_output_stopped_=false;
+    if(after_status!=ESP_OK||!stopped()||after.dir!=info.dir||after.mode!=info.mode||
+       after.is_enabled||after.total_dma_buf_size!=info.total_dma_buf_size)return failed();
+    return MuseDiscard::StoppedDmaCleared; // not DMA-sent, acoustic silence or native authorization
+}
 bool CoreS3AudioCodec::MuseStopInputChecked(const companion::AudioLease& lease){
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);return MuseMatch(lease)&&!muse_retired_&&DirectStopChecked(direct_generation_,false);
 }
@@ -606,7 +635,7 @@ bool CoreS3AudioCodec::MuseStopOutputChecked(const companion::AudioLease& lease)
 }
 bool CoreS3AudioCodec::MuseCodecRelease(const companion::AudioLease& lease){
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);
-    if(!MuseMatch(lease))return false;
+    if(!MuseMatch(lease)||muse_discarding_)return false;
     companion::RevokeAudio(lease);
     if(!direct_input_stopped_||!direct_output_stopped_||!direct_input_closed_||!direct_output_closed_||input_enabled_||output_enabled_)return false;
     // Do not release the original logical lease. Its owner still owes worker

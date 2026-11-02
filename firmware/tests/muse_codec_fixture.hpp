@@ -28,7 +28,14 @@ static int esp_codec_dev_set_in_channel_gain(void*,int,int){return 0;}
 static int esp_codec_dev_set_out_vol(void*,int){return 0;}
 static int esp_codec_dev_read(void*,void* out,size_t size){++reads;std::fill_n(static_cast<int16_t*>(out),size/2,42);auto f=std::move(read_hook);read_hook={};if(f)f();Hook();return read_result;}
 static int esp_codec_dev_write(void*,void*,size_t){++writes;Hook();return write_result;}
-static int i2s_channel_disable(void* h){++disables;if(h==reinterpret_cast<void*>(1))++input_disables;else if(h==reinterpret_cast<void*>(2))++output_disables;else assert(false);Hook();return disable_result;}
+static i2s_chan_info_t dma_info{};
+static std::vector<unsigned char> dma_bytes(16384,0x6d);
+static size_t dma_cursor=0,largest_preload=0,dma_capacity=5760;
+static int info_calls=0,preload_calls=0,info_error=0,error_preload=0,partial_preload=0;
+static std::function<void()> info_hook,preload_hook;
+inline int i2s_channel_get_info(void* h,i2s_chan_info_t* out){assert(h==reinterpret_cast<void*>(2));++info_calls;auto f=std::move(info_hook);info_hook={};if(f)f();*out=dma_info;return info_error;}
+inline int i2s_channel_preload_data(void* h,const void* in,size_t n,size_t* loaded){assert(h==reinterpret_cast<void*>(2));++preload_calls;largest_preload=std::max(largest_preload,n);*loaded=0;if(error_preload==preload_calls)return -1;const size_t available=std::min(n,dma_capacity-dma_cursor);const size_t count=partial_preload==preload_calls?available/2:available;assert(dma_cursor+count<=dma_bytes.size());const auto* bytes=static_cast<const unsigned char*>(in);std::copy_n(bytes,count,dma_bytes.begin()+dma_cursor);dma_cursor+=count;*loaded=count;auto f=std::move(preload_hook);preload_hook={};if(f)f();return 0;}
+static int i2s_channel_disable(void* h){++disables;if(h==reinterpret_cast<void*>(1))++input_disables;else if(h==reinterpret_cast<void*>(2))++output_disables;else assert(false);if(h==reinterpret_cast<void*>(2)&&!disable_result)dma_cursor=0;Hook();return disable_result;}
 CoreS3AudioCodec::CoreS3AudioCodec(void*,int input,int output,gpio_num_t,gpio_num_t,gpio_num_t,gpio_num_t,gpio_num_t,uint8_t,uint8_t,bool reference){input_sample_rate_=input;output_sample_rate_=output;input_reference_=reference;input_channels_=reference?2:1;direct_callback_ready_=true;input_dev_=reinterpret_cast<void*>(1);output_dev_=reinterpret_cast<void*>(2);}
 CoreS3AudioCodec::~CoreS3AudioCodec()=default;
 ACTUAL_METHODS

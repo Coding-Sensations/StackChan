@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <vector>
 using gpio_num_t=int;using i2s_chan_handle_t=void*;using portMUX_TYPE=int;
+enum {I2S_DIR_TX=1,I2S_DIR_RX=2,I2S_COMM_MODE_STD=1};
+struct i2s_chan_info_t{int dir=I2S_DIR_TX,mode=I2S_COMM_MODE_STD;bool is_enabled=false;uint32_t total_dma_buf_size=5760;};
 struct i2s_event_data_t{void* dma_buf;size_t size;};
 #define portMUX_INITIALIZER_UNLOCKED 0
 #define portENTER_CRITICAL(p) ((void)(p))

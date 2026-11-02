@@ -16,6 +16,9 @@ with tempfile.TemporaryDirectory(prefix='muse-codec-closure-') as temporary:
   cpp.write_text('#include <type_traits>\n#include "hal/board/cores3_audio_codec.h"\n'
    'template<class T,class=void>struct HasMuse:std::false_type{};\n'
    'template<class T>struct HasMuse<T,std::void_t<decltype(&T::MuseCodecAcquire)>>:std::true_type{};\n'
-   f'static_assert(HasMuse<CoreS3AudioCodec>::value == {int(bool(muse and voice))});\n')
+   'template<class T,class=void>struct HasDiscard:std::false_type{};\n'
+   'template<class T>struct HasDiscard<T,std::void_t<decltype(&T::MuseDiscardOutputChecked)>>:std::true_type{};\n'
+   f'static_assert(HasDiscard<CoreS3AudioCodec>::value == {int(bool(muse and voice))});\n'
+   f'static_assert(HasMuse<CoreS3AudioCodec>::value == {int(bool(muse and voice))});\n' )
   subprocess.run(['clang++','-std=c++17','-fsyntax-only','-Wall','-Wextra','-Werror',f'-DSTACKCHAN_BUILD_MUSE={muse}',f'-DSTACKCHAN_BUILD_MUSE_VOICE_PROTOCOL={voice}','-I'+str(r/'muse-codec-fixtures'),'-I'+str(r.parent/'main'),str(cpp)],check=True)
 print('PASS actual CoreS3 native binding and Muse/voice-on/off API closure; no physical IO')
