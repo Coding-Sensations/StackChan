@@ -143,3 +143,6 @@ add_test(NAME voice_exchange_test COMMAND ${Python3_EXECUTABLE}
 
 add_test(NAME muse_codec_test COMMAND ${Python3_EXECUTABLE}
   ${CMAKE_CURRENT_LIST_DIR}/test_muse_codec.py)
+
+add_test(NAME muse_pcm_test COMMAND ${Python3_EXECUTABLE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_muse_pcm.py)
