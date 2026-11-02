@@ -25,7 +25,12 @@ class VoiceAdmission final:public muse_native_review::Custody {
     std::unique_ptr<musegadgets::noise::core::ClientSession> session_;
     std::unique_ptr<Worker> worker_;
     VoiceAdmissionScope scope_{};muse_native_review::Stamp last_{};
-    std::array<uint8_t,musegadgets::noise::core::ClientSession::kMaxOutboundWebSocketPayloadSize> frame_{};
+    // Only empty-payload Noise messages1/3 and the existing bounded message2
+    // are handled here; application frames belong to the retained worker.
+    static constexpr size_t HandshakeCapacity=512;
+    static_assert(musegadgets::noise::core::InitiatorHandshake::kMessage1Size<=HandshakeCapacity);
+    static_assert(musegadgets::noise::core::InitiatorHandshake::kMinMessage3Size<=HandshakeCapacity);
+    std::array<uint8_t,HandshakeCapacity> frame_{};
     bool spent_=false,active_=false,stop_=false,closed_=false,busy_=false,checking_=false,lookup_joined_=false,socket_joined_=false;
     struct Busy{bool& value;explicit Busy(bool& v):value(v){value=true;}~Busy(){value=false;}};
     VoiceAdmission(voice_prep::Protocol& p,DeviceCredentialReader& r,musegadgets::noise::core::CryptoBackend& crypto,muse_native_review::Clock& clock,muse_native_review::Custody& source,LookupFactory lookup,SocketFactory socket)
