@@ -68,6 +68,9 @@ public:
     }
     VoiceAdmission(const VoiceAdmission&)=delete;VoiceAdmission& operator=(const VoiceAdmission&)=delete;
     ~VoiceAdmission(){assert(!spent_||closed_);WipeFrame();} // never performs native IO
+    bool Unused()const{return !spent_&&!closed_;}
+    bool UsesProtocol(const voice_prep::Protocol& p)const{return &protocol_==&p;}
+    bool UsesClock(const muse_native_review::Clock& c)const{return &clock_==&c;}
     bool ReadBudget(muse_native_review::Budget& out)override{if(!CurrentGrant())return false;out=scope_.budget;return true;}
     bool Current(const muse_native_review::Budget& budget)override{return Same(budget,scope_.budget)&&CurrentGrant();}
     bool Open(const VoiceAdmissionScope& scope){
