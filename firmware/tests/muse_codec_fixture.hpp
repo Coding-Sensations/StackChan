@@ -40,7 +40,7 @@ CoreS3AudioCodec::CoreS3AudioCodec(void*,int input,int output,gpio_num_t,gpio_nu
 CoreS3AudioCodec::~CoreS3AudioCodec()=default;
 ACTUAL_METHODS
 using namespace companion;
-static AudioLease Take(AudioOwner owner=AudioOwner::Muse,AudioPurpose purpose=AudioPurpose::MusePushToTalk,uint64_t epoch=7){AudioLease lease;assert(AcquireAudio(owner,purpose,epoch,lease));return lease;}
+inline AudioLease Take(AudioOwner owner=AudioOwner::Muse,AudioPurpose purpose=AudioPurpose::MusePushToTalk,uint64_t epoch=7){AudioLease lease;assert(AcquireAudio(owner,purpose,epoch,lease));return lease;}
 static void Reset(){open_result=close_result=disable_result=read_result=write_result=0;opens=closes=disables=reads=writes=input_disables=output_disables=0;during={};read_hook={};}
 inline void Cleanup(CoreS3AudioCodec& codec,AudioLease& lease){assert(codec.MuseStopInputChecked(lease));assert(codec.MuseStopOutputChecked(lease));assert(codec.MuseCodecRelease(lease));assert(CommonAudioAuthority().Holds(lease));assert(ReleaseAudio(lease,true));}
 static CoreS3AudioCodec Make(){return {nullptr,24000,24000,0,0,0,0,0,0,0,true};}

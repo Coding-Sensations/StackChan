@@ -35,6 +35,8 @@ class Bridge final:public muse_review::Source {
  explicit Bridge(voice_prep::Protocol&p):protocol_(p),clock_(unavailable_clock_),custody_(unavailable_custody_){}
  Bridge(voice_prep::Protocol&p,Clock&clock,Custody&custody):protocol_(p),clock_(clock),custody_(custody){}
  ~Bridge(){Revoke();}Bridge(const Bridge&)=delete;Bridge&operator=(const Bridge&)=delete;
+ bool UsesProtocol(const voice_prep::Protocol& p)const{return &protocol_==&p;}
+ bool UsesClock(const Clock& c)const{return &clock_==&c;}
  bool Read(muse_review::Target&out)override{Stamp after;return Project(out,after);}
  muse_review::Time Now()override{muse_review::Target discard{};Stamp after;bool ok=Project(discard,after);muse_review::Wipe(&discard,sizeof discard);if(!ok)return {};return {uint64_t(after.mono_us/1000),uint64_t(after.wall_ms)};}
  muse_review::Model& Review(){return model_;}

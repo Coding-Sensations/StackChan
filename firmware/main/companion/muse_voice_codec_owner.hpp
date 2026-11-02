@@ -9,7 +9,12 @@
 #include <cstring>
 namespace voice_codec_prep {
 struct Observation{bool known=false,mic_open=false,speaker_open=false,capturing=false,playing=false;};
-class Permit{public:virtual ~Permit()=default;virtual bool VoiceContext(uint64_t,int64_t)const=0;virtual bool Microphone(uint64_t,int64_t)const=0;virtual bool Output(uint64_t,int64_t)const=0;virtual bool Provider(uint64_t,int64_t)const=0;virtual bool Hold(uint64_t,uint64_t,int64_t)const=0;};
+class Permit{public:virtual ~Permit()=default;// Native owner checks its original actor/account/node/VM and all selected
+ // current rights against the exact returned target. Bounded local check;
+ // borrow target only during this call, never retain it or derive rights from it.
+ // A local review receipt cannot implement native authority on its own.
+ virtual bool MatchesReviewedContext(const muse_review::Target&,companion::muse::Directions,int64_t)const{return false;}
+ virtual bool VoiceContext(uint64_t,int64_t)const=0;virtual bool Microphone(uint64_t,int64_t)const=0;virtual bool Output(uint64_t,int64_t)const=0;virtual bool Provider(uint64_t,int64_t)const=0;virtual bool Hold(uint64_t,uint64_t,int64_t)const=0;};
 class NativeUnavailablePermit final:public Permit{public:bool VoiceContext(uint64_t,int64_t)const override{return false;}bool Microphone(uint64_t,int64_t)const override{return false;}bool Output(uint64_t,int64_t)const override{return false;}bool Provider(uint64_t,int64_t)const override{return false;}bool Hold(uint64_t,uint64_t,int64_t)const override{return false;}};
 enum class Operation{Bind,Input,Output};
 enum class ReadResult{Complete,Pending,Failed};
