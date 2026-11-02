@@ -17,7 +17,7 @@ template<class T>void companion_codec_fault(T,int){}
 #define ESP_ERROR_CHECK_WITHOUT_ABORT(x) ((void)(x))
 #define ESP_ERROR_CHECK(x) assert((x)==0)
 static int open_result=0,close_result=0,disable_result=0,read_result=0,write_result=0;
-static int opens=0,closes=0,disables=0,reads=0,writes=0;
+static int opens=0,closes=0,disables=0,reads=0,writes=0,input_disables=0,output_disables=0;
 static std::function<void()> during;
 static void Hook(){auto f=std::move(during);during={};if(f)f();}
 static int esp_codec_dev_open(void*,esp_codec_dev_sample_info_t*){++opens;Hook();return open_result;}
@@ -26,13 +26,13 @@ static int esp_codec_dev_set_in_channel_gain(void*,int,int){return 0;}
 static int esp_codec_dev_set_out_vol(void*,int){return 0;}
 static int esp_codec_dev_read(void*,void* out,size_t size){++reads;std::fill_n(static_cast<int16_t*>(out),size/2,42);Hook();return read_result;}
 static int esp_codec_dev_write(void*,void*,size_t){++writes;Hook();return write_result;}
-static int i2s_channel_disable(void*){++disables;Hook();return disable_result;}
+static int i2s_channel_disable(void* h){++disables;if(h==reinterpret_cast<void*>(1))++input_disables;else if(h==reinterpret_cast<void*>(2))++output_disables;else assert(false);Hook();return disable_result;}
 CoreS3AudioCodec::CoreS3AudioCodec(void*,int input,int output,gpio_num_t,gpio_num_t,gpio_num_t,gpio_num_t,gpio_num_t,uint8_t,uint8_t,bool reference){input_sample_rate_=input;output_sample_rate_=output;input_reference_=reference;input_channels_=reference?2:1;direct_callback_ready_=true;input_dev_=reinterpret_cast<void*>(1);output_dev_=reinterpret_cast<void*>(2);}
 CoreS3AudioCodec::~CoreS3AudioCodec()=default;
 ACTUAL_METHODS
 using namespace companion;
 static AudioLease Take(AudioOwner owner=AudioOwner::Muse,AudioPurpose purpose=AudioPurpose::MusePushToTalk,uint64_t epoch=7){AudioLease lease;assert(AcquireAudio(owner,purpose,epoch,lease));return lease;}
-static void Reset(){open_result=close_result=disable_result=read_result=write_result=0;opens=closes=disables=reads=writes=0;during={};}
+static void Reset(){open_result=close_result=disable_result=read_result=write_result=0;opens=closes=disables=reads=writes=input_disables=output_disables=0;during={};}
 static void Cleanup(CoreS3AudioCodec& codec,AudioLease& lease){assert(codec.MuseStopInputChecked(lease));assert(codec.MuseStopOutputChecked(lease));assert(codec.MuseCodecRelease(lease));assert(CommonAudioAuthority().Holds(lease));assert(ReleaseAudio(lease,true));}
 static CoreS3AudioCodec Make(){return {nullptr,24000,24000,0,0,0,0,0,0,0,true};}
 int main(){
@@ -99,13 +99,35 @@ int main(){
  }
  {
   Reset();auto codec=Make();auto first=Take(AudioOwner::Muse,AudioPurpose::MusePushToTalk,82);assert(codec.MuseCodecAcquire(first));Cleanup(codec,first);
-  const auto stops=disables,closed=closes;
+  const auto stops=disables,closed=closes,rx_stops=input_disables,tx_stops=output_disables;
   auto second=Take(AudioOwner::Muse,AudioPurpose::MusePushToTalk,83);assert(codec.MuseCodecAcquire(second));
   assert(codec.MuseStopInputChecked(second)&&codec.MuseStopOutputChecked(second)&&codec.MuseCodecRelease(second));
   assert(disables==stops&&closes==closed);assert(ReleaseAudio(second,true));
   auto third=Take(AudioOwner::Muse,AudioPurpose::MusePushToTalk,84);assert(codec.MuseCodecAcquire(third));
   assert(codec.MuseEnableInputChecked(third,true));assert(codec.MuseStopInputChecked(third)&&codec.MuseStopOutputChecked(third)&&codec.MuseCodecRelease(third));
-  assert(disables==stops+1&&closes==closed+1);assert(ReleaseAudio(third,true));
+  // Input set_fs can restart paired TX: fresh RX and TX stops, only input codec close.
+  assert(disables==stops+2&&input_disables==rx_stops+1&&output_disables==tx_stops+1&&closes==closed+1);assert(ReleaseAudio(third,true));
+ }
+
+ // Cached receipts survive a new Muse lease only while hardware has not been
+ // reopened. Legacy Stock/Mira opens invalidate proof even on partial failure.
+ for(auto owner:{AudioOwner::Stock,AudioOwner::Mira})for(int fault=0;fault<2;++fault)for(int mode=0;mode<6;++mode){
+  Reset();auto codec=Make();auto first=Take();assert(codec.MuseCodecAcquire(first));Cleanup(codec,first);
+  const bool output=mode%2;auto legacy=Take(owner,owner==AudioOwner::Mira?AudioPurpose::Session:AudioPurpose::StockRuntime);
+  if(mode<2){if(output){codec.EnableOutput(true);codec.EnableOutput(false);}else{codec.EnableInput(true);codec.EnableInput(false);}}
+  else {if(mode>=4)open_result=-1;const bool opened=output?codec.EnableOutputChecked(true):codec.EnableInputChecked(true);assert(opened==(mode<4));open_result=0;assert(output?codec.EnableOutputChecked(false):codec.EnableInputChecked(false));}
+  assert(ReleaseAudio(legacy,true));auto next=Take();assert(codec.MuseCodecAcquire(next));const int stops=disables,closed=closes;if(fault==0)disable_result=-1;else close_result=-1;
+  assert(!(output?codec.MuseStopOutputChecked(next):codec.MuseStopInputChecked(next)));assert(disables==stops+1&&closes==closed+(fault?1:0)&&CommonAudioAuthority().Holds(next));AudioLease denied;assert(!AcquireAudio(AudioOwner::Stock,AudioPurpose::StockRuntime,9,denied));disable_result=close_result=0;Cleanup(codec,next);
+ }
+
+ // The pinned I2S set_fs input path may restart paired TX for its clock.
+ // An input-only reopen must invalidate TX digital stop, not codec-close proof.
+ for(auto owner:{AudioOwner::Stock,AudioOwner::Mira})for(int mode=0;mode<3;++mode){
+  Reset();auto codec=Make();auto first=Take();assert(codec.MuseCodecAcquire(first));Cleanup(codec,first);auto legacy=Take(owner,owner==AudioOwner::Mira?AudioPurpose::Session:AudioPurpose::StockRuntime);
+  if(mode==0){codec.EnableInput(true);codec.EnableInput(false);}else{if(mode==2)open_result=-1;assert(codec.EnableInputChecked(true)==(mode==1));open_result=0;assert(codec.EnableInputChecked(false));}assert(ReleaseAudio(legacy,true));auto next=Take();assert(codec.MuseCodecAcquire(next));const int stops=disables,closed=closes;disable_result=-1;assert(!codec.MuseStopOutputChecked(next));assert(disables==stops+1&&closes==closed&&CommonAudioAuthority().Holds(next));disable_result=0;assert(codec.MuseStopOutputChecked(next));assert(closes==closed);Cleanup(codec,next);
+ }
+ {
+  Reset();auto codec=Make();assert(codec.DirectUsbCodecAcquire(12));assert(codec.DirectUsbStopInputChecked(12)&&codec.DirectUsbStopOutputChecked(12));assert(codec.DirectUsbEnableInputChecked(12,true));const int stops=disables,closed=closes;disable_result=-1;assert(!codec.DirectUsbStopOutputChecked(12));assert(disables==stops+1&&closes==closed);disable_result=0;assert(codec.DirectUsbStopInputChecked(12)&&codec.DirectUsbStopOutputChecked(12)&&codec.DirectUsbCodecRelease(12));assert(closes==closed+1);
  }
  std::puts("PASS actual CoreS3 Muse original-lease binding, wrong-owner exclusion, retained failures, DMA ticket and Stock/Mira/DirectUsb custody regression; synthetic drivers only");
 }

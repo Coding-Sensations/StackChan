@@ -236,6 +236,10 @@ void CoreS3AudioCodec::EnableInput(bool enable) {
         if (input_reference_) {
             fs.channel_mask |= ESP_CODEC_DEV_MAKE_CHANNEL_MASK(1);
         }
+        // A new open attempt invalidates earlier stop/close receipts, even on failure.
+        direct_input_stopped_ = direct_input_closed_ = false;
+        // RX format setup can restart paired TX for its clock without opening its codec.
+        direct_output_stopped_ = false;
         companion_codec_stage(companion::diagnostic::StageCode::DriverInputOpen);
         {
             auto status=esp_codec_dev_open(input_dev_, &fs);
@@ -274,6 +278,8 @@ void CoreS3AudioCodec::EnableOutput(bool enable) {
             .sample_rate = (uint32_t)output_sample_rate_,
             .mclk_multiple = 0,
         };
+        // A new open attempt invalidates earlier stop/close receipts, even on failure.
+        direct_output_stopped_ = direct_output_closed_ = false;
         companion_codec_stage(companion::diagnostic::StageCode::DriverOutputOpen);
         {
             auto status=esp_codec_dev_open(output_dev_, &fs);
@@ -348,6 +354,10 @@ bool CoreS3AudioCodec::EnableInputChecked(bool enable) {
         if (input_reference_) {
             fs.channel_mask |= ESP_CODEC_DEV_MAKE_CHANNEL_MASK(1);
         }
+        // A new open attempt invalidates earlier stop/close receipts, even on failure.
+        direct_input_stopped_ = direct_input_closed_ = false;
+        // RX format setup can restart paired TX for its clock without opening its codec.
+        direct_output_stopped_ = false;
         companion_codec_stage(companion::diagnostic::StageCode::DriverInputOpen);
         {
             auto status=esp_codec_dev_open(input_dev_, &fs);
@@ -390,6 +400,8 @@ bool CoreS3AudioCodec::EnableOutputChecked(bool enable) {
             .sample_rate = (uint32_t)output_sample_rate_,
             .mclk_multiple = 0,
         };
+        // A new open attempt invalidates earlier stop/close receipts, even on failure.
+        direct_output_stopped_ = direct_output_closed_ = false;
         companion_codec_stage(companion::diagnostic::StageCode::DriverOutputOpen);
         {
             auto status=esp_codec_dev_open(output_dev_, &fs);
