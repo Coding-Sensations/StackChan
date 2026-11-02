@@ -89,6 +89,8 @@ public:
   const auto expires=static_cast<int64_t>(permit_.pinned_.target.expires.mono*1000);const auto now=permit_.last_.mono_us;
   if(!owner_.Prepare(generation_,expires,now,selected)){permit_.Revoke();return false;}return true;
  }
+ void Revoke(){permit_.Revoke();} // pure cancellation, never hardware IO
+ voice_codec_prep::State Status()const{return owner_.Status();}
  uint64_t Generation()const{return generation_;}
  bool Start(int64_t now){return generation_&&owner_.Start(generation_,now);}
  bool Talking(uint64_t ticket,bool held,int64_t now){return generation_&&owner_.Talking(generation_,ticket,held,now);}
