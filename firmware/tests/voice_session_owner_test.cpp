@@ -72,5 +72,15 @@ int main(){
  {
   Composed c;c.Live();auto ui=c.Reviewed();c.original.port->close_hook=[&]{assert(!c.session->Close()&&c.original.h.socket_destroyed==0);};assert(!c.session->Close()&&c.session->TransportJoined());ui.Reset();assert(c.session->Close()&&c.original.h.socket_destroyed==1);
  }
+ for(unsigned phase=0;phase<3;++phase)for(unsigned grant=0;grant<3;++grant)for(unsigned action=0;action<3;++action){
+  Composed c;std::function<void()> trigger;auto scope=c.original.Scope();std::array<uint64_t,16> marker{};marker[7]=0x12345678;
+  const auto callback=[&,marker]{auto f=std::move(trigger);trigger={};if(f)f();const volatile uint64_t* retained=marker.data();assert(retained[7]==0x12345678);return grant==0?c.original.h.credential:grant==1?c.original.h.network:c.original.h.voice;};
+  if(grant==0)scope.credential_current=callback;else if(grant==1)scope.network_current=callback;else scope.voice_current=callback;
+  assert(c.session->Open(scope));c.original.port->incoming.push_back(c.original.server.Response(7,200));assert(c.session->Tick());c.original.port->incoming.push_back(c.original.server.Body(7,session_event));assert(c.session->Tick());auto ui=c.session->BorrowReview();auto* view=ui.Get();assert(view);if(phase)assert(view->Open());
+  if(phase==2){auto&m=view->Review();while(!m.Reviewed())assert(m.Acknowledge(m.Revision(),m.Page()));assert(m.OptIn(m.Revision(),true,true)&&m.Finish(m.Revision()));}
+  bool called=false;trigger=[&]{called=true;assert(!(action==0?c.session->Close():action==1?c.session->End():c.session->Tick()));};
+  if(phase==0)assert(!view->Open());else if(phase==1)assert(!view->Poll());else assert(!view->Review().Receipt().valid);
+  assert(called&&!c.session->TransportJoined()&&c.original.h.socket_closes==0&&c.original.h.socket_destroyed==0&&!ui.Get());assert(!c.session->Close()&&c.session->TransportJoined());ui.Reset();assert(c.session->Close());
+ }
  std::puts("PASS actual session/audio/UI retention; synthetic authority and ports only");
 }
