@@ -1,0 +1,18 @@
+{
+  "existing_dependency": "espressif__esp_audio_effects; already selected by firmware",
+  "headers": {
+    "esp_ae_rate_cvt.h": "36055590b324134745894707e610cc8bf6115f3eb9e5c101765129e9caee2510",
+    "esp_ae_types.h": "a3f2ad4f9e5fe6593784ab586e157fbd910498cc77404c9f9026915096a3df71"
+  },
+  "license": "ESPRESSIF MIT License, Espressif products; existing dependency retained; no DSP/library/header payload copied",
+  "fixture": "handwritten inert declarations matching real enum/config/signatures; not numeric DSP implementation",
+  "local_reuse": {
+    "file": "firmware/main/companion/desk_codec_adapter.hpp",
+    "base": "b1833abef1016ccfcda0bceb622b09f7c6e49634",
+    "adaptation": "Existing ESP mono converter configuration/bound checks; bidirectional fixed storage and exact Muse custody wrapper"
+  },
+  "upstream_assessment": {
+    "customfw": "fd563a14c80effecff4cb7fb025c46f2fd8b8d29 firmware/xiaozhi-esp32.patch; scheduling changes, no Muse owner; no payload copied",
+    "nous": "fe8b02342a382598de1faa5c9bc93144549ea9e9 recursive tree/readme; xiaozhi/self-hosted path, wake-word firmware source, no compatible Muse owner; no payload copied"
+  }
+}
