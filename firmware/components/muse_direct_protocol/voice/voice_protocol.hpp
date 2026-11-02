@@ -102,9 +102,10 @@ public:
  static constexpr size_t LineCapacity=4096;
  Protocol()=default;Protocol(const Protocol&)=delete;Protocol& operator=(const Protocol&)=delete;
  ~Protocol(){Zero(this,sizeof(*this));} // All members are fixed-size, trivial storage.
+ static bool ValidAdmissionIds(std::string_view call,std::string_view device){return Id(call,MUSE_VC_CALL_ID_MAX)&&Id(device,MUSE_VC_ID_MAX);}
  State Status()const{return state_;}const Operation& Pending()const{return op_;}
  bool Begin(Scope s,int64_t now,int64_t wall_ms){
-  if(spent_||!s.generation||!Id(s.call_id,MUSE_VC_CALL_ID_MAX)||!Id(s.device_id,MUSE_VC_ID_MAX)||s.media_stream<=0||s.end_stream<=0||s.media_stream==s.end_stream||!(s.media_stream&1)||!(s.end_stream&1)||now<0||now>INT64_MAX-240000000||s.expires_us<=now||s.expires_us-now>120000000||wall_ms<1704067200000LL||wall_ms>INT64_MAX-240000)return false;
+  if(spent_||!s.generation||!ValidAdmissionIds(s.call_id,s.device_id)||s.media_stream<=0||s.end_stream<=0||s.media_stream==s.end_stream||!(s.media_stream&1)||!(s.end_stream&1)||now<0||now>INT64_MAX-240000000||s.expires_us<=now||s.expires_us-now>120000000||wall_ms<1704067200000LL||wall_ms>INT64_MAX-240000)return false;
   generation_=s.generation;media_=s.media_stream;end_=s.end_stream;expiry_=s.expires_us;last_=start_=now;wall_start_=wall_ms;spent_=true;state_=State::Opening;
   muse_vc_limits_t limits{5000000,5000000,30000000,120000000,5000000,2000000};
   muse_vc_call_init(&call_,&limits,&turns_);std::array<char,MUSE_VC_CALL_ID_MAX> id{};std::memcpy(id.data(),s.call_id.data(),s.call_id.size());
