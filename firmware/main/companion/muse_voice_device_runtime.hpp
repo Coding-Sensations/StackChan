@@ -6,37 +6,47 @@
 #include "muse_voice_device_ui.hpp"
 #include <optional>
 namespace companion::muse {
+// Explicit UI lock boundary; caller retains this port through cleanup. Native
+// callbacks only queue private actions. This does not attest protocol ownership.
+class VoiceUiAccess {public:virtual ~VoiceUiAccess()=default;virtual bool Enter()=0;virtual void Leave()=0;};
 // Stable, single-use owner. Caller retains borrowed ports/scope callbacks and
-// LVGL parent through Close completion; every call uses the same serialized
-// LVGL owner lock. No task, timer, launcher or authority is registered here.
+// LVGL parent through Close completion. One protocol owner calls methods; an
+// explicit UI access port selects queued callbacks and scopes only widget work.
+// Legacy null-access mode requires the caller-held LVGL lock. No task/route.
 template<class Admission,class Reader,class Device>
 class DeviceVoiceRuntime final {
  using Session=VoiceSessionOwner<Admission>;
  using Consent=DeviceVoiceConsent<Admission,Reader,Device>;
  using Ui=DeviceVoiceReviewUi<Session,Consent>;
- voice_prep::Protocol& protocol_;Reader& reader_;Device& device_;
+ voice_prep::Protocol& protocol_;Reader& reader_;Device& device_;VoiceUiAccess* ui_access_;
  Consent consent_;
  std::unique_ptr<Session> session_;
  std::optional<Ui> ui_;
- lv_obj_t* parent_=nullptr;
+ lv_obj_t* parent_=nullptr;std::atomic<bool> stop_signal_{false};
  bool spent_=false,active_=false,busy_=false,closing_=false,closed_=false;
  bool ending_=false,ending_transport_=false,end_started_=false,ui_opened_=false,end_confirmed_=false;
  struct Busy {bool& flag;explicit Busy(bool& f):flag(f){flag=true;}~Busy(){flag=false;}};
- DeviceVoiceRuntime(voice_prep::Protocol&p,Admission&a,Reader&r,muse_native_review::Clock&k,Device&d):protocol_(p),reader_(r),device_(d),consent_(a,r,k,d){}
- bool AdmissionAllowed()const{return spent_&&!closing_&&!closed_&&(!ending_||ending_transport_);}
- bool NativeCurrent()const{return AdmissionAllowed()&&reader_.Current()&&device_.Foreground()&&AdmissionAllowed();}
+ DeviceVoiceRuntime(voice_prep::Protocol&p,Admission&a,Reader&r,muse_native_review::Clock&k,Device&d,VoiceUiAccess*access):protocol_(p),reader_(r),device_(d),ui_access_(access),consent_(a,r,k,d){}
+ template<class Operation>bool WithUi(Operation operation){
+  if(!ui_access_){operation();return true;} // legacy already-serialized inline owner
+  if(!ui_access_->Enter())return false;
+  struct Leave{VoiceUiAccess&port;~Leave(){port.Leave();}} leave{*ui_access_};operation();return true;
+ }
+ bool CloseUi(){bool done=false;return WithUi([&]{done=!ui_||ui_->Close();})&&done;}
+ bool AdmissionAllowed()const{return spent_&&!closing_&&!closed_&&!stop_signal_.load()&&(!ending_||ending_transport_);}
+ bool NativeCurrent()const{return AdmissionAllowed()&&(!consent_.RevocationRequested()||ending_transport_)&&reader_.Current()&&device_.Foreground()&&AdmissionAllowed();}
  void RequestClose(){closing_=true;ending_transport_=false;consent_.Revoke();}
  void RequestEnd(){ending_=true;consent_.Revoke();}
  bool Cleanup(){
   // A UI callback may still be on the stack even when runtime is not busy.
   // Close then returns false; do not retire its backing session in that case.
-  if(ui_&&!ui_->Close())return false;
+  if(!CloseUi())return false;
   ui_opened_=false;
   if(session_&&!session_->Close())return false;
   parent_=nullptr;active_=false;closed_=true;return true;
  }
  bool StartEnd(){
-  if(!ui_->Close())return false;
+  if(!CloseUi())return false;
   ui_opened_=false;
   if(end_started_)return true;
   ending_transport_=true;
@@ -55,21 +65,22 @@ class DeviceVoiceRuntime final {
   return true;
  }
 public:
- static std::unique_ptr<DeviceVoiceRuntime> Create(voice_prep::Protocol&protocol,std::unique_ptr<Admission>&candidate,Reader&reader,voice_codec_prep::Codec&codec,muse_native_review::Clock&clock,Device&device){
+ static std::unique_ptr<DeviceVoiceRuntime> Create(voice_prep::Protocol&protocol,std::unique_ptr<Admission>&candidate,Reader&reader,voice_codec_prep::Codec&codec,muse_native_review::Clock&clock,Device&device,VoiceUiAccess*access=nullptr){
   if(!candidate||!candidate->Unused()||!candidate->UsesProtocol(protocol)||!candidate->UsesClock(clock)||!candidate->UsesReader(reader))return {};
-  auto result=std::unique_ptr<DeviceVoiceRuntime>(new(std::nothrow)DeviceVoiceRuntime(protocol,*candidate,reader,clock,device));
+  auto result=std::unique_ptr<DeviceVoiceRuntime>(new(std::nothrow)DeviceVoiceRuntime(protocol,*candidate,reader,clock,device,access));
   if(!result)return {};
   result->session_=Session::Create(protocol,candidate,codec,result->consent_,clock);
   if(!result->session_)return {};
-  result->ui_.emplace(*result->session_,result->consent_);return result;
+  result->ui_.emplace(*result->session_,result->consent_,access?Ui::Dispatch::Queued:Ui::Dispatch::Inline);return result;
  }
  DeviceVoiceRuntime(const DeviceVoiceRuntime&)=delete;DeviceVoiceRuntime&operator=(const DeviceVoiceRuntime&)=delete;
  ~DeviceVoiceRuntime(){assert(!spent_||closed_);} // no substitute cleanup IO
  bool Open(lv_obj_t*parent,const VoiceAdmissionScope&scope){
   if(!STACKCHAN_MUSE_RAM_ONLY||busy_||spent_||closing_||closed_||!parent)return false;
   Busy busy(busy_);spent_=true;parent_=parent;
-  std::string node;lv_obj_update_layout(parent);
-  const bool ready=lv_obj_get_width(parent)>=320&&lv_obj_get_height(parent)>=240&&NativeCurrent()&&device_.Node(node)&&node==scope.node&&NativeCurrent();
+  std::string node;bool geometry=false;
+  const bool layout=WithUi([&]{lv_obj_update_layout(parent);geometry=lv_obj_get_width(parent)>=320&&lv_obj_get_height(parent)>=240;});
+  const bool ready=layout&&geometry&&NativeCurrent()&&device_.Node(node)&&node==scope.node&&NativeCurrent();
   Wipe(node);if(!ready){RequestClose();return false;}
   auto captured=scope;
   const auto wrap=[this](std::function<bool()> original){return [this,original=std::move(original)]{return NativeCurrent()&&original&&original()&&NativeCurrent();};};
@@ -84,27 +95,31 @@ public:
  bool Poll(){
   if(busy_||closed_)return false;
   Busy busy(busy_);
+  if(stop_signal_.load())RequestClose();
   if(closing_)return Cleanup();
   if(!active_)return false;
-  if(ending_||ui_->TakeEndRequested()){RequestEnd();return EndTick();}
+  bool end=false,prepare=false,ui_current=true;
+  // Drain a native Close/End before another SDK operation. GUI callbacks only
+  // signal atomic revocation; actual state changes happen on this owner.
+  if(ui_opened_){
+   if(!WithUi([&]{ui_current=ui_->Poll();end=ui_->TakeEndRequested();if(ui_current&&!end)prepare=ui_->TakePrepareRequested();})){RequestClose();return Cleanup();}
+   if(end){RequestEnd();return EndTick();}
+   if(!ui_current||closing_){RequestClose();return Cleanup();}
+  }
+  if(ending_){RequestEnd();return EndTick();}
   if(!session_->Tick()||closing_||ending_){RequestClose();return Cleanup();}
   if(!ui_opened_&&protocol_.Status()==voice_prep::State::Live){
-   if(!ui_->Open(parent_)||closing_||ending_){RequestClose();return Cleanup();}
+   bool opened=false;if(!WithUi([&]{opened=ui_->Open(parent_);})||!opened||closing_||ending_){RequestClose();return Cleanup();}
    ui_opened_=true;
   }
-  if(ui_opened_){
-   if(!ui_->Poll()||closing_||ending_){RequestClose();return Cleanup();}
-   const bool prepare=ui_->TakePrepareRequested();
-   if(closing_||ending_){RequestClose();return Cleanup();}
-   if(prepare&&!session_->PrepareDirections()){RequestClose();return Cleanup();}
-  }
+  if(prepare&&!session_->PrepareDirections()){RequestClose();return Cleanup();}
   if(closing_||ending_||session_->CloseRequested()){RequestClose();return Cleanup();}
   return true;
  }
  bool ShowReview(){
   if(busy_||!active_||closing_||ending_||!ui_opened_)return false;
-  Busy busy(busy_);const bool shown=ui_->Show();
-  if(!shown||closing_||ending_)RequestClose();
+  Busy busy(busy_);bool shown=false;const bool locked=WithUi([&]{shown=ui_->Show();});
+  if(!locked||!shown||closing_||ending_)RequestClose();
   return shown&&!closing_&&!ending_;
  }
  // Explicit bounded playback request, never automatic microphone/hold/capture.
@@ -120,6 +135,7 @@ public:
   RequestEnd();if(busy_)return false;
   Busy busy(busy_);return StartEnd();
  }
+ void SignalClose(){stop_signal_.store(true);consent_.SignalRevoke();} // other actor: signal only, never cleanup receipt
  bool Close(){RequestClose();if(busy_)return false;if(closed_)return true;Busy busy(busy_);return Cleanup();}
  bool CloseRequested()const{return closing_;}
  bool EndRequested()const{return ending_;}
