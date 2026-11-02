@@ -76,7 +76,9 @@ class Protocol {
   muse_vc_event_t ev{};
   if(!muse_vc_parse_event(line_.data(),line_size_,&ev)){Stop(MUSE_VC_END_FAILED,now);return false;}
   Act(muse_vc_call_event(&call_,&ev,now));
-  if(state_!=State::Live)return false;
+  // A parsed stop/error may validly enter Ending and queue graceful cleanup.
+  // Opening advisory events are also valid input, not evidence of readiness.
+  if(state_!=State::Live){Zero(&ev,sizeof(ev));return state_==State::Opening||state_==State::Ending;}
   muse_vc_reply_gate_event(&reply_,&ev);
   if(muse_vc_reply_gate_take_flush(&reply_))RequestFlush();
   if(muse_vc_reply_gate_full(&reply_)){Stop(MUSE_VC_END_FAILED,now);return false;}
@@ -129,7 +131,7 @@ public:
   if(!Identity(g)||stream!=media_||!media_sent_||!Advance(g,now)||(state_!=State::Opening&&state_!=State::Live)||(!data&&n))return false;
   if(n>LineCapacity){Stop(MUSE_VC_END_FAILED,now);return false;}
   for(size_t i=0;i<n;++i){
-   if(data[i]=='\n'){if(line_size_&&!Line(now)){Zero(line_.data(),line_.size());line_size_=0;return false;}Zero(line_.data(),line_.size());line_size_=0;}
+   if(data[i]=='\n'){if(line_size_&&!Line(now)){Zero(line_.data(),line_.size());line_size_=0;return false;}Zero(line_.data(),line_.size());line_size_=0;if(state_==State::Ending)return true;}
    else{if(data[i]=='\0'||line_size_>=line_.size()-1){Stop(MUSE_VC_END_FAILED,now);return false;}line_[line_size_++]=data[i];}
   }return true;
  }
@@ -156,6 +158,8 @@ public:
  }
  bool EndConfirmed()const{return confirmed_;}
  bool MediaEnded(uint64_t g,int64_t stream,bool okay,int status,int64_t now){if(!Identity(g)||stream!=media_||!Advance(g,now))return false;Act(muse_vc_call_media_end(&call_,okay,status,now));return true;}
+ // A failed/uncertain transport cannot be retried or claim end-call success.
+ bool TransportFailed(uint64_t g){if(!g||g!=generation_||state_==State::Idle||state_==State::Done)return false;RequireTransportClose();return true;}
  bool TransportClosed(uint64_t g,bool joined){if(!g||g!=generation_||state_!=State::AwaitTransportClose)return false;if(!joined)return false;ClearOperation();ClearMedia();Zero(&call_,sizeof(call_));Zero(&turns_,sizeof(turns_));state_=State::Done;return true;}
  bool Poll(uint64_t g,int64_t now){if(!Advance(g,now))return false;Act(muse_vc_call_poll(&call_,now));return true;}
  unsigned ActiveTurns()const{return turns_.n_active;}
