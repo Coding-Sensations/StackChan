@@ -122,6 +122,9 @@ public:
  bool CloseRequested()const{return closing_;}
  bool EndRequested()const{return ending_;}
  bool DirectionsBound()const{return audio_&&audio_->Status()==voice_codec_prep::State::Ready&&!closing_&&!ending_;} // resource state, not actual activity
+ bool UsesAdmission(const Admission&a)const{return admission_.get()==&a;}
+ bool UsesNativeAuthority(const voice_codec_prep::Permit&n)const{return &native_==&n;}
+ bool UsesClock(const muse_native_review::Clock&clock)const{return &clock_==&clock;}
  bool TransportJoined()const{return transport_joined_;}
  bool CleanupComplete()const{return closed_;}
  bool EndConfirmed()const{return protocol_.EndConfirmed();}

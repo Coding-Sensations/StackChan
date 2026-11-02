@@ -17,6 +17,8 @@ class CredentialLease final:public CredentialStore,public DeviceCredentialReader
  DirectNvsStore store_;bool acquired_=false;
 #endif
 public:
+ CredentialLease()=default;CredentialLease(const CredentialLease&)=delete;CredentialLease&operator=(const CredentialLease&)=delete;
+ CredentialLease(CredentialLease&&)=delete;CredentialLease&operator=(CredentialLease&&)=delete;
  bool Acquire();bool Current()const;bool CanCreateNew();
  StoreResult CommitNew(const DeviceRecord&)override;
  bool LoadAccess(const std::string&,std::function<bool()>,DeviceRecord&)override;

@@ -110,6 +110,11 @@ public:
         if(!exchange_.CleanupComplete()&&!exchange_.Joined(true))return false;
         closed_=true;return true;
     }
+    bool ReadCurrentTarget(voice_prep::TargetSnapshot& out){
+        out={};if(busy_||!begun_||retained_||closed_)return false;
+        Busy busy(busy_);
+        if(!Verify()||!protocol_.ReturnedTarget(budget_.generation,last_.mono_us,out)||!Verify()){out={};return false;}return true;
+    }
     bool CleanupComplete()const{return closed_;}
     muse_native_review::Bridge& Review(){return review_;} // local projection only; NativePermit remains false
 };

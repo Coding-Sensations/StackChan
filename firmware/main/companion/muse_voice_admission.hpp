@@ -13,6 +13,12 @@ struct VoiceAdmissionScope {
     muse_native_review::Budget budget{};
     std::function<bool()> credential_current,network_current,voice_current;
 };
+// Verified original-scope projection only; never native authority or credentials.
+struct AdmittedVoiceContext {
+    std::string node,vm,call;muse_native_review::Budget budget{};muse_native_review::Stamp stamp{};voice_prep::TargetSnapshot target{};
+    void Clear(){Wipe(node);Wipe(vm);Wipe(call);budget={};stamp={};muse_review::Wipe(&target,sizeof target);}
+    ~AdmittedVoiceContext(){Clear();}
+};
 template<class Lookup,class Socket>
 class VoiceAdmission final:public muse_native_review::Custody {
     using Worker=VoiceSessionWorker<Socket>;
@@ -68,6 +74,15 @@ public:
     }
     VoiceAdmission(const VoiceAdmission&)=delete;VoiceAdmission& operator=(const VoiceAdmission&)=delete;
     ~VoiceAdmission(){assert(!spent_||closed_);WipeFrame();} // never performs native IO
+    bool UsesReader(const DeviceCredentialReader& r)const{return &reader_==&r;}
+    bool ReadAuthorizedContext(AdmittedVoiceContext& out){
+        out.Clear();if(busy_||checking_||!active_||stop_||closed_||!worker_)return false;
+        Busy busy(busy_);voice_prep::TargetSnapshot target{};
+        const bool valid=CurrentGrant()&&worker_->ReadCurrentTarget(target)&&CurrentGrant();
+        if(!valid){muse_review::Wipe(&target,sizeof target);return false;}
+        out.node=scope_.node;out.vm=scope_.vm;out.call=scope_.call;out.budget=scope_.budget;out.stamp=last_;out.target=target;muse_review::Wipe(&target,sizeof target);
+        return true;
+    }
     bool Unused()const{return !spent_&&!closed_;}
     bool UsesProtocol(const voice_prep::Protocol& p)const{return &protocol_==&p;}
     bool UsesClock(const muse_native_review::Clock& c)const{return &clock_==&c;}
