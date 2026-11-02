@@ -1,22 +1,10 @@
 from pathlib import Path
 import subprocess,tempfile,re
 r=Path(__file__).resolve().parent
-source=(r.parent/'main/hal/board/cores3_audio_codec.cc').read_text()
-def body(signature):
- start=source.index(signature);opening=source.index('{',start);depth=0
- for i in range(opening,len(source)):
-  depth+=(source[i]=='{')-(source[i]=='}')
-  if depth==0:return source[start:i+1]
- raise AssertionError('unclosed production method')
-methods=[]
-for match in re.finditer(r'(?m)^[\w:]+(?:\s+IRAM_ATTR)?\s+CoreS3AudioCodec::(\w+)\(',source):
- if match.group(1)=='CreateDuplexChannels':continue
- methods.append(body(match.group(0)))
-assert any('MuseCodecAcquire' in method for method in methods)
-methods='\n'.join(methods)
+from muse_codec_fixture import production_fixture
 with tempfile.TemporaryDirectory(prefix='muse-codec-') as temporary:
  t=Path(temporary);cpp=t/'test.cpp';binary=t/'test'
- cpp.write_text((r/'muse_codec_test.cpp').read_text().replace('ACTUAL_METHODS',methods))
+ cpp.write_text(production_fixture('muse_codec_test.cpp'))
  subprocess.run(['clang++','-std=c++17','-Wall','-Wextra','-Werror','-fsanitize=address,undefined','-fno-omit-frame-pointer','-DSTACKCHAN_BUILD_MUSE=1','-DSTACKCHAN_BUILD_MUSE_VOICE_PROTOCOL=1','-I'+str(r/'muse-codec-fixtures'),'-I'+str(r.parent/'main'),str(cpp),'-o',str(binary)],check=True)
  subprocess.run([str(binary)],check=True,timeout=10)
 
