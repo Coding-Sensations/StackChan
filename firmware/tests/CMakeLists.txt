@@ -149,3 +149,6 @@ add_test(NAME muse_pcm_test COMMAND ${Python3_EXECUTABLE}
 
 add_test(NAME voice_worker_test COMMAND ${Python3_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/test_voice_worker.py)
+
+add_test(NAME voice_admission_test COMMAND ${Python3_EXECUTABLE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_voice_admission.py)
