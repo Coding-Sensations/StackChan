@@ -13,6 +13,12 @@ struct VoiceAdmissionScope {
     muse_native_review::Budget budget{};
     std::function<bool()> credential_current,network_current,voice_current;
 };
+// Verified original-scope projection only; never native authority or credentials.
+struct AdmittedVoiceContext {
+    std::string node,vm,call;muse_native_review::Budget budget{};muse_native_review::Stamp stamp{};voice_prep::TargetSnapshot target{};
+    void Clear(){Wipe(node);Wipe(vm);Wipe(call);budget={};stamp={};muse_review::Wipe(&target,sizeof target);}
+    ~AdmittedVoiceContext(){Clear();}
+};
 template<class Lookup,class Socket>
 class VoiceAdmission final:public muse_native_review::Custody {
     using Worker=VoiceSessionWorker<Socket>;
@@ -68,6 +74,18 @@ public:
     }
     VoiceAdmission(const VoiceAdmission&)=delete;VoiceAdmission& operator=(const VoiceAdmission&)=delete;
     ~VoiceAdmission(){assert(!spent_||closed_);WipeFrame();} // never performs native IO
+    bool UsesReader(const DeviceCredentialReader& r)const{return &reader_==&r;}
+    bool ReadAuthorizedContext(AdmittedVoiceContext& out){
+        out.Clear();if(busy_||checking_||!active_||stop_||closed_||!worker_)return false;
+        Busy busy(busy_);voice_prep::TargetSnapshot target{};
+        const bool valid=CurrentGrant()&&worker_->ReadCurrentTarget(target)&&CurrentGrant();
+        if(!valid){muse_review::Wipe(&target,sizeof target);return false;}
+        out.node=scope_.node;out.vm=scope_.vm;out.call=scope_.call;out.budget=scope_.budget;out.stamp=last_;out.target=target;muse_review::Wipe(&target,sizeof target);
+        return true;
+    }
+    bool Unused()const{return !spent_&&!closed_;}
+    bool UsesProtocol(const voice_prep::Protocol& p)const{return &protocol_==&p;}
+    bool UsesClock(const muse_native_review::Clock& c)const{return &clock_==&c;}
     bool ReadBudget(muse_native_review::Budget& out)override{if(!CurrentGrant())return false;out=scope_.budget;return true;}
     bool Current(const muse_native_review::Budget& budget)override{return Same(budget,scope_.budget)&&CurrentGrant();}
     bool Open(const VoiceAdmissionScope& scope){
@@ -102,12 +120,12 @@ public:
         if(!worker_||!CurrentGrant()||!worker_->Begin({scope_.budget.generation,scope_.call,scope_.node,7,9,scope_.budget.expires_us}))return Fail();
         return true;
     }
-    bool Tick(){if(busy_||!active_||stop_||!worker_)return false;Busy busy(busy_);return worker_->Tick()||Fail();}
-    bool Cancel(){if(busy_){stop_=true;return false;}if(!worker_||!active_||stop_)return false;Busy busy(busy_);return worker_->Cancel()||Fail();}
+    bool Tick(){if(busy_||checking_||!active_||stop_||!worker_)return false;Busy busy(busy_);return worker_->Tick()||Fail();}
+    bool Cancel(){if(busy_||checking_){stop_=true;return false;}if(!worker_||!active_||stop_)return false;Busy busy(busy_);return worker_->Cancel()||Fail();}
     muse_native_review::Bridge* Review(){return worker_&&active_&&!stop_?&worker_->Review():nullptr;}
     bool Close(){
         if(closed_)return true;
-        if(busy_){stop_=true;return false;}
+        if(busy_||checking_){stop_=true;return false;}
         Busy busy(busy_);Fail();
         if(worker_)socket_joined_=worker_->Close();
         else if(!socket_joined_)socket_joined_=!socket_||socket_->CloseAndJoin(20);
