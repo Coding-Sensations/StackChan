@@ -75,6 +75,13 @@ int main(){
   Fixture f;f.Live();assert(f.exchange.Cancel(++f.now));while(f.protocol.Pending().kind!=Kind::None)f.Send();assert(f.Receive(f.server.Response(9,200,"{\"ok\":true}",true)));
   auto half=f.Send();assert(half.kind==tn::ServiceFrameKind::BodyChunk&&half.end);f.now+=2000001;auto reset=f.Send();assert(reset.kind==tn::ServiceFrameKind::Reset&&reset.stream==7);f.MustRetain();
  }
+ {
+  Fixture f;f.Live();assert(f.exchange.Cancel(++f.now));auto end=f.Send();assert(end.path=="/voice/end-call");
+  assert(f.Receive(f.server.Body(7,"{\"type\":\"response.done\"}\n",true)));
+  assert(f.protocol.Status()==State::Ending&&!f.exchange.NeedsTransportClose());
+  assert(f.Receive(f.server.Response(9,200,"{\"ok\":true}",true)));assert(f.protocol.EndConfirmed());
+  f.MustRetain();
+ }
 
  {
   Fixture f;assert(f.exchange.Queue(++f.now));auto p=f.exchange.Next(++f.now);auto response=f.server.Response(7,200);

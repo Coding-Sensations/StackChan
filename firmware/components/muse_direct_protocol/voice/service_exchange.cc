@@ -91,7 +91,7 @@ bool ServiceExchange::Frame(const wire::DecodedServiceFrame& frame,int64_t now){
  if(frame.stream_id==media_){
   if(head){if(media_head_||!protocol_.Head(generation_,media_,frame.response.status,now))return false;media_head_=true;}
   if(!media_head_)return false;
-  if(body.size()&&!protocol_.Media(generation_,media_,reinterpret_cast<const char*>(body.data()),body.size(),now))return false;
+  if(body.size()&&protocol_.Status()!=State::Ending&&!protocol_.Media(generation_,media_,reinterpret_cast<const char*>(body.data()),body.size(),now))return false;
   return !ended||protocol_.MediaEnded(generation_,media_,true,head?frame.response.status:200,now);
  }
  if(frame.stream_id==end_){
