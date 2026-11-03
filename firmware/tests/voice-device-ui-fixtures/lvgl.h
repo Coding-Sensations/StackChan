@@ -1,6 +1,6 @@
 #pragma once
 #include "companion_ui_fixture.hpp"
-constexpr int LV_EVENT_PRESS_LOST=4,LV_INDEV_TYPE_POINTER=1,LV_INDEV_STATE_PRESSED=1,LV_INDEV_STATE_RELEASED=0,LV_LABEL_LONG_WRAP=3;
+constexpr int LV_EVENT_PRESS_LOST=4,LV_INDEV_TYPE_POINTER=1,LV_INDEV_STATE_PRESSED=1,LV_INDEV_STATE_RELEASED=0,LV_LABEL_LONG_WRAP=3,LV_LABEL_LONG_SCROLL_CIRCULAR=4;
 struct lv_indev_t{int type=LV_INDEV_TYPE_POINTER,state=LV_INDEV_STATE_RELEASED;lv_obj_t* active=nullptr;};
 inline lv_indev_t* active_input=nullptr;inline lv_indev_t* event_input=nullptr;
 inline lv_indev_t* lv_indev_active(){return active_input;}

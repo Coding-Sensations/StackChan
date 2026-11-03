@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "muse_direct_local_port.h"
+#include "muse_direct_credential_policy.hpp"
 #include "muse_direct_live.h"
+#include "muse_voice_task.h"
+#include "muse_voice_core_access.h"
+#if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+#include <hal/hal.h>
+#endif
 #include "provider_room_runtime.h"
 #include "station_authority.hpp"
 #include <esp_chip_info.h>
@@ -53,6 +59,15 @@ public:
   auto borrow=network::Authority().BorrowSaved();if(!borrow)return {};
   auto result=std::unique_ptr<LocalNetworkUse>(new(std::nothrow)SavedUse(std::move(borrow),expected));if(!result||!result->Current())return {};return result;
  }
+#if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+ void* VoiceInput()override{return GetHAL().lvTouchpad;}
+ bool VoiceClock(muse_native_review::Stamp&out)override{return SampleNativeVoiceClock(out);}
+ bool VoiceIdentity(uint64_t&generation,std::string&call)override{return AllocateNativeVoiceIdentity(generation,call);}
+ bool VoiceReady()override{return STACKCHAN_MUSE_RAM_ONLY&&ExistingVoiceCore()!=nullptr;}
+ bool VoiceIdle()override{return NativeVoiceTaskCleanupComplete();}
+ bool PrepareVoice(const VoiceAdmissionScope&scope)override{auto*core=ExistingVoiceCore();return STACKCHAN_MUSE_RAM_ONLY&&core&&PrepareNativeVoiceTask(scope,*core);}
+ void StopVoice(uint64_t generation)override{StopNativeVoiceTaskScope(generation);}
+#endif
  bool PairIdle()override{return DevicePairingCleanupComplete();}bool ChatIdle()override{return NativeSessionCleanupComplete();}
  bool PreparePair(const PairingGrant& grant,std::string_view token)override{return PrepareDevicePairing(grant,token);}
  bool PrepareChat(const SessionGrant& grant)override{return PrepareNativeSession(grant);}

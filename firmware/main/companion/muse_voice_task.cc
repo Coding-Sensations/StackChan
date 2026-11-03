@@ -12,6 +12,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <esp_timer.h>
+#include <esp_random.h>
 #include <sys/time.h>
 #include <mutex>
 namespace companion::muse {
@@ -39,7 +40,7 @@ struct Kernel {
 struct Window;
 class Work;
 using Task=RetainedVoiceTask<Work,Kernel>;
-std::mutex mutex;std::shared_ptr<Window> window;uint64_t last_generation=0;uint32_t preparing=0;
+std::mutex mutex;std::shared_ptr<Window> window;uint64_t last_generation=0,last_issued_generation=0;uint32_t preparing=0;
 struct Preparation {
  bool active=false;
  Preparation(){std::lock_guard<std::mutex> lock(mutex);if(preparing!=UINT32_MAX){++preparing;active=true;}}
@@ -115,6 +116,20 @@ bool EnsureReaper(const std::shared_ptr<Window>&owner){
  auto* retained=new(std::nothrow)std::shared_ptr<Window>(owner);if(!retained)return false;owner->reaping.store(true);
  if(xTaskCreate(Reap,"muse_voice_join",3072,retained,3,nullptr)!=pdPASS){owner->reaping.store(false);delete retained;return false;}return true;
 }
+}
+bool SampleNativeVoiceClock(muse_native_review::Stamp&out){NativeClock clock;out={};return clock.Sample(out);}
+bool AllocateNativeVoiceIdentity(uint64_t&generation,std::string&call){
+ generation=0;Wipe(call);if(!visible.load()||staging_broken.load()||!room::ProviderSelected(room::Provider::Muse))return false;
+ uint8_t bytes[16]{};esp_fill_random(bytes,sizeof bytes);bytes[6]=(bytes[6]&15)|64;bytes[8]=(bytes[8]&63)|128;
+ static constexpr char hex[]="0123456789abcdef";std::string value;value.reserve(36);
+ for(unsigned i=0;i<16;++i){if(i==4||i==6||i==8||i==10)value+='-';value+=hex[bytes[i]>>4];value+=hex[bytes[i]&15];}for(volatile auto&b:bytes)b=0;
+ std::lock_guard<std::mutex> lock(mutex);auto next=std::max(last_generation,last_issued_generation);
+ if(next==UINT64_MAX||!visible.load()||staging_broken.load()){Wipe(value);return false;}generation=last_issued_generation=next+1;call=std::move(value);return true;
+}
+void StopNativeVoiceTaskScope(uint64_t generation){
+ std::shared_ptr<Window> owner;{std::lock_guard<std::mutex> lock(mutex);if(window&&!window->retiring.load()&&window->grant.budget.generation==generation)owner=window;}
+ if(!owner)return;
+ owner->revoked.store(true);if(!owner->started.exchange(true))owner->creation_finished.store(true);(void)EnsureReaper(owner);
 }
 void VoiceTaskProviderVisible(bool value){if(visible.exchange(value)!=value)InvalidateStaging();if(!value)StopNativeVoiceTask();}
 bool PrepareNativeVoiceTask(const VoiceAdmissionScope&grant,CoreS3AudioCodec&core){

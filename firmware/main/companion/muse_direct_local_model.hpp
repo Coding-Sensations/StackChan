@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
+#include <build_profiles/features.hpp>
 #include "muse_direct_device.h"
 #include "muse_direct_admission.hpp"
 #include <atomic>
 #include <memory>
+namespace muse_native_review {struct Stamp;}
 namespace companion::muse {
+struct VoiceAdmissionScope;
 enum class LocalMode{Pair,Chat};enum class LocalField{None,Token,Vm,Chat,Message};
 struct LocalIdentity{std::string node,device,mac,version;};
 struct LocalNetwork{std::array<uint8_t,32> ssid{};std::array<uint8_t,6> bssid{};uint64_t epoch=0;bool valid=false;};
@@ -18,6 +21,16 @@ public:
  virtual bool PreparePair(const PairingGrant&,std::string_view)=0;virtual bool PrepareChat(const SessionGrant&)=0;
  virtual void Stop(LocalMode)=0;virtual bool Text(const std::string& generation,const std::string& request,const std::string& text)=0;
  virtual bool RandomId(std::string&)=0;
+#if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+ // Default deny; these are native local ports, not data-supplied authority.
+ virtual void* VoiceInput(){return nullptr;}
+ virtual bool VoiceClock(muse_native_review::Stamp&){return false;}
+ virtual bool VoiceIdentity(uint64_t&,std::string&){return false;}
+ virtual bool VoiceReady(){return false;}
+ virtual bool VoiceIdle(){return false;}
+ virtual bool PrepareVoice(const VoiceAdmissionScope&){return false;}
+ virtual void StopVoice(uint64_t){}
+#endif
 };
 struct LocalScope {
  LocalPort& port;LocalMode mode;std::unique_ptr<LocalNetworkUse> network;std::atomic<bool> active{true};uint64_t expires=0;std::string generation;
