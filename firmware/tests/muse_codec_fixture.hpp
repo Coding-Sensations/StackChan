@@ -10,6 +10,7 @@
 #define private public
 #include "hal/board/cores3_audio_codec.h"
 #undef private
+#include <companion/muse_quiesce_diagnostic.hpp>
 namespace companion::diagnostic {
 enum class StageCode {DriverInputOpen,DriverInputGain,DriverInputClose,DriverRead,DriverOutputOpen,DriverOutputVolume,DriverOutputClose,DriverWrite};
 using FaultCode=StageCode;
