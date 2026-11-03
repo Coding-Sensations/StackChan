@@ -37,6 +37,7 @@ public:
     virtual ~StackChanAvatarDisplay();
 
     void InitializeLcdThemes();
+    void ResetSessionUi();
 
     // Override Display methods to control Robot
     virtual void SetEmotion(const char* emotion) override;

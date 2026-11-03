@@ -1,3 +1,4 @@
+#include <apps/runtime_lifecycle/session.h>
 /*
  * SPDX-FileCopyrightText: 2026 M5Stack Technology CO LTD
  *
@@ -263,8 +264,13 @@ void AppAvatar::onRunning()
 
 void AppAvatar::onClose()
 {
+#ifdef STACKCHAN_COMPANION_BOOT
+    if(runtime_lifecycle::DeferNativeClose())return;
+#endif
     mclog::tagInfo(getAppInfo().name, "on close");
 
+    GetHAL().onWsLog.clear();
+    GetHAL().onWsCallResponse.clear();
     {
         LvglLockGuard lock;
 

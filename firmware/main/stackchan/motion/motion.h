@@ -144,7 +144,7 @@ public:
      * @param z The vertical distance; positive values move the head up (usually in mm).
      * @param speed The movement speed, ranging from 0 (slowest) to 1000 (fastest).
      *
-     * @note If the target point is at (0,0,0), the behavior is undefined (mathematical singularity).
+     * @note Nonfinite coordinates and (0,0,0) are ignored without changing targets.
      */
     void lookAtPoint(float x, float y, float z, int speed = 500);
 

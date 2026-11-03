@@ -26,6 +26,9 @@ private:
     std::unique_ptr<view::AppListPage> _app_list_page;
     std::unique_ptr<view::AppDetailPage> _app_detail_page;
     std::unique_ptr<view::AppInstallPage> _app_install_page;
+    std::unique_ptr<view::AppConfirmPage> _app_confirm_page;
+    void reloadCatalog();
+    bool _refresh_requested = false;
     int _selected_index    = -1;
     bool _launch_requested = false;
 };

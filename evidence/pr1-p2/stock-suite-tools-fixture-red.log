@@ -1,0 +1,59 @@
+{"result": "passed", "setup": "official 6 sections/12 rows + Screensaver", "launcher": "official prefix, then joint Companion and extensions", "tools": "one Tools tile -> selection -> dedicated graphical pages", "device_access": false}
+....
+----------------------------------------------------------------------
+Ran 4 tests in 4.490s
+
+OK
+PASS USB ownership, foreign driver refusal, core affinity, stale FIFO, expiry, bounds and close failure
+firmware install policy tests passed
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/test_tools_ui.cpp:37:55: error: no matching function for call to 'AcquireAudio'
+   37 |  assert(CurrentAudioOwner()==AudioOwner::None);assert(AcquireAudio(AudioOwner::Mira));assert(!AcquireAudio(AudioOwner::Stock));
+      |                                                       ^~~~~~~~~~~~
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/firmware/main/companion/audio_owner.hpp:58:13: note: candidate function not viable: requires 4 arguments, but 1 was provided
+   58 | inline bool AcquireAudio(AudioOwner owner,AudioPurpose purpose,uint64_t epoch,AudioLease& out){return CommonAudioAuthority().Acquire(owner,purpose,epoch,out);}
+      |             ^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/test_tools_ui.cpp:37:95: error: no matching function for call to 'AcquireAudio'
+   37 |  assert(CurrentAudioOwner()==AudioOwner::None);assert(AcquireAudio(AudioOwner::Mira));assert(!AcquireAudio(AudioOwner::Stock));
+      |                                                                                               ^~~~~~~~~~~~
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/firmware/main/companion/audio_owner.hpp:58:13: note: candidate function not viable: requires 4 arguments, but 1 was provided
+   58 | inline bool AcquireAudio(AudioOwner owner,AudioPurpose purpose,uint64_t epoch,AudioLease& out){return CommonAudioAuthority().Acquire(owner,purpose,epoch,out);}
+      |             ^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/test_tools_ui.cpp:38:2: error: no matching function for call to 'ReleaseAudio'
+   38 |  ReleaseAudio(AudioOwner::Stock);assert(CurrentAudioOwner()==AudioOwner::Mira);
+      |  ^~~~~~~~~~~~
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/firmware/main/companion/audio_owner.hpp:60:13: note: candidate function not viable: requires 2 arguments, but 1 was provided
+   60 | inline bool ReleaseAudio(AudioLease& l,bool closed_and_joined){return CommonAudioAuthority().Release(l,closed_and_joined);}
+      |             ^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/test_tools_ui.cpp:39:2: error: no matching function for call to 'ReleaseAudio'
+   39 |  ReleaseAudio(AudioOwner::Mira);assert(AcquireAudio(AudioOwner::Stock));assert(!AcquireAudio(AudioOwner::Mira));ReleaseAudio(AudioOwner::Stock);
+      |  ^~~~~~~~~~~~
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/firmware/main/companion/audio_owner.hpp:60:13: note: candidate function not viable: requires 2 arguments, but 1 was provided
+   60 | inline bool ReleaseAudio(AudioLease& l,bool closed_and_joined){return CommonAudioAuthority().Release(l,closed_and_joined);}
+      |             ^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/test_tools_ui.cpp:39:40: error: no matching function for call to 'AcquireAudio'
+   39 |  ReleaseAudio(AudioOwner::Mira);assert(AcquireAudio(AudioOwner::Stock));assert(!AcquireAudio(AudioOwner::Mira));ReleaseAudio(AudioOwner::Stock);
+      |                                        ^~~~~~~~~~~~
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/firmware/main/companion/audio_owner.hpp:58:13: note: candidate function not viable: requires 4 arguments, but 1 was provided
+   58 | inline bool AcquireAudio(AudioOwner owner,AudioPurpose purpose,uint64_t epoch,AudioLease& out){return CommonAudioAuthority().Acquire(owner,purpose,epoch,out);}
+      |             ^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/test_tools_ui.cpp:39:81: error: no matching function for call to 'AcquireAudio'
+   39 |  ReleaseAudio(AudioOwner::Mira);assert(AcquireAudio(AudioOwner::Stock));assert(!AcquireAudio(AudioOwner::Mira));ReleaseAudio(AudioOwner::Stock);
+      |                                                                                 ^~~~~~~~~~~~
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/firmware/main/companion/audio_owner.hpp:58:13: note: candidate function not viable: requires 4 arguments, but 1 was provided
+   58 | inline bool AcquireAudio(AudioOwner owner,AudioPurpose purpose,uint64_t epoch,AudioLease& out){return CommonAudioAuthority().Acquire(owner,purpose,epoch,out);}
+      |             ^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/test_tools_ui.cpp:39:113: error: no matching function for call to 'ReleaseAudio'
+   39 |  ReleaseAudio(AudioOwner::Mira);assert(AcquireAudio(AudioOwner::Stock));assert(!AcquireAudio(AudioOwner::Mira));ReleaseAudio(AudioOwner::Stock);
+      |                                                                                                                 ^~~~~~~~~~~~
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/firmware/main/companion/audio_owner.hpp:60:13: note: candidate function not viable: requires 2 arguments, but 1 was provided
+   60 | inline bool ReleaseAudio(AudioLease& l,bool closed_and_joined){return CommonAudioAuthority().Release(l,closed_and_joined);}
+      |             ^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+7 errors generated.
+Traceback (most recent call last):
+  File "/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/run_stock_restoration_checks.py", line 43, in <module>
+    subprocess.run(command, check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mikedemott/.local/share/uv/python/cpython-3.13.15-macos-aarch64-none/lib/python3.13/subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['clang++', '-std=c++17', '-Wall', '-Wextra', '-Werror', '-I/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/firmware/main/apps/stock_shell', '-I/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/firmware/main/companion', '/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/test_tools_ui.cpp', '-o', '/var/folders/1_/85m0gzgx34dgj2mjfjz4r8qc0000gn/T/stackchan-stock-tests-1s6wqpt3/tools_ui']' returned non-zero exit status 1.

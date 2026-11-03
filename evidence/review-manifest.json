@@ -1,0 +1,28 @@
+{
+  "base": "832730492ab9ae68d693ce6c2e7b024aba3c8d82",
+  "branch": "codex/current-navigation",
+  "patch_sha256": "b3df6ae66efdbba852f421d196981374f02cc62d3b6da6799032bd8d22bb848f",
+  "files": {
+    "firmware/main/apps/app_launcher/app_launcher.cpp": "e6f7f18f937d4b222e02548f196a46cc07b0b249de0c6fcb3ee24cc4edf41986",
+    "firmware/main/apps/app_launcher/category_routes.hpp": "f274ca0eeed36d4885c4b09450c4731726018f244964291248adb61b63475f9b",
+    "firmware/main/apps/app_launcher/view/effect_catalog/effect_catalog.cpp": "6484452b8d5a340478397f3b69ba68ebfa71eb827fc6598c0742bb06f82dfd87",
+    "firmware/main/apps/app_launcher/view/effect_catalog/effect_catalog.hpp": "9772e9838ed1e190bafef52424fe300492133b81d145ae4e46709f0214a3d1bf",
+    "firmware/main/apps/app_launcher/view/effect_catalog/generate_catalog.py": "33bdcddb0d394605067bae16e501562aaf162802010fec36955d9746723bddf6",
+    "firmware/main/apps/app_launcher/view/effect_catalog/raster.hpp": "8999b6fe952fe0bfcdca4b4de5038aab7601bed04d7e7369a2fd11d59782be90",
+    "firmware/main/apps/app_launcher/view/screensaver.cpp": "31662b79f2a8ccd246b78a3b5a6d27bb265eaa8ebe969e3f60bfda1c256f415a",
+    "firmware/main/apps/app_setup/app_setup.cpp": "762208583045a20c4846eb5bf9f903115fa1931d32f144279701d15d134c4844",
+    "firmware/main/apps/app_setup/workers/screensaver_setup.cpp": "bf5a78c1d80999526a14b3724687ef6bdaa535507a1141cd9f613f1c9bd6d7fd",
+    "firmware/main/apps/stock_agent/stock_agent.cc": "9b3442eadcdbfe733db06a2bece0c20d4593fa3bd1310b210fadd6fc7f26cdd3",
+    "firmware/main/apps/stock_shell/feature_apps.cc": "f0baba8b0c96aa9dc593f083afef9e11c14176d232e92eb608c4f5f1237e943a",
+    "firmware/main/apps/stock_shell/navigation.cc": "c9d8ea916753ce5864be71872fdcacd90b51134ea9153d1341388480e32a2df7",
+    "firmware/main/apps/stock_shell/navigation.h": "26d2903f6304d98566b43f447e3e9c8b01e8cdcf2fb22fc2d17fecc00ff473fd",
+    "firmware/main/apps/stock_shell/stock_apps.cc": "4b435a156721e2ccd124491037dc7f8cef34c91881e96ffdb69546ec7ff5b7c1",
+    "firmware/main/companion/direct_usb_pcm/usb_pcm_app.cc": "6ec526ae80492bf6dfe5eae6cb5ca465c32dc9faaac675e4a54bcca8e8063dff",
+    "firmware/main/companion/direct_usb_pcm/usb_pcm_app.h": "b1990c9a8a843b860c4d081ff4072875ce9339fd9bb91591955842cd5fb28a4b",
+    "firmware/tests/CMakeLists.txt": "e987cd7b58380ce5da2c1bac68f9b137937f92f4670c855deccb60fc65e31170",
+    "firmware/tests/navigation/catalog_bounded_test.cpp": "c5f544c26e47f01828826a8f57f54a1a18e1235024e27ef85caf5e000ebbc68c",
+    "firmware/tests/navigation/category_test.cpp": "163f1dfc41da98ce1364e32a885a0257fcf7dd6646e3e4d27e020899f709b784",
+    "firmware/tests/navigation/launcher_test.py": "4f20a9ccb71252786e1aae02a1e8e622ba60042bdcd59707f8ba9498e993027e",
+    "firmware/tests/navigation/raster_test.cpp": "10b3b977e1146284a125efbbf6da826d6bf6217ea9d19e2e8c186b500cefc3f1"
+  }
+}

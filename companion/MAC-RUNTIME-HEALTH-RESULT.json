@@ -1,0 +1,14 @@
+{
+  "time_utc": "2026-10-09T05:30:45.255034+00:00",
+  "result": "PASS",
+  "health_status": 200,
+  "diagnostics_status": 401,
+  "server_shutdown": true,
+  "post_test_port_18765_listener": false,
+  "auth": "always deny; no credentials",
+  "adapters": {},
+  "state_store": null,
+  "audio_provider": false,
+  "persistent_service": false,
+  "device_io": false
+}

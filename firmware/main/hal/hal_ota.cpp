@@ -8,8 +8,23 @@
 #include <cstdio>
 #include <memory>
 #include <ota.h>
+#ifdef STACKCHAN_COMPANION_BOOT
+#include <apps/runtime_lifecycle/session.h>
+#endif
 
 static const std::string_view _tag = "HAL-OTA";
+
+static bool RebootUnlessCancelled(Hal& hal, uint32_t wait_ms)
+{
+#ifdef STACKCHAN_COMPANION_BOOT
+    if (runtime_lifecycle::WaitCancelled(wait_ms)) return false;
+    return runtime_lifecycle::CommitFirmwareInstall([&] { hal.reboot(); return true; });
+#else
+    vTaskDelay(pdMS_TO_TICKS(wait_ms));
+    hal.reboot();
+    return true;
+#endif
+}
 
 bool Hal::updateFirmware(std::function<void(std::string_view)> onLog)
 {
@@ -48,6 +63,9 @@ bool Hal::updateFirmware(std::function<void(std::string_view)> onLog)
     onLog("Starting firmware upgrade...");
     int last_reported_progress = -1;
     bool upgrade_success       = Ota::Upgrade(firmware_url, [&](int progress, size_t speed) {
+#ifdef STACKCHAN_COMPANION_BOOT
+        if (runtime_lifecycle::HomeRequested()) return;
+#endif
         if (progress == last_reported_progress) {
             return;
         }
@@ -60,17 +78,17 @@ bool Hal::updateFirmware(std::function<void(std::string_view)> onLog)
         onLog(msg);
           });
 
+#ifdef STACKCHAN_COMPANION_BOOT
+    if (runtime_lifecycle::HomeRequested()) return false;
+#endif
     if (!upgrade_success) {
         mclog::tagError(_tag, "firmware upgrade failed: version={}, url={}", firmware_version, firmware_url);
         onLog("Firmware upgrade failed, rebooting...");
-        vTaskDelay(pdMS_TO_TICKS(5000));
-        reboot();
+        RebootUnlessCancelled(*this, 5000);
         return false;
     }
 
     mclog::tagInfo(_tag, "firmware upgrade successful, rebooting");
     onLog("Upgrade successful, rebooting...");
-    vTaskDelay(pdMS_TO_TICKS(1000));
-    reboot();
-    return true;
+    return RebootUnlessCancelled(*this, 1000);
 }

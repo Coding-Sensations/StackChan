@@ -1,0 +1,462 @@
+name: Build(arduino-m5stack)
+
+env:
+  SKETCH_NAMES_FIND_START: ./examples/UnitUnified
+  REQUIRED_LIBRARIES: M5Unified,M5UnitUnified
+
+on:
+  push:
+    tags-ignore:
+      - '*.*.*'
+      - 'v*.*.*'
+    branches:
+      - '*'
+    paths:
+      - 'src/**.cpp'
+      - 'src/**.hpp'
+      - 'src/**.h'
+      - 'src/**.c'
+      - 'examples/UnitUnified/**.ino'
+      - 'examples/UnitUnified/**.cpp'
+      - 'examples/UnitUnified/**.hpp'
+      - 'examples/UnitUnified/**.h'
+      - 'examples/UnitUnified/**.c'
+      - '.github/workflows/arduino-m5-build-check.yml'
+  pull_request:
+    paths:
+      - 'src/**.cpp'
+      - 'src/**.hpp'
+      - 'src/**.h'
+      - 'src/**.c'
+      - 'examples/UnitUnified/**.ino'
+      - 'examples/UnitUnified/**.cpp'
+      - 'examples/UnitUnified/**.hpp'
+      - 'examples/UnitUnified/**.h'
+      - 'examples/UnitUnified/**.c'
+      - '.github/workflows/arduino-m5-build-check.yml'
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ${{ matrix.build-properties }}:${{ matrix.nfc }}/${{ matrix.sketch }}:${{matrix.board}}@${{matrix.platform-version}}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        platform-url:
+          - https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+
+        sketch:
+          - Detect
+
+        # Cross design: NFCA Detect on every board (chip-coverage matrix), NFCB/F/V Detect on
+        # m5stack_core only via include. NFC protocols share the same library code path, so
+        # per-board compile of NFCA is enough to catch chip issues; NFCB/F/V get one build each
+        # to confirm the family-specific stack compiles.
+        nfc:
+          - NFCA
+#          - NFCB    # via include (m5stack_core only)
+#          - NFCF    # via include (m5stack_core only)
+#          - NFCV    # via include (m5stack_core only)
+
+        build-properties:
+          - "-DUSING_UNIT_NFC"
+
+        # Reduced from 23 → 11 boards. One representative per chip family + the boards where
+        # NFC is actually deployed in the field (NessoN1/Dial for PortA, Cardputer for CapCC1101).
+        # Uncomment any line below to widen coverage.
+        board:
+          - arduino_nesso_n1       # ESP32-C6 (RISC-V single, NFC PortA primary)
+#          - m5stack_atom           # ESP32 small atom
+          - m5stack_atoms3         # ESP32-S3 small atom
+#          - m5stack_atoms3r        # ESP32-S3 (= atoms3 + IMU)
+#          - m5stack_capsule        # ESP32-S3 small board
+          - m5stack_cardputer      # ESP32-S3 (CapCC1101 built-in)
+          - m5stack_core           # ESP32 classic representative
+          - m5stack_core2          # ESP32 (touch + IMU + RTC)
+#          - m5stack_coreink        # ESP32 e-ink
+          - m5stack_cores3         # ESP32-S3 representative
+          - m5stack_dial           # ESP32-S3 (NFC primary use case)
+#          - m5stack_dinmeter       # ESP32-S3 (similar to dial)
+#          - m5stack_fire           # ESP32 (= core + PSRAM)
+          - m5stack_nano_c6        # ESP32-C6 (Wire GROVE constraint)
+          - m5stack_nano_h2        # ESP32-H2 (RISC-V single, RISC-V H2 path)
+#          - m5stack_paper          # ESP32 e-ink
+#          - m5stack_papers3        # ESP32-S3 e-ink
+#          - m5stack_poe_cam
+#          - m5stack_powerhub
+#          - m5stack_stamp_c3
+#          - m5stack_stamp_pico
+#          - m5stack_stamp_s3       # ESP32-S3 stamp variant
+#          - m5stack_stamplc
+#          - m5stack_station
+#          - m5stack_stickc         # ESP32 (legacy)
+#          - m5stack_stickc_plus    # ESP32 (older stick)
+          - m5stack_stickc_plus2   # ESP32 (latest stick)
+#          - m5stack_sticks3        # ESP32-S3 (similar to cores3)
+          - m5stack_tab5           # ESP32-P4 (Tab5)
+#          - m5stack_timer_cam
+#          - m5stack_tough
+#          - m5stack_unit_c6l
+#          - m5stack_unit_cam
+#          - m5stack_unit_cams3
+
+        platform-version:
+          - 3.3.7
+
+        platform:
+          - m5stack
+
+        archi:
+          - esp32
+
+        exclude:
+          - board: m5stack_cardputer
+            build-properties: "-DUSING_UNIT_NFC"
+
+        include:
+          # NFCB/F/V Detect on m5stack_core (cross design — see nfc: comment above).
+          - sketch: Detect
+            nfc: NFCB
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+            board: m5stack_core
+            build-properties: "-DUSING_UNIT_NFC"
+          - sketch: Detect
+            nfc: NFCF
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+            board: m5stack_core
+            build-properties: "-DUSING_UNIT_NFC"
+          - sketch: Detect
+            nfc: NFCV
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+            board: m5stack_core
+            build-properties: "-DUSING_UNIT_NFC"
+
+          # NFCA Specific sketches
+          - sketch: Dump
+            nfc: NFCA
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+            board: m5stack_core
+            build-properties: "-DUSING_UNIT_NFC"
+          - sketch: ValueBlock
+            nfc: NFCA
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+            board: m5stack_core
+            build-properties: "-DUSING_UNIT_NFC"
+          - sketch: ReadWrite
+            nfc: NFCA
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+            board: m5stack_core
+            build-properties: "-DUSING_UNIT_NFC"
+          - sketch: NDEF
+            nfc: NFCA
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+            board: m5stack_core
+            build-properties: "-DUSING_UNIT_NFC"
+          - sketch: Emulation
+            nfc: NFCA
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+            board: m5stack_core
+            build-properties: "-DUSING_UNIT_NFC"
+          - sketch: PolicyOverride
+            nfc: NFCA
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+            board: m5stack_core
+            build-properties: "-DUSING_UNIT_NFC"
+
+          # NFCB Specific sketches
+          - sketch: JapanIDCard
+            nfc: NFCB
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+            board: m5stack_core
+            build-properties: "-DUSING_UNIT_NFC"
+
+          # NFCF Specific sketches
+          - sketch: Dump
+            nfc: NFCF
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+            board: m5stack_core
+            build-properties: "-DUSING_UNIT_NFC"
+          - sketch: NDEF
+            nfc: NFCF
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+            board: m5stack_core
+            build-properties: "-DUSING_UNIT_NFC"
+          - sketch: Subtract
+            nfc: NFCF
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+            board: m5stack_core
+            build-properties: "-DUSING_UNIT_NFC"
+          - sketch: ReadWriteMAC
+            nfc: NFCF
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+            board: m5stack_core
+            build-properties: "-DUSING_UNIT_NFC"
+          - sketch: JapanTransportationICCard
+            nfc: NFCF
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+            board: m5stack_core
+            build-properties: "-DUSING_UNIT_NFC"
+          - sketch: Emulation
+            nfc: NFCF
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+            board: m5stack_core
+            build-properties: "-DUSING_UNIT_NFC"
+
+          # NFCV Specific sketches
+          - sketch: Dump
+            nfc: NFCV
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+            board: m5stack_core
+            build-properties: "-DUSING_UNIT_NFC"
+          - sketch: NDEF
+            nfc: NFCV
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+            board: m5stack_core
+            build-properties: "-DUSING_UNIT_NFC"
+
+          # CapCC1101 on Cardputer
+          - sketch: Detect
+            nfc: NFCA
+            board: m5stack_cardputer
+            build-properties: "-DUSING_CAP_CC1101"
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+          - sketch: Detect
+            nfc: NFCB
+            board: m5stack_cardputer
+            build-properties: "-DUSING_CAP_CC1101"
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+          - sketch: Detect
+            nfc: NFCF
+            board: m5stack_cardputer
+            build-properties: "-DUSING_CAP_CC1101"
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+          - sketch: Detect
+            nfc: NFCV
+            board: m5stack_cardputer
+            build-properties: "-DUSING_CAP_CC1101"
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+          # CapCC1101 NFCA non-Detect sketches
+          - sketch: Dump
+            nfc: NFCA
+            board: m5stack_cardputer
+            build-properties: "-DUSING_CAP_CC1101"
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+          - sketch: ReadWrite
+            nfc: NFCA
+            board: m5stack_cardputer
+            build-properties: "-DUSING_CAP_CC1101"
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+          - sketch: ValueBlock
+            nfc: NFCA
+            board: m5stack_cardputer
+            build-properties: "-DUSING_CAP_CC1101"
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+          - sketch: NDEF
+            nfc: NFCA
+            board: m5stack_cardputer
+            build-properties: "-DUSING_CAP_CC1101"
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+          - sketch: Emulation
+            nfc: NFCA
+            board: m5stack_cardputer
+            build-properties: "-DUSING_CAP_CC1101"
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+          # CapCC1101 NFCB non-Detect sketches
+          - sketch: JapanIDCard
+            nfc: NFCB
+            board: m5stack_cardputer
+            build-properties: "-DUSING_CAP_CC1101"
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+          # CapCC1101 NFCF non-Detect sketches
+          - sketch: Dump
+            nfc: NFCF
+            board: m5stack_cardputer
+            build-properties: "-DUSING_CAP_CC1101"
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+          - sketch: NDEF
+            nfc: NFCF
+            board: m5stack_cardputer
+            build-properties: "-DUSING_CAP_CC1101"
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+          - sketch: Subtract
+            nfc: NFCF
+            board: m5stack_cardputer
+            build-properties: "-DUSING_CAP_CC1101"
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+          - sketch: ReadWriteMAC
+            nfc: NFCF
+            board: m5stack_cardputer
+            build-properties: "-DUSING_CAP_CC1101"
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+          - sketch: JapanTransportationICCard
+            nfc: NFCF
+            board: m5stack_cardputer
+            build-properties: "-DUSING_CAP_CC1101"
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+          - sketch: Emulation
+            nfc: NFCF
+            board: m5stack_cardputer
+            build-properties: "-DUSING_CAP_CC1101"
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+          # CapCC1101 NFCV non-Detect sketches
+          - sketch: Dump
+            nfc: NFCV
+            board: m5stack_cardputer
+            build-properties: "-DUSING_CAP_CC1101"
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+          - sketch: NDEF
+            nfc: NFCV
+            board: m5stack_cardputer
+            build-properties: "-DUSING_CAP_CC1101"
+            platform-url: https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+            platform: m5stack
+            archi: esp32
+            platform-version: 3.3.7
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare libraries list
+        id: libs
+        run: |
+          {
+            echo "yaml<<EOF"
+            echo "$REQUIRED_LIBRARIES" | tr ',' '\n' | while read -r lib; do
+              echo "- name: $lib"
+            done
+            echo "- source-path: ./"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Compile examples
+        uses: arduino/compile-sketches@v1
+        with:
+          fqbn: ${{ matrix.platform }}:${{ matrix.archi }}:${{ matrix.board }}
+          platforms: |
+            - name: ${{ matrix.platform }}:${{ matrix.archi }}
+              source-url: ${{ matrix.platform-url }}
+              version: ${{ matrix.platform-version }}
+          libraries: ${{ steps.libs.outputs.yaml }}
+          sketch-paths: |
+            - ${{ env.SKETCH_NAMES_FIND_START }}/${{ matrix.nfc }}/${{ matrix.sketch }}
+          cli-compile-flags: |
+            - --build-property
+            - build.extra_flags=${{ matrix.build-properties }}

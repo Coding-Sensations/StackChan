@@ -79,12 +79,14 @@ void Motion::lookAtNormalized(float x, float y, int speed)
 {
     auto angles = calculateNormalizedLookAngles(
         x, y, _yaw_servo->getAngleLimit().x, _yaw_servo->getAngleLimit().y, _pitch_servo->getAngleLimit().x, _pitch_servo->getAngleLimit().y);
+    if (!angles.valid) return;
     moveWithSpeed(angles.yaw, angles.pitch, speed);
 }
 
 void Motion::lookAtPoint(float x, float y, float z, int speed)
 {
     auto angles = calculatePointLookAngles(x, y, z);
+    if (!angles.valid) return;
     moveWithSpeed(angles.yaw, angles.pitch, speed);
 }
 

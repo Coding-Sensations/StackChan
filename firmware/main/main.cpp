@@ -9,6 +9,12 @@
 #include <mooncake.h>
 #include <apps/apps.h>
 #include <hal/hal.h>
+#include "companion/boot.h"
+#include "companion/diagnostics.h"
+#include <esp_random.h>
+#include <esp_system.h>
+#include "apps/stock_shell/stock_apps.h"
+#include "usb_composite_v2/startup.h"
 
 using namespace mooncake;
 using namespace smooth_ui_toolkit;
@@ -18,6 +24,16 @@ extern "C" void app_main(void)
     // Setup logger
     mclog::set_level(mclog::level_info);
     mclog::set_time_format(mclog::time_format_unix_milliseconds);
+
+#ifdef STACKCHAN_COMPANION_BOOT
+    uint32_t diagnostic_boot=esp_random();
+    companion::diagnostic::Init(diagnostic_boot?diagnostic_boot:1,static_cast<uint32_t>(esp_reset_reason()));
+    // Selection is volatile and disabled until board power/port/identity are qualified.
+    // This call precedes all console/provisioning owner creation; no live PHY migration.
+    usb_composite_v2::StartQualifiedCompositeAtBoot(usb_composite_v2::BootQualification{});
+    stock_shell::Run(); // Stock launcher with feature-scoped companion/tools/games.
+    return;
+#endif
 
     // HAL init
     GetHAL().init();

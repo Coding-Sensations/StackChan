@@ -165,6 +165,12 @@ void Toast::update_anim(const KeyFrame_t& target, bool teleport)
 static uitk::RingBuffer<Toast::Config_t, 5> _toast_request_queue;
 static int _toast_manager_id = -1;
 
+ToastManager::~ToastManager()
+{
+    LvglLockGuard lock;
+    _toast_list.clear();
+}
+
 void ToastManager::onCreate()
 {
     // 3 toasts max
@@ -227,3 +233,10 @@ void view::pop_a_toast(std::string_view msg, ToastType type, uint32_t durationMs
     }
     _toast_request_queue.push({type, durationMs, std::string(msg)});
 }
+// BEGIN STACKCHAN toast runtime reset
+void view::reset_toast_runtime()
+{
+    _toast_manager_id = -1;
+    while (!_toast_request_queue.empty()) _toast_request_queue.pop();
+}
+// END STACKCHAN toast runtime reset

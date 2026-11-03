@@ -6,6 +6,8 @@
 #include "view.h"
 #include <cstdint>
 #include <memory>
+#include <esp_heap_caps.h>
+#include <cstring>
 
 using namespace view;
 using namespace uitk;
@@ -23,7 +25,28 @@ static const uint32_t _bg_color = 0x000000;
 
 Screensaver::~Screensaver()
 {
-    _prev_screen->load();
+    if (_prev_screen && isActiveScreen() && lv_obj_is_valid(_prev_screen->get())) _prev_screen->load();
+    // Canvas must release its borrowed pixels before the PSRAM buffer is freed.
+    if (_effect_canvas) { lv_obj_delete(_effect_canvas); _effect_canvas=nullptr; }
+    if (_effect_pixels) { heap_caps_free(_effect_pixels); _effect_pixels=nullptr; }
+}
+
+bool Screensaver::isActiveScreen() const
+{
+    return _screen && lv_screen_active()==_screen->get();
+}
+
+void Screensaver::showEffectError()
+{
+    _effect_failed=true;
+    if(_effect_canvas) lv_obj_add_flag(_effect_canvas,LV_OBJ_FLAG_HIDDEN);
+    if(!_effect_error) {
+        _effect_error=lv_label_create(_screen->get());
+        lv_obj_set_width(_effect_error,280);
+        lv_obj_set_style_text_color(_effect_error,lv_color_hex(0xffffff),0);
+        lv_obj_center(_effect_error);
+    }
+    lv_label_set_text(_effect_error,"Effect unavailable\nTouch to return to launcher");
 }
 
 void Screensaver::onInit()
@@ -35,6 +58,22 @@ void Screensaver::onInit()
     _screen->removeFlag(LV_OBJ_FLAG_SCROLLABLE);
     _screen->setPadding(0, 0, 0, 0);
     _screen->load();
+
+    if (_style != saver::Style::Dvd) {
+        const uint16_t index=uint16_t(static_cast<unsigned>(_style)-1);
+        if(!effect_catalog::Usable(index)) { showEffectError(); return; }
+        constexpr size_t bytes=320u*240u*sizeof(uint16_t);
+        _effect_pixels=static_cast<uint16_t*>(heap_caps_malloc(bytes,MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT));
+        if(!_effect_pixels) { showEffectError(); return; }
+        std::memset(_effect_pixels,0,bytes);
+        _effect_canvas=lv_canvas_create(_screen->get());
+        lv_canvas_set_buffer(_effect_canvas,_effect_pixels,320,240,LV_COLOR_FORMAT_RGB565);
+        lv_obj_set_pos(_effect_canvas,0,0);
+        lv_obj_remove_flag(_effect_canvas,static_cast<lv_obj_flag_t>(LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE));
+        effect_catalog::Reset(index);
+        onRender(0);
+        return;
+    }
 
     _logo = std::make_unique<Container>(_screen->get());
     _logo->setSize(_logo_size.width, _logo_size.height);
@@ -72,6 +111,7 @@ void Screensaver::onInit()
 
 void Screensaver::onBuildLevel()
 {
+    if (_style != saver::Style::Dvd) return;
     addScreenFrameAsWall(_screen_size);
 
     auto& random      = Random::getInstance();
@@ -83,6 +123,21 @@ void Screensaver::onBuildLevel()
 
 void Screensaver::onRender(float dt)
 {
+    if(!isActiveScreen())return;
+    if (_style != saver::Style::Dvd) {
+        if(_effect_failed || !_effect_canvas || !_effect_pixels) return;
+        // Clamp stalled frame delta; only visual time is advanced.
+        if (dt > 0 && dt < 1) _animation_ms += uint32_t(dt * 1000);
+        const uint16_t index=uint16_t(static_cast<unsigned>(_style)-1);
+        // Playback needs a complete frame. A wall-clock preview deadline can
+        // expire while clearing PSRAM and must not disable a usable effect.
+        // The renderer's finite work budget and clipped primitives still apply.
+        if(!effect_catalog::Render(index,_animation_ms,_effect_pixels,320,240)) {
+            showEffectError(); return;
+        }
+        lv_obj_invalidate(_effect_canvas);
+        return;
+    }
     getWorld().forEachObject([&](GameObject* obj) {
         if (obj->groupId == _logo_id) {
             auto p = obj->get<Transform>()->position;

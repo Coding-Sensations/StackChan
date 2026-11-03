@@ -11,23 +11,23 @@ namespace stackchan::motion {
 
 namespace {
 
-constexpr float kRadiansToDegrees = 180.0f / static_cast<float>(M_PI);
+constexpr double kRadiansToDegrees = 180.0 / 3.14159265358979323846;
 
 float clampNormalized(float value)
 {
     return std::clamp(value, -1.0f, 1.0f);
 }
 
-float mapRange(float value, float inMin, float inMax, float outMin, float outMax)
+double mapRange(double value, double inMin, double inMax, double outMin, double outMax)
 {
     if (inMax == inMin) {
         return outMin;
     }
-    float ratio = (value - inMin) / (inMax - inMin);
+    double ratio = (value - inMin) / (inMax - inMin);
     return outMin + ratio * (outMax - outMin);
 }
 
-int radiansToTenthsOfDegrees(float radians)
+int radiansToTenthsOfDegrees(double radians)
 {
     return static_cast<int>(radians * kRadiansToDegrees * 10.0f);
 }
@@ -36,11 +36,17 @@ int radiansToTenthsOfDegrees(float radians)
 
 int mapNormalizedValueToAngle(float value, int minimum, int maximum)
 {
-    return static_cast<int>(mapRange(clampNormalized(value), -1.0f, 1.0f, static_cast<float>(minimum), static_cast<float>(maximum)));
+    if (!std::isfinite(value) || minimum > maximum) return 0;
+    // Double preserves every int endpoint; float can round INT_MAX above the
+    // representable integer range before conversion.
+    return static_cast<int>(mapRange(clampNormalized(value), -1.0, 1.0, minimum, maximum));
 }
 
 MotionAngles calculateNormalizedLookAngles(float x, float y, int yawMin, int yawMax, int pitchMin, int pitchMax)
 {
+    if (!std::isfinite(x) || !std::isfinite(y) || yawMin > yawMax || pitchMin > pitchMax) {
+        return {0, 0, false};
+    }
     return {
         .yaw = mapNormalizedValueToAngle(x, yawMin, yawMax),
         .pitch = mapNormalizedValueToAngle(y, pitchMin, pitchMax),
@@ -49,9 +55,12 @@ MotionAngles calculateNormalizedLookAngles(float x, float y, int yawMin, int yaw
 
 MotionAngles calculatePointLookAngles(float x, float y, float z)
 {
-    float yawRadians = std::atan2(y, x);
-    float groundDistance = std::sqrt(x * x + y * y);
-    float pitchRadians = std::atan2(z, groundDistance);
+    if (!std::isfinite(x) || !std::isfinite(y) || !std::isfinite(z) || (x == 0 && y == 0 && z == 0)) {
+        return {0, 0, false};
+    }
+    const double yawRadians = std::atan2(double(y), double(x));
+    const double groundDistance = std::hypot(double(x), double(y));
+    const double pitchRadians = std::atan2(double(z), groundDistance);
 
     return {
         .yaw = radiansToTenthsOfDegrees(yawRadians),

@@ -1,3 +1,4 @@
+#include <stdbool.h>
 /*
  * SPDX-FileCopyrightText: 2026 M5Stack Technology CO LTD
  *
@@ -124,8 +125,17 @@ esp_err_t my_esp_https_ota(const esp_https_ota_config_t *ota_config, void (*on_p
     return ESP_OK;
 }
 
+#ifdef STACKCHAN_COMPANION_BOOT
+extern bool stackchan_stock_install_firmware(const char *url, void (*on_progress)(int progress));
+#endif
 void start_ota_update(const char *url, void (*on_progress)(int progress))
 {
+#ifdef STACKCHAN_COMPANION_BOOT
+    // Exact local user confirmation grants the C++ updater. It uses the original
+    // Board network client and ESP-IDF image validation, rather than a test CA.
+    stackchan_stock_install_firmware(url,on_progress);
+    return;
+#endif
     ESP_LOGI(TAG, "Starting OTA example task");
 #ifdef CONFIG_EXAMPLE_FIRMWARE_UPGRADE_BIND_IF
     esp_netif_t *netif = get_example_netif_from_desc(bind_interface_name);

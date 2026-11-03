@@ -1,0 +1,30 @@
+{
+  "result": "PASS",
+  "tests": 18,
+  "admission_tests": 7,
+  "connection_tests": 11,
+  "exit": 0,
+  "seconds": 0.42386741600057576,
+  "argv": [
+    "/Users/mikedemott/Homelab/.venv/bin/python",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "/Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/companion/host/streaming",
+    "-p",
+    "test_gateway*.py",
+    "-v"
+  ],
+  "network_listener": false,
+  "audio_IO": false,
+  "credential_scope": "in-memory synthetic fixtures only; no real grants issued",
+  "source_sha256": {
+    "gateway_admission.py": "723ff2218595e48978ce4c947b2c1e65dbcc43794f0e491fcd56135b586649ad",
+    "test_gateway_admission.py": "2d97cb2c1580a31b085abd1563c46a7648f552c2143f0b249258fc02bbc7eed4",
+    "gateway_connection.py": "6696a15afe07562be29cca73952d4ffca9f3614e2cfcdc8697ee50afc089caec",
+    "test_gateway_connection.py": "22889bf222d75631987974b6bbd2573f65893259cd0fe2924c4bf67e85b15926"
+  },
+  "log": "test_authenticated_existing_grant_and_redacted_repr (test_gateway_admission.Tests.test_authenticated_existing_grant_and_redacted_repr) ... ok\ntest_control_characters_missing_and_overlong_credentials (test_gateway_admission.Tests.test_control_characters_missing_and_overlong_credentials) ... ok\ntest_duplicate_case_insensitive_authority_headers (test_gateway_admission.Tests.test_duplicate_case_insensitive_authority_headers) ... ok\ntest_missing_audio_capability_denied (test_gateway_admission.Tests.test_missing_audio_capability_denied) ... ok\ntest_path_fixture_and_header_bounds (test_gateway_admission.Tests.test_path_fixture_and_header_bounds) ... ok\ntest_revoked_device_denied (test_gateway_admission.Tests.test_revoked_device_denied) ... ok\ntest_wrong_device_or_invalid_grant (test_gateway_admission.Tests.test_wrong_device_or_invalid_grant) ... ok\ntest_existing_session_controls_and_cleanup (test_gateway_connection.ActualSessionTests.test_existing_session_controls_and_cleanup) ... ok\ntest_existing_session_requires_real_protocol_consent (test_gateway_connection.ActualSessionTests.test_existing_session_requires_real_protocol_consent) ... ok\ntest_cancel_cleans_receive_and_audio (test_gateway_connection.Tests.test_cancel_cleans_receive_and_audio) ... ok\ntest_controls_and_binary_dispatch_until_deadline (test_gateway_connection.Tests.test_controls_and_binary_dispatch_until_deadline) ... ok\ntest_duplicate_json_closes_without_dispatch (test_gateway_connection.Tests.test_duplicate_json_closes_without_dispatch) ... ok\ntest_idle_peer_revocation_checked_without_receive (test_gateway_connection.Tests.test_idle_peer_revocation_checked_without_receive) ... ok\ntest_listening_does_not_stream_encoded_silence (test_gateway_connection.Tests.test_listening_does_not_stream_encoded_silence) ... ok\ntest_oversize_wire_rejected_before_session (test_gateway_connection.Tests.test_oversize_wire_rejected_before_session) ... ok\ntest_provider_failure_closes_connection (test_gateway_connection.Tests.test_provider_failure_closes_connection) ... ok\ntest_return_packets_bounded_and_no_drain_when_muted (test_gateway_connection.Tests.test_return_packets_bounded_and_no_drain_when_muted) ... ok\ntest_send_timeout_invalidates_audio (test_gateway_connection.Tests.test_send_timeout_invalidates_audio) ... ok\n\n----------------------------------------------------------------------\nRan 18 tests in 0.276s\n\nOK\n"
+}

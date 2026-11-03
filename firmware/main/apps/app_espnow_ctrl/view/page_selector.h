@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 #pragma once
+#include <apps/runtime_lifecycle/session.h>
 #include <memory>
 #include <smooth_lvgl.hpp>
 #include <uitk/short_namespace.hpp>
@@ -86,11 +87,12 @@ static inline int create_page_selector_and_wait(std::string_view label, const st
     auto page_selector = std::make_unique<view::PageSelector>(label, options);
     GetHAL().lvglUnlock();
 
-    int index = 0;
+    int index = -1;
     while (1) {
         GetHAL().delay(50);
 
         LvglLockGuard lock;
+        if(runtime_lifecycle::HomeRequested())break;
         if (page_selector->update()) {
             index = page_selector->getSelectedIndex();
             break;

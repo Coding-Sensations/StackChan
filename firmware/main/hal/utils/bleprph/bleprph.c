@@ -1,3 +1,6 @@
+#include <stdatomic.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -78,6 +81,7 @@ static uint16_t bearers;
 #endif
 
 static bool s_use_alt_uuid = false;
+static atomic_bool home_ble_initialized=false,home_ble_host_started=false,home_ble_host_exited=true;
 
 void ble_store_config_init(void);
 
@@ -633,7 +637,10 @@ void bleprph_host_task(void *param)
     /* This function will return only when nimble_port_stop() is executed */
     nimble_port_run();
 
-    nimble_port_freertos_deinit();
+    // The external stop owner performs the SDK task deletion. Calling its
+    // deinit here self-deletes before the SDK can clear its global task handle.
+    atomic_store(&home_ble_host_exited,true);
+    while(1)vTaskSuspend(NULL);
 }
 
 void ble_prph_init(bool use_alt_uuid)
@@ -655,6 +662,7 @@ void ble_prph_init(bool use_alt_uuid)
         ESP_LOGE(tag, "Failed to init nimble %d ", ret);
         return;
     }
+    atomic_store(&home_ble_initialized,true);
     /* Initialize the NimBLE host configuration. */
     ble_hs_cfg.reset_cb          = bleprph_on_reset;
     ble_hs_cfg.sync_cb           = bleprph_on_sync;
@@ -702,6 +710,8 @@ void ble_prph_init(bool use_alt_uuid)
     /* XXX Need to have template for store */
     ble_store_config_init();
 
+    atomic_store(&home_ble_host_exited,false);
+    atomic_store(&home_ble_host_started,true);
     nimble_port_freertos_init(bleprph_host_task);
 
     /* Initialize command line interface to accept input from user */
@@ -717,3 +727,19 @@ void ble_prph_init(bool use_alt_uuid)
     }
 #endif
 }
+
+// Called only by the retained cleanup worker, never by BLE or LVGL callbacks.
+bool ble_prph_stop_checked(void) {
+    if(!atomic_load(&home_ble_initialized))return true;
+    if(atomic_load(&home_ble_host_started)){
+        if(nimble_port_stop()!=0)return false;
+        while(!atomic_load(&home_ble_host_exited))vTaskDelay(pdMS_TO_TICKS(1));
+        nimble_port_freertos_deinit(); // external delete returns and clears SDK handle
+        atomic_store(&home_ble_host_started,false);
+    }
+    if(nimble_port_deinit()!=ESP_OK)return false;
+    const stackchan_ble_callbacks_t revoked={0};stackchan_ble_register_callbacks(&revoked);
+    atomic_store(&home_ble_initialized,false);return true;
+}
+
+bool ble_prph_initialized(void){return atomic_load(&home_ble_initialized)&&atomic_load(&home_ble_host_started);}

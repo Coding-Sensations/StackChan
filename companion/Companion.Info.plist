@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict>
+<key>CFBundleExecutable</key><string>StackChanPairing</string>
+<key>CFBundleIdentifier</key><string>local.mrkillbob.StackChanPairing</string>
+<key>CFBundleName</key><string>StackChan Companion</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>LSMinimumSystemVersion</key><string>14.0</string>
+<key>NSPrincipalClass</key><string>NSApplication</string>
+<key>NSMicrophoneUsageDescription</key><string>StackChan Companion reads your selected virtual audio output to play it on StackChan after physical Listen.</string>
+</dict></plist>

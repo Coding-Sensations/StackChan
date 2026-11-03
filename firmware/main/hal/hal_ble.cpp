@@ -4,16 +4,32 @@
  * SPDX-License-Identifier: MIT
  */
 #include "hal.h"
+#include <companion/ble_owner.hpp>
+#include <mutex>
 #include "utils/bleprph/bleprph.h"
 #include "utils/secret_logic/secret_logic.h"
 #include <ArduinoJson.hpp>
 #include <algorithm>
+#include <atomic>
 #include <cstdint>
 #include <mooncake_log.h>
 #include <mooncake.h>
 #include <settings.h>
 #include <esp_mac.h>
+#include <apps/network_setup/wifi_credentials.hpp>
+#include <apps/network_setup/persistence_gate.h>
+namespace {
+void wipe_config_text(std::string& value) {
+    volatile char* bytes = value.empty() ? nullptr : value.data();
+    for (size_t i = 0; i < value.size(); ++i) bytes[i] = 0;
+    value.clear();
+}
+}
 
+static std::atomic<bool> config_server_started{false};
+static std::mutex stock_ble_mutex;
+static companion::BleLease stock_ble_lease;
+static bool stock_ble_alt_profile=false;
 static const std::string_view _tag              = "HAL-BLE";
 static const uint8_t _ble_fragment_magic0       = 0xAA;
 static const uint8_t _ble_fragment_magic1       = 0x55;
@@ -98,6 +114,10 @@ class BleFragmentAssembler {
 public:
     bool consume(const char* data, uint16_t len, std::string& out_data, uint16_t& out_len)
     {
+        if (!data || len == 0 || len > STACKCHAN_MAX_JSON_LEN) {
+            reset();
+            return false;
+        }
         if (!isFragmentFrame(data, len)) {
             out_data.assign(data, data + len);
             reset();
@@ -199,7 +219,7 @@ private:
         _expected_total_len     = total_len;
         _expected_total_packets = total_packets;
         _expected_packet_index  = 0;
-        _buffer.clear();
+        wipe_config_text(_buffer);
         _buffer.reserve(total_len);
     }
 
@@ -209,7 +229,7 @@ private:
         _expected_total_len     = 0;
         _expected_total_packets = 0;
         _expected_packet_index  = 0;
-        _buffer.clear();
+        wipe_config_text(_buffer);
     }
 
     bool _assembling                 = false;
@@ -230,6 +250,7 @@ static std::string _rgb_payload_cache;
 
 static const char* _cachePayload(std::string& cache, const std::string& payload)
 {
+    wipe_config_text(cache);
     cache = payload;
     return cache.c_str();
 }
@@ -268,6 +289,7 @@ static int _handle_ble_avatar_write(const char* json_data, uint16_t len, uint16_
 
 static int _handle_ble_config_write(const char* json_data, uint16_t len, uint16_t conn_handle)
 {
+    if (!network_setup::CredentialPersistenceAllowed()) return 0;
     std::string payload;
     uint16_t payload_len = len;
     (void)conn_handle;
@@ -279,6 +301,8 @@ static int _handle_ble_config_write(const char* json_data, uint16_t len, uint16_
         return 0;
     }
     GetHAL().onBleConfigData.emit(_cachePayload(_config_payload_cache, payload));
+    wipe_config_text(_config_payload_cache);
+    wipe_config_text(payload);
     return 0;
 }
 
@@ -304,8 +328,13 @@ static uint8_t _handle_ble_battery_read(void)
     return 96;
 }
 
-void Hal::ble_init(bool useAltUuid)
+bool Hal::ble_init(bool useAltUuid)
 {
+    std::lock_guard<std::mutex> lock(stock_ble_mutex);
+    auto& authority=companion::CommonBleAuthority();
+    if(stock_ble_lease)return stock_ble_alt_profile==useAltUuid&&authority.Current(stock_ble_lease);
+    if(!authority.Acquire(companion::BleOwner::Stock,stock_ble_lease))return false;
+    stock_ble_alt_profile=useAltUuid;
     mclog::tagInfo(_tag, "init");
 
     static stackchan_ble_callbacks_t ble_callbacks = {
@@ -315,14 +344,23 @@ void Hal::ble_init(bool useAltUuid)
         .rgb_cb          = _handle_ble_rgb_write,
         .battery_read_cb = _handle_ble_battery_read,
     };
-    stackchan_ble_register_callbacks(&ble_callbacks);
+    static stackchan_ble_callbacks_t setup_callbacks = {
+        .motion_cb = nullptr,
+        .avatar_cb = nullptr,
+        .config_cb = _handle_ble_config_write,
+        .rgb_cb = nullptr,
+        .battery_read_cb = _handle_ble_battery_read,
+    };
+    // The phone setup service exposes configuration and battery only. Remote
+    // motion/avatar/RGB writes cannot activate hardware from this session.
+    stackchan_ble_register_callbacks(useAltUuid ? &setup_callbacks : &ble_callbacks);
 
     ble_prph_init(useAltUuid);
 
-    uint8_t mac[6];
-    esp_read_mac(mac, ESP_MAC_EFUSE_FACTORY);
-    mclog::tagInfo(_tag, "init done, factory mac: {:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}", mac[0], mac[1], mac[2],
-                   mac[3], mac[4], mac[5]);
+    const bool started=ble_prph_initialized();
+    if(!started)authority.Revoke(stock_ble_lease); // Keep failed custody until checked cleanup.
+    mclog::tagInfo(_tag, "init done");
+    return started;
 }
 
 void Hal::startBleServer()
@@ -346,26 +384,35 @@ bool Hal::isBleConnected()
 #include <mutex>
 #include <atomic>
 
-static bool _app_config_server_started = false;
-
+class WifiConfigServer;
+static std::shared_ptr<WifiConfigServer> retained_config_server;
 class WifiConfigServer {
 public:
-    ~WifiConfigServer()
-    {
-        GetHAL().onBleConfigData.disconnect(_config_connection);
-        _wifi_station.reset();
-        network_diagnostics::finishWifiProvisioning();
+    bool StopChecked() {
+        if (_wifi_station && !_wifi_station->StopChecked()) return false;
+        if (_provisioning_started) { network_diagnostics::finishWifiProvisioning(); _provisioning_started = false; }
+        return true;
+    }
+    ~WifiConfigServer() {
+        configASSERT(StopChecked());
+        if (_config_connection >= 0) GetHAL().onBleConfigData.disconnect(_config_connection);
+        std::lock_guard<std::mutex> lock(_mutex);
+        while (!_msg_queue.empty()) { wipe_config_text(_msg_queue.front()); _msg_queue.pop(); }
+        while (!_results.empty()) { wipe_config_text(_results.front().ssid); _results.pop(); }
+        wipe_config_text(_last_result.ssid);
     }
 
     void init()
     {
+        if (!network_setup::CredentialPersistenceAllowed()) return;
         _config_connection = GetHAL().onBleConfigData.connect([this](const char* data) { on_config_data(data); });
         _was_connected     = stackchan_ble_is_connected();
 
         // Setup WifiStation callbacks
         network_diagnostics::prepareWifiProvisioning();
+        _provisioning_started = true;
         _wifi_station = std::make_unique<StackChanWifiStation>();
-        _wifi_station->OnConnect([](const std::string& ssid) { mclog::tagInfo(_tag, "wifi Connecting to {}", ssid); });
+        _wifi_station->OnConnect([](const std::string&) { mclog::tagInfo(_tag, "wifi Connecting"); });
         _wifi_station->OnConnected([this](const std::string& ssid) {
             std::lock_guard<std::mutex> lock(_mutex);
             _results.push({true, ssid, {}});
@@ -375,11 +422,12 @@ public:
             _results.push({false, ssid, failure});
         });
 
-        _wifi_station->Start();
+        if (!_wifi_station->Start()) GetHAL().onAppConfigEvent.emit(AppConfigEvent::WifiConnectFailed);
     }
 
     void update()
     {
+        if (!_wifi_station || !network_setup::CredentialPersistenceAllowed()) return;
         _wifi_station->Poll();
         // ESP Wi-Fi callbacks only queue results; BLE sends and UI signals stay
         // on this worker rather than blocking the ESP event loop.
@@ -391,17 +439,18 @@ public:
         while (!results.empty()) {
             const auto& result  = results.front();
             _is_wifi_connecting = false;
+            wipe_config_text(_last_result.ssid);
             _last_result        = result;
             _has_last_result    = true;
             if (result.success) {
                 notify_state(1, "wifiConnected");
-                Settings settings("app_config", true);
-                settings.SetBool("is_configed", true);
+                // Wi-Fi setup does not change account/binding state.
                 GetHAL().onAppConfigEvent.emit(AppConfigEvent::WifiConnected);
             } else {
                 notify_failure(result.ssid, result.failure);
                 GetHAL().onAppConfigEvent.emit(AppConfigEvent::WifiConnectFailed);
             }
+            wipe_config_text(results.front().ssid);
             results.pop();
         }
         bool is_connected = stackchan_ble_is_connected();
@@ -421,14 +470,15 @@ public:
         {
             std::lock_guard<std::mutex> lock(_mutex);
             if (!_msg_queue.empty()) {
-                data = _msg_queue.front();
+                data = std::move(_msg_queue.front());
                 _msg_queue.pop();
                 has_data = true;
             }
         }
 
         if (has_data) {
-            process_config_data(data.c_str());
+            if (network_setup::CredentialPersistenceAllowed()) process_config_data(data.c_str());
+            wipe_config_text(data);
         }
     }
 
@@ -443,6 +493,8 @@ private:
     ConnectionResult _last_result{};
     bool _has_last_result  = false;
     int _config_connection = -1;
+    bool _provisioning_started = false;
+    static constexpr size_t max_queued_messages = 4;
     std::queue<std::string> _msg_queue;
     std::mutex _mutex;
     bool _was_connected = false;
@@ -451,8 +503,12 @@ private:
 
     void on_config_data(const char* json_data)
     {
+        if (!json_data || !network_setup::CredentialPersistenceAllowed()) return;
+        size_t length = strnlen(json_data, STACKCHAN_MAX_JSON_LEN + 1);
+        if (length == 0 || length > STACKCHAN_MAX_JSON_LEN) return;
         std::lock_guard<std::mutex> lock(_mutex);
-        _msg_queue.push(json_data);
+        if (_msg_queue.size() >= max_queued_messages) return;
+        _msg_queue.emplace(json_data, length);
     }
 
     void process_config_data(const char* json_data)
@@ -469,9 +525,10 @@ private:
             handle_set_wifi(doc["data"]);
         } else if (doc["cmd"] == "getWifiStatus") {
             handle_get_wifi_status();
-        } else if (doc["cmd"] == "handshake") {
+        } else if (doc["cmd"] == "handshake" && doc["data"].is<const char*>()) {
             std::string data = doc["data"].as<std::string>();
             handle_handshake(data);
+            wipe_config_text(data);
         }
     }
 
@@ -490,21 +547,25 @@ private:
 
     void handle_set_wifi(ArduinoJson::JsonObject data)
     {
-        if (_is_wifi_connecting) {
+        if (!_wifi_station || !network_setup::CredentialPersistenceAllowed() || _is_wifi_connecting) {
             mclog::tagWarn(_tag, "busy connecting, ignoring setWifi");
             notify_failure(
                 "", {"busy", "The device is already connecting to Wi-Fi. Wait for the current attempt to finish."});
             return;
         }
 
-        if (!data["ssid"].is<const char*>() || !data["password"].is<const char*>()) {
+        if (data.isNull() || !data["ssid"].is<const char*>() || !data["password"].is<const char*>()) {
             notify_failure(
                 "", {"invalid_configuration",
                      "Wi-Fi configuration must contain an SSID and a password string (empty for an open network)."});
             return;
         }
-        const std::string ssid     = data["ssid"].as<std::string>();
-        const std::string password = data["password"].as<std::string>();
+        network_setup::Credential credential{data["ssid"].as<std::string>(), data["password"].as<std::string>()};
+        if (!network_setup::Valid(credential)) {
+            wipe_config_text(credential.password); wipe_config_text(credential.ssid);
+            notify_failure("", {"invalid_configuration", "Invalid Wi-Fi credentials."});
+            return;
+        }
 
         // Optional App hints used to tell a 5 GHz network apart from a missing
         // one once the connection fails. Older Apps simply do not send them.
@@ -515,8 +576,7 @@ private:
         band.reported_5ghz   = frequency.is<int>() && frequency.as<int>() >= 4900;
         band.current_network = data["currentNetwork"].as<bool>();
 
-        mclog::tagInfo(_tag, "Wi-Fi configuration received for {} (5g={}, current={})", ssid, band.reported_5ghz,
-                       band.current_network);
+        mclog::tagInfo(_tag, "Wi-Fi configuration received");
 
         // Notify state: connecting
         _is_wifi_connecting = true;
@@ -524,7 +584,12 @@ private:
         notify_state(0, "wifiConnecting");
         GetHAL().onAppConfigEvent.emit(AppConfigEvent::TryWifiConnect);
 
-        _wifi_station->AddAuth(ssid, password, band);
+        bool accepted = _wifi_station->AddAuth(credential.ssid, credential.password, band);
+        wipe_config_text(credential.password); wipe_config_text(credential.ssid);
+        if (!accepted) {
+            std::lock_guard<std::mutex> lock(_mutex);
+            if (_results.empty()) _results.push({false, "", {"wifi_unavailable", "Wi-Fi setup could not accept the request."}});
+        }
     }
 
     void handle_handshake(std::string_view data)
@@ -572,7 +637,8 @@ class AppConfigServerWorker : public mooncake::BasicAbility {
 public:
     void onCreate() override
     {
-        _server = std::make_unique<WifiConfigServer>();
+        _server = std::make_shared<WifiConfigServer>();
+        retained_config_server=_server;
         _server->init();
     }
 
@@ -588,21 +654,22 @@ public:
     void onDestroy() override
     {
         _server.reset();
-        _app_config_server_started = false;
     }
 
 private:
-    std::unique_ptr<WifiConfigServer> _server;
+    std::shared_ptr<WifiConfigServer> _server;
     uint32_t _last_tick = 0;
 };
 
 void Hal::startAppConfigServer()
 {
-    if (_app_config_server_started) return;
-    _app_config_server_started = true;
+    if (!network_setup::CredentialPersistenceAllowed()) return;
+    // Original onboarding may reenter after BLE disconnect. A session has one
+    // server/driver; leaving an active session resets into the stopped shell.
+    if (config_server_started.exchange(true)) return;
     mclog::tagInfo(_tag, "start app config server");
 
-    ble_init(true);
+    if(!ble_init(true)){config_server_started=false;return;}
 
     mooncake::GetMooncake().extensionManager()->createAbility(std::make_unique<AppConfigServerWorker>());
 }
@@ -617,4 +684,15 @@ void Hal::resetAppConfiged()
 {
     Settings settings("app_config", true);
     settings.SetBool("is_configed", false);
+}
+
+bool Hal::stopBleServer(){
+    std::lock_guard<std::mutex> lock(stock_ble_mutex);
+    auto& authority=companion::CommonBleAuthority();
+    if(authority.Owner()==companion::BleOwner::Muse)return false;
+    if(stock_ble_lease)authority.Revoke(stock_ble_lease);
+    if(!ble_prph_stop_checked())return false;
+    if(retained_config_server&&!retained_config_server->StopChecked())return false;
+    retained_config_server.reset();config_server_started=false;
+    return !stock_ble_lease||authority.Release(stock_ble_lease,true);
 }

@@ -1,0 +1,46 @@
+{
+  "h01_head": "cb2511fd99880355c1fe6887a4ea612f1fdb1b84",
+  "installed_head": "85fb3be834cae873a7f9cb67d23a410beb7d6805",
+  "original_common_ancestor": "1b5765599fba8aaad1811d9a79358ccc7051f5f3",
+  "original_conflicted_paths": 90,
+  "firmware_tree": "Production firmware paths identical to installed head; PR4 adds host-only test coverage without changing runtime firmware",
+  "preserved_installed_controls": [
+    "public binding and project paths",
+    "camera ownership/custody cleanup",
+    "Objective-C native bridge compilation",
+    "actual ESP/app CI lanes"
+  ],
+  "h01_controls": [
+    "ordered nonblocking stdout retirement",
+    "bounded coalesced checked shutdown",
+    "honest capture status and whole-worker Stop",
+    "lifecycle launch/close/consent projection"
+  ],
+  "review_repairs": [
+    "Configured registry device/state path replaces historical default; row expiry must match metadata",
+    "Cold Home Connect refreshes route availability",
+    "Reviewed Mira image packaged with fixed digest",
+    "Saved sessions are distinguished from temporary pairing without unverified listener-ready claims",
+    "Healthy active remembered session retains camera controls and reversible Home navigation"
+  ],
+  "registry_limit": "Read-only state/count availability projection; no credential/private key/CA/URI-column reads. Worker independently verifies complete trust tuple/TLS before connecting.",
+  "validation": {
+    "all_eight_swift_fixtures_compile": true,
+    "five_pure_model_fixtures_pass": true,
+    "new_configured_registry_and_cold_route_cases_pass": true,
+    "public_numeric_worker_cases": 48,
+    "public_model_cases": 18,
+    "full_composed_app_and_esp_CI": "Pending new publication and exact-head actual CI; no local full-app retry after sandbox denial",
+    "host_ctest_cases": 29,
+    "host_ctest_skipped": 0,
+    "saved_session_presentation_and_navigation_regressions": "Compiled and passed Mira lifecycle fixture"
+  },
+  "device_deployment": false,
+  "preserved_pr4": "f70fd3e1c5a55cf9096717ba32efd05a7f18cda7: documentation/security guidance, seven host policy/catalog fixtures and advancing Gears frame assertions; newer workflow and Mooncake preparation retained",
+  "scanner": "Unchanged17fingerprints; --all --full-history --remerge-diff with unsupported-octopus guard; synthetic merge-only and same-path new-value canaries detected",
+  "protected_leaf_merge_ancestry": [
+    "d5801a190d66fc8ce63f04c847ec6f6d19196fcb",
+    "9a12db6c108005a82c6725f814d04d3ac055ebf0"
+  ],
+  "pr4_fixture_update": "Old217count replaced by accepted216 with explicit!Allowed226/Allowed225 assertions, tests only"
+}

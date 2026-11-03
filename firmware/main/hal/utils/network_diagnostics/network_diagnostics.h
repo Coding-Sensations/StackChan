@@ -9,7 +9,7 @@ namespace network_diagnostics {
 void prepareWifiProvisioning();
 void finishWifiProvisioning();
 
-enum class Status { Waiting, Checking, Available, Reachable, Failed };
+enum class Status { Waiting, Checking, Available, Reachable, Failed, NotTested };
 
 struct ServiceResult {
     Status status      = Status::Waiting;

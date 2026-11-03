@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "features": [
+    "claude",
+    "codex",
+    "hermes",
+    "led_controls",
+    "muse",
+    "muse_voice_protocol",
+    "network_tools",
+    "toolbox"
+  ]
+}

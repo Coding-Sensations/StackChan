@@ -1,0 +1,41 @@
+{
+  "reviewer": "/root/receiver_review",
+  "role": "independent read-only reviewer; did not implement source changes",
+  "reviewed_source_revision": "1cedafdad113b3fb501b4ee5cc6e84b0671a427d",
+  "reviewed_image_sha256": "000a245183e288df4cafdcefb4af16892c8ebef3efc933c7fcb64b7c4176c4f3",
+  "reviewed_at_recorded_utc": "2026-10-09T06:36:54.261880+00:00",
+  "blocking_findings": [],
+  "result": "No blocking findings in the exact built revision",
+  "verified": [
+    "HEAD differs from built revision only in evidence; firmware/main unchanged",
+    "Archived image hash matches exact built image",
+    "Tools navigation, Back/stop retries, graphical bounds, physical-action allowlist and bounded deadlines",
+    "AppCenter deferred installed-app launches, main-thread WiFi initialization, cancelled-worker lifetime, single-flight gate and catalog limits",
+    "StockAI explicit Start, exclusive audio ownership, stopped reboot preview and persistent Stop/Home reset",
+    "Archived backend suppresses firmware and asset downloads and persistent hotspot changes; camera/motion guards and independent expression cleanup present"
+  ],
+  "source_sha256": {
+    "stock_apps.cc": "43b5231bdf61bd02c169933a8c69723332600569df954000a851e65adaf1cfd4",
+    "stock_app_center.cc": "4dc7fa6bab6b8fa635d4b5cae38560e0dc0c7e84dbbfdea52e1f086a8b22a71c",
+    "stock_agent.cc": "c325729d4944789f223ab989499d3bbb20163331a3f7971f4135fb664cd98bca",
+    "generate_backend.py": "63b611b17fbba210ed915dcc1a6f92c2499466ed4d1dc7d2fb24c99aa000a321"
+  },
+  "review_method": "Static source review and archived binary hashing only",
+  "limitations": [
+    "Physical layout and IR/NFC shutdown remain unverified",
+    "Vendor activation/audio remain unverified",
+    "TLS routing and same-Mira attachment remain unverified"
+  ],
+  "actions_not_performed": [
+    "build",
+    "flash",
+    "device IO",
+    "network activation"
+  ],
+  "prior_findings_fixed_before_final_review": [
+    "NFC detail label/button overlap",
+    "Catalog worker WiFi-init race and premature IP check",
+    "Idle expression modifier accumulation",
+    "Hotspot advanced settings direct NVS writes"
+  ]
+}

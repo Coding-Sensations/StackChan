@@ -1,0 +1,37 @@
+{
+  "source_hashes": {
+    "run_loopback.py": "be8e7363de273e22266c9bc68481a991e78b16142aa9658cc56998967d194aed",
+    "test_streaming.py": "8e91bf61eb8eec3465e1090e78e6617d2ef0c05e2a819434c2b843b6cc3e1196",
+    "streaming_session.py": "4748a1d0dc94682b1b582de83cbf858fb0050aa77393e0630cc6caf736fd8f99",
+    "audio_wire.hpp": "dd2cc3b47f7526e47620c57a427199afa3ac36c13560c53e62fd1e9d7f7663fb",
+    "verify.py": "b0b8f263eed2af6d3b7cf5cd5ed743b5cea15403763dfc44d5c5d8bb634e591b"
+  },
+  "commands": [
+    {
+      "argv": [
+        "/Users/mikedemott/.local/bin/python3.13",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "/Users/mikedemott/Documents/Codex/2026-10-08/task-3/streaming",
+        "-p",
+        "test_streaming.py",
+        "-v"
+      ],
+      "exit": 1,
+      "seconds": 0.18603470800007926,
+      "sampled_peak_tree_rss_bytes": 5963776,
+      "retained_identities": {
+        "10865": "Thu Oct 8 15:32:39 2026"
+      },
+      "cleanup_errors": [],
+      "remaining_group_pids": [],
+      "log": "test_streaming (unittest.loader._FailedTest.test_streaming) ... ERROR\n\n======================================================================\nERROR: test_streaming (unittest.loader._FailedTest.test_streaming)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_streaming\nTraceback (most recent call last):\n  File \"/Users/mikedemott/.local/share/uv/python/cpython-3.13.15-macos-aarch64-none/lib/python3.13/unittest/loader.py\", line 403, in _find_test_path\n    module = self._get_module_from_name(name)\n  File \"/Users/mikedemott/.local/share/uv/python/cpython-3.13.15-macos-aarch64-none/lib/python3.13/unittest/loader.py\", line 346, in _get_module_from_name\n    __import__(name)\n    ~~~~~~~~~~^^^^^^\n  File \"/Users/mikedemott/Documents/Codex/2026-10-08/task-3/streaming/test_streaming.py\", line 3, in <module>\n    from home_lab.sessions import ConversationSessions\n  File \"/Users/mikedemott/Homelab/src/home_lab/sessions.py\", line 220\n    except OSError, sqlite3.Error:\n           ^^^^^^^^^^^^^^^^^^^^^^\nSyntaxError: multiple exception types must be parenthesized\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+    }
+  ],
+  "result": "FAIL",
+  "error": "RuntimeError('compile/test/closure failed')",
+  "wall_seconds": 0.19108950000372715
+}

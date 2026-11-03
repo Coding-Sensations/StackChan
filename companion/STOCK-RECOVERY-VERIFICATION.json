@@ -1,0 +1,39 @@
+{
+  "status": "DOWNLOADED_AND_OFFLINE_VERIFIED_NOT_FLASHED",
+  "name": "StackChan-UserDemo",
+  "author": "M5Stack",
+  "version": "V1.5.1",
+  "published_at": "2026-07-31",
+  "catalog_url": "https://m5burner-api.m5stack.com/api/firmware",
+  "artifact_url": "https://m5burner-cdn.m5stack.com/firmware/746f9662f48ac465cccf49bcad941414.bin",
+  "catalog_fid": "a0873b3516e945f28d39a0870736a017",
+  "catalog_entry": "/Users/mikedemott/Developer/AgentWork/StackChan/.tools/stock-recovery-v1.5.1/official-catalog-entry.json",
+  "full_image": {
+    "file": "/Users/mikedemott/Developer/AgentWork/StackChan/.tools/stock-recovery-v1.5.1/StackChan-UserDemo-V1.5.1-full.bin",
+    "bytes": 12783789,
+    "sha256": "411578a2ebca2cfe3541fdc32aeddbc4703cf912a5daa7e1253f69306d6e1d87",
+    "flash_offset": "0x0",
+    "NVS_contents": "all FF; writing full image clears device NVS"
+  },
+  "app_only": {
+    "file": "/Users/mikedemott/Developer/AgentWork/StackChan/.tools/stock-recovery-v1.5.1/StackChan-UserDemo-V1.5.1-app.bin",
+    "bytes": 3790288,
+    "sha256": "c4839b0a77d030725da125db41167eda426c44ccf6e518776bac5a4d1b722dd1",
+    "flash_offset": "0x20000",
+    "derivation": "exact embedded app image from vendor merged binary, bounded through checksum and appended digest"
+  },
+  "verification": {
+    "chip": "ESP32-S3 (id9), 16MB, DIO80MHz, minrev0.0 maxrev0.99",
+    "app_version": "1.5.1",
+    "idf": "v5.5.4",
+    "app_checksum": "PASS via esptool4.12.0",
+    "app_validation_hash": "PASS via esptool4.12.0",
+    "boot_checksum_and_digest": "PASS via format parser",
+    "partition_md5": "PASS",
+    "partition_layout": "matches previous physical partition review",
+    "hardware": "matches original controller family; actual panel/boot still unqualified",
+    "shipped_byte_identity": "not established; no device state read"
+  },
+  "restore_procedure": "Use official M5Burner StackChan-UserDemo V1.5.1 entry, not remote-controller firmware. A full-image write at0 clears NVS; prefer separately reviewed app at0x20000 plus OTA init at0xd000 when existing bootloader/table/assets are intact. Neither performed.",
+  "checksums": "locally computed; no separate manufacturer signature or published SHA256 supplied by catalog"
+}

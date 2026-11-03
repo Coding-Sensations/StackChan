@@ -1,0 +1,28 @@
+{
+  "result": "no_blocking_source_findings",
+  "reviewer": "/root/receiver_review",
+  "source_revision": "c04acc3c63fefc3c81614d5de88ea2686df71f51",
+  "image_sha256": "a9e360e003dd8f0349a33ab0271e41f0f2250951ec17fd8a0b862d5165fde785",
+  "receipt_hashes_independently_checked": 269,
+  "hash_mismatches": 0,
+  "generator_sha256": "048c98897d97e3b9f2f39de31feefd79d47aa3a46ff5f0b1c39ffa092e9c20e8",
+  "build_exit": 0,
+  "image_bytes": 3966176,
+  "findings_fixed": [
+    "Stock hotspot scoped persistence and failure reporting",
+    "onboarding configured flag after committed credentials",
+    "original user-only MCP tools and asset downloads",
+    "persistent identity/protocol/volume/brightness settings",
+    "browser advanced settings",
+    "original welcome/servo/phone onboarding",
+    "actual App Center firmware download and locally confirmed update",
+    "legacy Wi-Fi export/readback before OTA write",
+    "selected source and download progress displayed"
+  ],
+  "boundaries": [
+    "Static source and exact image provenance verified",
+    "Physical stock parity remains unverified",
+    "No device/network/account acceptance operations performed",
+    "No flash; prior limited approval remains cancelled"
+  ]
+}

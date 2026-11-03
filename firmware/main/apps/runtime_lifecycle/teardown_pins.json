@@ -1,0 +1,8 @@
+{
+  "esp_tcp.cc": "0e3647b95261a98a1dc952df41fcb4606fa51bbfb508ce0a802bc07d6b70e11b",
+  "esp_udp.cc": "3d85dd131d73f75ca60415f0ac8a0f29a3168eb27741546a25b7ace2786783dd",
+  "esp_ssl.cc": "d37ffe4b1dca5cdaba5059c44c606d93972adc5ed0f1d1e5610fbdf4e7b2e700",
+  "esp_mqtt.cc": "68cf8215c52a7f244fa2322ed9a1bfa6eb6591a55f0ce7c9a8f4dc3464d86c3e",
+  "web_socket.cc": "ea5398bce8e283e1e3cf41da384e11a241afdf88ae5a980b7594fe549d0758fe",
+  "espnow.c": "4db54a4cd22731a62009475eb8102eb460a247268e6791b0813178d7c808711c"
+}

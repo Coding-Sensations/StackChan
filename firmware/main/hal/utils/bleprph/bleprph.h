@@ -167,6 +167,8 @@ void gatt_svr_register_cb(struct ble_gatt_register_ctxt *ctxt, void *arg);
 int gatt_svr_init(bool use_alt_uuid);
 
 void ble_prph_init(bool use_alt_uuid);
+bool ble_prph_initialized(void);
+bool ble_prph_stop_checked(void);
 
 #ifdef __cplusplus
 }

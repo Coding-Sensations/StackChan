@@ -1,0 +1,7 @@
+{
+  "source": "ESP-IDF5.5.4 retained cJSON headers; declaration-only UI fixture dependency, no library source or binary imported",
+  "sha256": {
+    "cJSON.h": "25b0145150d500498e4d209cec69c18c42cf818bffcc54690be3b895a2a16dee",
+    "LICENSE": "a36dda207c36db5818729c54e7ad4e8b0c6fba847491ba64f372c1a2037b6d5c"
+  }
+}

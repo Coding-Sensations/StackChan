@@ -1,0 +1,62 @@
+{
+  "M5Unit-NFC": {
+    "repo": "m5stack/M5Unit-NFC",
+    "sha": "63c4caac1a07018ef73027e4b098d4fefe56c6f6",
+    "archive_url": "https://codeload.github.com/m5stack/M5Unit-NFC/tar.gz/63c4caac1a07018ef73027e4b098d4fefe56c6f6",
+    "archive_bytes": 299871,
+    "archive_sha256": "47964ea52faf429f62c2823af3823ece3e8538477f19c99a4fee17000ba39983",
+    "license": {
+      "key": "mit",
+      "name": "MIT License",
+      "spdx_id": "MIT",
+      "url": "https://api.github.com/licenses/mit",
+      "node_id": "MDc6TGljZW5zZTEz"
+    },
+    "license_sha256": "ef0a5ad6fa02972bae0fd2572e34c35ef4b8235563675d4b1c31a96ca09e6dd9"
+  },
+  "M5UnitUnified": {
+    "repo": "m5stack/M5UnitUnified",
+    "sha": "c6d337cf09a19f6762c52c2bd1c41fe5c0d7d285",
+    "archive_url": "https://codeload.github.com/m5stack/M5UnitUnified/tar.gz/c6d337cf09a19f6762c52c2bd1c41fe5c0d7d285",
+    "archive_bytes": 115818,
+    "archive_sha256": "f14390f5ba603725368ad2555dd1b06ba7949911f6fcefbcb5c06d356d91d412",
+    "license": {
+      "key": "mit",
+      "name": "MIT License",
+      "spdx_id": "MIT",
+      "url": "https://api.github.com/licenses/mit",
+      "node_id": "MDc6TGljZW5zZTEz"
+    },
+    "license_sha256": "0e123df9eb854601170fe17c0f4e3cbc96d70a625f27ad0a4f7c2b02eefd1149"
+  },
+  "M5Utility": {
+    "repo": "m5stack/M5Utility",
+    "sha": "a8c562520bc1024d312a9746967e719f370a472d",
+    "archive_url": "https://codeload.github.com/m5stack/M5Utility/tar.gz/a8c562520bc1024d312a9746967e719f370a472d",
+    "archive_bytes": 156682,
+    "archive_sha256": "4a29cd2435e931402a9b7aef7d7abf210512c817923d961968a3f8cb37ebf330",
+    "license": {
+      "key": "mit",
+      "name": "MIT License",
+      "spdx_id": "MIT",
+      "url": "https://api.github.com/licenses/mit",
+      "node_id": "MDc6TGljZW5zZTEz"
+    },
+    "license_sha256": "0e123df9eb854601170fe17c0f4e3cbc96d70a625f27ad0a4f7c2b02eefd1149"
+  },
+  "M5HAL": {
+    "repo": "m5stack/M5HAL",
+    "sha": "c2bfcb2a7534b9af07e199f29d255ef38fb3885c",
+    "archive_url": "https://codeload.github.com/m5stack/M5HAL/tar.gz/c2bfcb2a7534b9af07e199f29d255ef38fb3885c",
+    "archive_bytes": 21055,
+    "archive_sha256": "47a525e8d969e7dde46abd44c3189809faed297fa0a7f3c95d2d47f5d6f3fb2b",
+    "license": {
+      "key": "mit",
+      "name": "MIT License",
+      "spdx_id": "MIT",
+      "url": "https://api.github.com/licenses/mit",
+      "node_id": "MDc6TGljZW5zZTEz"
+    },
+    "license_sha256": "0e123df9eb854601170fe17c0f4e3cbc96d70a625f27ad0a4f7c2b02eefd1149"
+  }
+}

@@ -1,0 +1,362 @@
+[
+  {
+    "path": ".github/workflows/ci.yml",
+    "decision": "Installed CI retained; CI owner union adds MiraLifecycleChecks and W1LifecycleChecks pure execution"
+  },
+  {
+    "path": "companion/EXPANSION-PLAN.md",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/configure_local_tls.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/DIAGNOSTIC-CAPTURE.md",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/boot-tests/run_numeric_checks.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/boot-tests/run_stock_restoration_checks.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/boot-tests/test_numeric_tls.cpp",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/boot-tests/test_pairing_ack.cpp",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/boot-tests/test_readonly.cpp",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/boot-tests/test_tools_ui.cpp",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/boot-tests/test_wireless_pairing_next.cpp",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/boot-tests/verify_stock_menu_hierarchy.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/native-audio/README.md",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/native-audio/coreaudio_bridge.cpp",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/native-audio/native_adapter.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/native-audio/test_native_adapter.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/numeric-ui/App/StackChanPairingApp.swift",
+    "decision": "H01 lifecycle wiring plus installed configured project root and original-call acknowledgement; registry metadata identity and cold-route fixes independently reviewed"
+  },
+  {
+    "path": "companion/host/numeric-ui/HOME-INTEGRATION.md",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/numeric-ui/Models/AudioDeviceRoute.swift",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/numeric-ui/Models/CompanionFlow.swift",
+    "decision": "content three-way using W1 baseline; clean, source comparison and fixtures reviewed"
+  },
+  {
+    "path": "companion/host/numeric-ui/README.md",
+    "decision": "Manually composed H01 finalization/tests with installed public config, camera/custody and Objective-C fixture build; regression fixtures checked"
+  },
+  {
+    "path": "companion/host/numeric-ui/Services/AudioRouteCatalog.swift",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/numeric-ui/Services/PairingController.swift",
+    "decision": "Manually composed H01 finalization/tests with installed public config, camera/custody and Objective-C fixture build; regression fixtures checked"
+  },
+  {
+    "path": "companion/host/numeric-ui/Services/StackChanAudioDevices.swift",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/numeric-ui/Tests/CompanionChecks.swift",
+    "decision": "content three-way using W1 baseline; clean, source comparison and fixtures reviewed"
+  },
+  {
+    "path": "companion/host/numeric-ui/Tests/LifecycleChecks.swift",
+    "decision": "content three-way using W1 baseline; clean, source comparison and fixtures reviewed"
+  },
+  {
+    "path": "companion/host/numeric-ui/Tests/PersistentChecks.swift",
+    "decision": "Manually composed H01 finalization/tests with installed public config, camera/custody and Objective-C fixture build; regression fixtures checked"
+  },
+  {
+    "path": "companion/host/numeric-ui/Tests/RememberedDeviceChecks.swift",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/numeric-ui/Views/ContentView.swift",
+    "decision": "H01 lifecycle wiring plus installed configured project root and original-call acknowledgement; registry metadata identity and cold-route fixes independently reviewed"
+  },
+  {
+    "path": "companion/host/numeric-ui/Views/IntegrationReadinessView.swift",
+    "decision": "content three-way using W1 baseline; clean, source comparison and fixtures reviewed"
+  },
+  {
+    "path": "companion/host/numeric-ui/Views/RememberedDeviceView.swift",
+    "decision": "content three-way using W1 baseline; clean, source comparison and fixtures reviewed"
+  },
+  {
+    "path": "companion/host/numeric-ui/script/build_and_run.sh",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/numeric-ui/script/test_offline.sh",
+    "decision": "Manually composed H01 finalization/tests with installed public config, camera/custody and Objective-C fixture build; regression fixtures checked"
+  },
+  {
+    "path": "companion/host/streaming/PERSISTENT-HOST.md",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/streaming/USER-PAIRING-HANDOFF.md",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/streaming/gateway_connection.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/streaming/native_conversation.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/streaming/numeric_pairing.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/streaming/numeric_pairing_worker.py",
+    "decision": "content three-way using W1 baseline; clean, source comparison and fixtures reviewed"
+  },
+  {
+    "path": "companion/host/streaming/remembered_pairing.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/streaming/remembered_pairing_worker.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/streaming/remote_gateway.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/streaming/streaming_session.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/streaming/test_close_retention_next.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/streaming/test_native_backpressure.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/streaming/test_numeric_pairing_worker.py",
+    "decision": "content three-way using W1 baseline; clean, source comparison and fixtures reviewed"
+  },
+  {
+    "path": "companion/host/streaming/test_transport_test.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/streaming/transport_diagnostics.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/streaming/transport_test.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/streaming/user_pairing.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "companion/host/tls-offline/test_build_profile.py",
+    "decision": "H01 byte-unchanged from W1; retain installed changes"
+  },
+  {
+    "path": "firmware/dependencies.lock",
+    "decision": "installed source intentionally has no stale H01 lock; regenerate in exact SDK CI"
+  },
+  {
+    "path": "firmware/main/CMakeLists.txt",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/apps/app_setup/app_setup.cpp",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/apps/network_setup/network_setup.cc",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/apps/stock_agent/README.md",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/apps/stock_agent/generate_backend.py",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/apps/stock_agent/stock_agent.cc",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/apps/stock_agent/stock_agent.h",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/apps/stock_app_center/stock_app_center.cc",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/apps/stock_services/stock_services.cc",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/apps/stock_services/stock_services.h",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/apps/stock_shell/navigation.cc",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/apps/stock_shell/navigation.h",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/apps/stock_shell/shell_teardown.hpp",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/apps/stock_shell/stock_apps.cc",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/apps/stock_shell/stock_tools_hw.h",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/apps/stock_shell/tools_ui.hpp",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/companion/audio_owner.hpp",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/companion/boot.cc",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/companion/boot.h",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/companion/bounded_web_socket.h",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/companion/codec_tasks.cc",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/companion/codec_tasks.h",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/companion/companion_socket.cc",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/companion/companion_socket.h",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/companion/numeric_pairing.cc",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/companion/numeric_pairing.h",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/companion/numeric_usb.hpp",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/companion/settings_policy.hpp",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/hal/board/cores3_audio_codec.cc",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/hal/board/stackchan.cc",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/hal/hal.cpp",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/hal/hal.h",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/hal/hal_ble.cpp",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/hal/utils/wifi_connect/wifi_station.cc",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/hal/utils/wifi_connect/wifi_station.h",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/idf_component.yml",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "firmware/main/main.cpp",
+    "decision": "H01 byte-unchanged from W1 base; retain accepted newer installed source"
+  },
+  {
+    "path": "scripts/ci/DEPENDENCIES.md",
+    "decision": "Union H01 public-file provenance with explicit private-runtime acceptance limitation"
+  }
+]

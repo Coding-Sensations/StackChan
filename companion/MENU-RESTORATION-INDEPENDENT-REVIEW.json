@@ -1,0 +1,16 @@
+{
+  "result": "no_blocking_source_findings",
+  "reviewer": "/root/receiver_review",
+  "source_revision": "8332120220d9f428af310e23409276cc829107b5",
+  "image_sha256": "06026c2ab598d0e5d0db40656f500737c6c95f6775b5dc934720659c6baf2c77",
+  "image_bytes": 3956816,
+  "receipt_hashes_independently_checked": 272,
+  "hash_mismatches": 0,
+  "build_exit": 0,
+  "visual_verification": "Actual LVGL Setup baseline/candidate identical at four scroll positions; actual Tools UI nine pages inspected",
+  "boundaries": [
+    "No flash or device operations this task",
+    "Stock Wi-Fi, Back/Stop and physical/cloud acceptance still pending",
+    "Visual harness excludes status/home overlays and hardware/actions"
+  ]
+}

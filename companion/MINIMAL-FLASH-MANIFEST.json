@@ -1,0 +1,38 @@
+{
+  "status": "PROPOSAL_ONLY_NOT_AUTHORIZED_OR_EXECUTED",
+  "image_source_commit": "c2480f20f55a494dead17be70d74db54c9781d9c",
+  "device_family": "official original StackChan K151/K151-R; exact SKU/display revision unconfirmed",
+  "device_rom_mac_previously_verified": "80:45:6b:56:14:04",
+  "chip": "ESP32-S3 rev0.2; 16MB flash; secure boot/encryption disabled by previous read-only ROM check",
+  "writes": [
+    {
+      "offset": "0x20000",
+      "file": "/Users/mikedemott/Developer/AgentWork/StackChan/.tools/custom-boot-182752bf8543/stack-chan.bin",
+      "bytes": 2577504,
+      "sha256": "182752bf85437a1f3828c0ab286e8b052b2fe07bcfa21a654caa30346b7ae2fe",
+      "sector_erase_range": "[0x20000,0x296000)"
+    },
+    {
+      "offset": "0xd000",
+      "file": "/Users/mikedemott/Developer/AgentWork/StackChan/.tools/custom-boot-182752bf8543/ota_data_initial.bin",
+      "bytes": 8192,
+      "sha256": "7d2c7ac4888bfd75cd5f56e8d61f69595121183afc81556c876732fd3782c62f",
+      "sector_erase_range": "[0xd000,0xf000)"
+    }
+  ],
+  "untouched_by_explicit_writes": [
+    "bootloader",
+    "partition table",
+    "NVS [0x9000,0xd000)",
+    "PHY init",
+    "ota_1 [0x510000,0xa00000)",
+    "assets",
+    "coredump",
+    "eFuses",
+    "SD card"
+  ],
+  "whole_chip_erase": false,
+  "after_write": "byte verification then reboot only within exact separately confirmed scope",
+  "backup": "declined; not a prerequisite",
+  "stock_recovery": "Official StackChan-UserDemo V1.5.1 downloaded and offline verified; see STOCK-RECOVERY-VERIFICATION.json. Full bundle clears NVS; app-only extraction saved."
+}

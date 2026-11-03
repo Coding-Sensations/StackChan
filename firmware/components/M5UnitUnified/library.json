@@ -1,0 +1,33 @@
+{
+    "name": "M5UnitUnified",
+    "description": "M5UnitUnified is a library for unified handling of various M5 units products.",
+    "keywords": "m5stack, m5unitunified, unit, i2c, gpio, uart, spi, sensor, hal",
+    "authors": {
+        "name": "M5Stack",
+        "url": "https://www.m5stack.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/m5stack/M5UnitUnified.git"
+    },
+    "dependencies": {
+        "m5stack/M5Utility": ">=0.3.0",
+        "m5stack/M5HAL": ">=0.1.4"
+    },
+    "version": "0.6.0",
+    "frameworks": [
+        "arduino",
+        "espidf"
+    ],
+    "platforms": [
+        "espressif32"
+    ],
+    "headers": "M5UnitUnified.h",
+    "license": "MIT",
+    "export": {
+        "exclude": [
+            "docs/html",
+            "extras"
+        ]
+    }
+}

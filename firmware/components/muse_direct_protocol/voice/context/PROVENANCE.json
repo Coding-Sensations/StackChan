@@ -1,0 +1,12 @@
+{
+  "source_package": "muse-voice-context-review-v2-prep-20261031",
+  "source_manifest_sha256": "523a7302c9418ba53801eecc2429e4bdb2316af15ef5bea450ca8aa232ea6f3c",
+  "copied_sha256": {
+    "review.hpp": "61af38af87775b3fbf43b8f8cafceaf76ee7b365283b3a25054c13967fbcf74d",
+    "dialog.hpp": "cb582227dd73c772f17ee8512b7c73dec579acbe81bb20f9c01e022d6e47593b"
+  },
+  "independent_review": "P2 source-read expiry closed; 38 freshness + original model/LVGL suites independently passed; no new actionable finding",
+  "production_source": "Unavailable",
+  "native_permit": false,
+  "live_wiring": false
+}

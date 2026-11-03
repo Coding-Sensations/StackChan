@@ -12,6 +12,8 @@
 #include <functional>
 #include <vector>
 #include <memory>
+#include <optional>
+#include "screensaver_styles.hpp"
 
 namespace view {
 
@@ -30,7 +32,7 @@ public:
 
     std::function<void(int appID)> onAppClicked;
 
-    void init(std::vector<mooncake::AppProps_t> appPorps);
+    void init(std::vector<mooncake::AppProps_t> appPorps,std::optional<int> preferredAppID=std::nullopt);
     void update();
 
 private:
@@ -55,12 +57,14 @@ private:
  */
 class Screensaver : public uitk::games::dvd_screensaver::DvdScreensaver {
 public:
+    explicit Screensaver(saver::Style style=saver::Style::Dvd) : _style(style) {}
     ~Screensaver();
 
     void onInit() override;
     void onBuildLevel() override;
     void onRender(float dt) override;
     void onLogoCollide(int logoGroupId) override;
+    bool isActiveScreen() const;
 
 private:
     std::unique_ptr<uitk::lvgl_cpp::ScreenActive> _prev_screen;
@@ -70,6 +74,13 @@ private:
     std::unique_ptr<uitk::lvgl_cpp::Container> _right_eye;
     std::unique_ptr<uitk::lvgl_cpp::Container> _mouth;
     int _color_index = 0;
+    saver::Style _style = saver::Style::Dvd;
+    uint32_t _animation_ms = 0;
+    lv_obj_t* _effect_canvas = nullptr;
+    lv_obj_t* _effect_error = nullptr;
+    uint16_t* _effect_pixels = nullptr;
+    bool _effect_failed = false;
+    void showEffectError();
 };
 
 }  // namespace view

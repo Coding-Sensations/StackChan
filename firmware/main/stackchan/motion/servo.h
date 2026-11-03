@@ -14,9 +14,23 @@ namespace stackchan::motion {
  * @brief
  *
  */
+#ifndef STACKCHAN_BOUNDED_MOTION
+#define STACKCHAN_BOUNDED_MOTION 0
+#endif
 class Servo {
 public:
     virtual ~Servo() = default;
+#if STACKCHAN_BOUNDED_MOTION
+    // Source-only entrypoint; trusted owner supplies exact generation authority.
+    using MotionAuthority = bool (*)(void*, uint64_t, uint32_t);
+    struct BoundedLimits { float speed_tenths_per_s=250; float acceleration_tenths_per_s2=800; };
+    bool beginBoundedMotion(uint64_t generation, uint32_t expiry_ms, MotionAuthority authority, void* context, BoundedLimits limits);
+    bool moveBounded(uint64_t generation, float angle_tenths);
+    void stopBounded(uint64_t generation);
+    bool boundedActive() const {return _bounded_state==1;}
+    // Software cancellation cannot confirm a physical stop or drained bus.
+    bool boundedPhysicalStopConfirmed() const {return false;}
+#endif
 
     /**
      * @brief
@@ -145,6 +159,28 @@ public:
     }
 
 protected:
+    bool bounded_output_current();
+    void bounded_output_fault();
+    bool bounded_legacy_available() const {
+#if STACKCHAN_BOUNDED_MOTION
+        return _bounded_state==0;
+#else
+        return true;
+#endif
+    }
+#if STACKCHAN_BOUNDED_MOTION
+    // Each concrete driver must prove its actual position mode read-only.
+    virtual bool bounded_position_mode_ready() { return false; }
+    void retire_bounded();
+    void update_bounded();
+    uint8_t _bounded_state=0; // 0 legacy, 1 active, 2 retired; no automatic fallback
+    uint64_t _bounded_generation=0;
+    uint32_t _bounded_expiry=0,_bounded_clock=0,_bounded_tick=0;
+    MotionAuthority _bounded_authority=nullptr;
+    void* _bounded_context=nullptr;
+    BoundedLimits _bounded_limits;
+    float _bounded_position=0,_bounded_velocity=0,_bounded_target=0;
+#endif
     Servo()
     {
     }

@@ -1,0 +1,339 @@
+/*
+ * SPDX-FileCopyrightText: 2025 M5Stack Technology CO LTD
+ *
+ * SPDX-License-Identifier: MIT
+ */
+/*!
+  @file adapter_gpio_v1.cpp
+  @brief Adapters to treat M5HAL and GPIO in the same way using RMT v1
+  @note  Currently handles GPIO directly, but will handle via M5HAL in the future
+*/
+#include "adapter_gpio_v1.hpp"
+
+#if defined(ESP_PLATFORM) && !defined(M5_UNIT_UNIFIED_USING_RMT_V2)
+
+// #include <esp_clk.h>
+#include <esp32/clk.h>
+#include <soc/soc_caps.h>
+using namespace m5::unit::gpio;
+
+namespace {
+
+// RX-capable channels follow the TX-only ones (ESP32/S2: 0, S3: 4, C3: 2)
+constexpr int8_t rmt_rx_first = SOC_RMT_CHANNELS_PER_GROUP - SOC_RMT_RX_CANDIDATES_PER_GROUP;
+// TX-capable channels are [0, rmt_tx_end)
+constexpr int8_t rmt_tx_end = SOC_RMT_TX_CANDIDATES_PER_GROUP;
+
+// RMT memory blocks in use. Channel n with mem_block_num k occupies blocks [n, n + k), so a channel is
+// only free when all of its blocks are (the legacy driver does not check overlaps between channels)
+uint32_t using_rmt_block_bits{};
+
+uint8_t rmt_blocks_of(const uint8_t mem_block_num)
+{
+    return std::max<uint8_t>(1, mem_block_num);
+}
+
+uint32_t rmt_block_mask(const int ch, const uint8_t blocks)
+{
+    return ((1U << blocks) - 1U) << ch;
+}
+
+// First channel in [first, end) whose blocks [ch, ch + blocks) are all free and inside the group
+rmt_channel_t retrieve_available_rmt_channel(const int8_t first, const int8_t end, const uint8_t blocks)
+{
+    for (int_fast8_t ch = first; ch < end && ch + blocks <= SOC_RMT_CHANNELS_PER_GROUP; ++ch) {
+        if ((rmt_block_mask(ch, blocks) & using_rmt_block_bits) == 0) {
+            return static_cast<rmt_channel_t>(ch);
+        }
+    }
+    return RMT_CHANNEL_MAX;
+}
+
+bool declare_use_rmt_channel(const int ch, const uint8_t blocks)
+{
+    if (ch >= 0 && ch + blocks <= SOC_RMT_CHANNELS_PER_GROUP &&
+        (rmt_block_mask(ch, blocks) & using_rmt_block_bits) == 0) {
+        using_rmt_block_bits |= rmt_block_mask(ch, blocks);
+        return true;
+    }
+    return false;
+}
+
+void clear_use_rmt_channel(const int ch, const uint8_t blocks)
+{
+    if (ch >= 0 && ch + blocks <= SOC_RMT_CHANNELS_PER_GROUP) {
+        using_rmt_block_bits &= ~rmt_block_mask(ch, blocks);
+    }
+}
+
+rmt_config_t to_rmt_config_tx(const adapter_config_t& cfg, const uint32_t apb_freq_hz)
+{
+    rmt_config_t out{};
+    out.rmt_mode          = RMT_MODE_TX;
+    out.mem_block_num     = std::min<uint8_t>(cfg.tx.mem_blocks, 8u);
+    out.clk_div           = calculate_rmt_clk_div(apb_freq_hz, cfg.tx.tick_ns);
+    out.tx_config.loop_en = cfg.tx.loop_enabled;
+    //    out.tx_config.carrier_en     = cfg.tx.carrier_enabled;
+    out.tx_config.idle_output_en = cfg.tx.idle_output_enabled;
+    out.tx_config.idle_level     = cfg.tx.idle_level_high ? RMT_IDLE_LEVEL_HIGH : RMT_IDLE_LEVEL_LOW;
+    return out;
+}
+
+rmt_config_t to_rmt_config_rx(const adapter_config_t& cfg, const uint32_t apb_freq_hz)
+{
+    rmt_config_t out{};
+    out.rmt_mode            = RMT_MODE_RX;
+    out.mem_block_num       = std::min<uint8_t>(cfg.rx.mem_blocks, 8u);
+    out.clk_div             = calculate_rmt_clk_div(apb_freq_hz, cfg.rx.tick_ns);
+    out.rx_config.filter_en = cfg.rx.filter_enabled;
+    out.rx_config.filter_ticks_thresh =
+        std::min<uint8_t>(static_cast<uint32_t>(cfg.rx.filter_ticks_threshold) * 1000 / cfg.rx.tick_ns, 255U);
+    out.rx_config.idle_threshold =
+        static_cast<uint16_t>(static_cast<uint32_t>(cfg.rx.idle_ticks_threshold) * 1000 / cfg.rx.tick_ns);
+    return out;
+}
+
+void dump_rmt_config(const rmt_config_t& cfg, const char* title = "RMT CONFIG")
+{
+    M5_LIB_LOGI("=== %s ===", title);
+    M5_LIB_LOGI("rmt_mode       : %s", cfg.rmt_mode == RMT_MODE_TX ? "TX" : "RX");
+    M5_LIB_LOGI("channel        : %d", static_cast<int>(cfg.channel));
+    M5_LIB_LOGI("gpio_num       : %d", static_cast<int>(cfg.gpio_num));
+    M5_LIB_LOGI("mem_block_num  : %d", cfg.mem_block_num);
+    M5_LIB_LOGI("clk_div        : %d", cfg.clk_div);
+
+    if (cfg.rmt_mode == RMT_MODE_TX) {
+        M5_LIB_LOGI("TX CONFIG:");
+        M5_LIB_LOGI("  loop_en         : %s", cfg.tx_config.loop_en ? "true" : "false");
+        M5_LIB_LOGI("  carrier_en      : %s", cfg.tx_config.carrier_en ? "true" : "false");
+        M5_LIB_LOGI("  idle_output_en  : %s", cfg.tx_config.idle_output_en ? "true" : "false");
+        M5_LIB_LOGI("  idle_level      : %d", cfg.tx_config.idle_level);
+        M5_LIB_LOGI("  carrier_freq_hz : %d", cfg.tx_config.carrier_freq_hz);
+        M5_LIB_LOGI("  carrier_duty    : %d%%", cfg.tx_config.carrier_duty_percent);
+        M5_LIB_LOGI("  carrier_level   : %d", cfg.tx_config.carrier_level);
+    } else {
+        M5_LIB_LOGI("RX CONFIG:");
+        M5_LIB_LOGI("  filter_en       : %s", cfg.rx_config.filter_en ? "true" : "false");
+        M5_LIB_LOGI("  filter_thresh   : %d", cfg.rx_config.filter_ticks_thresh);
+        M5_LIB_LOGI("  idle_threshold  : %d", cfg.rx_config.idle_threshold);
+    }
+}
+
+#if 0
+void dump_items(const rmt_item32_t* items, const uint32_t item_num)
+{
+    for (uint32_t i = 0; i < item_num; ++i) {
+        auto d = items[i];
+        M5_LIB_LOGI("[%02u]:{%u,%u,%u,%u}", i, d.duration0, d.level0, d.duration1, d.level1);
+    }
+}
+#endif
+
+}  // namespace
+
+namespace m5 {
+namespace unit {
+
+class GPIOImplV1 : public AdapterGPIOBase::GPIOImpl {
+public:
+    explicit GPIOImplV1(const int8_t rx_pin = -1, const int8_t tx_pin = -1) : AdapterGPIOBase::GPIOImpl(rx_pin, tx_pin)
+    {
+        _rx_config.channel = RMT_CHANNEL_MAX;
+        _tx_config.channel = RMT_CHANNEL_MAX;
+    }
+    int rmtTxChannel() const override
+    {
+        return _tx_config.channel;
+    }
+    int rmtRxChannel() const override
+    {
+        return _rx_config.channel;
+    }
+
+    virtual ~GPIOImplV1()
+    {
+        if (_tx_config.channel != RMT_CHANNEL_MAX) {
+            rmt_tx_stop(_tx_config.channel);
+            rmt_driver_uninstall(_tx_config.channel);
+            clear_use_rmt_channel(_tx_config.channel, rmt_blocks_of(_tx_config.mem_block_num));
+        }
+        if (_rx_config.channel != RMT_CHANNEL_MAX) {
+            rmt_rx_stop(_rx_config.channel);
+            rmt_driver_uninstall(_rx_config.channel);
+            clear_use_rmt_channel(_rx_config.channel, rmt_blocks_of(_rx_config.mem_block_num));
+        }
+    }
+
+    virtual bool begin(const gpio::adapter_config_t& cfg) override
+    {
+        _adapter_cfg = cfg;
+
+        // RMT TX
+        if (_tx_config.channel == RMT_CHANNEL_MAX &&
+            (cfg.mode == gpio::Mode::RmtTX || cfg.mode == gpio::Mode::RmtRXTX)) {
+            auto tx_config         = to_rmt_config_tx(cfg, esp_clk_apb_freq());
+            const uint8_t blocks   = rmt_blocks_of(tx_config.mem_block_num);
+            const rmt_channel_t ch = retrieve_available_rmt_channel(0, rmt_tx_end, blocks);
+            if (ch >= RMT_CHANNEL_MAX) {
+                M5_LIB_LOGE("RMT(v1) No room on TX channel for %u memory blocks", blocks);
+                return false;
+            }
+            _tx_config          = tx_config;
+            _tx_config.channel  = ch;
+            _tx_config.gpio_num = tx_pin();
+
+            dump_rmt_config(_tx_config, "TX");
+
+            auto err = rmt_config(&_tx_config);
+            if (err != ESP_OK) {
+                M5_LIB_LOGE("Failed to config TX %d:%s", err, esp_err_to_name(err));
+                return false;
+            }
+
+            err = rmt_driver_install(_tx_config.channel, 0, 0);
+            if (err != ESP_OK) {
+                M5_LIB_LOGE("Failed to install TX %d:%s", err, esp_err_to_name(err));
+                return false;
+            }
+
+            if (_adapter_cfg.tx.invert_signal) {
+                gpio_matrix_out(_tx_config.gpio_num, _tx_config.channel + RMT_SIG_OUT0_IDX, true, false);
+            }
+
+            declare_use_rmt_channel(ch, blocks);
+            M5_LIB_LOGI("Retrieve RMT(v1) TX %d/%u blocks:%u", tx_pin(), ch, blocks);
+        }
+        // RMT RX
+        if (_rx_config.channel == RMT_CHANNEL_MAX &&
+            (cfg.mode == gpio::Mode::RmtRX || cfg.mode == gpio::Mode::RmtRXTX)) {
+            auto rx_config         = to_rmt_config_rx(cfg, esp_clk_apb_freq());
+            const uint8_t blocks   = rmt_blocks_of(rx_config.mem_block_num);
+            const rmt_channel_t ch = retrieve_available_rmt_channel(rmt_rx_first, RMT_CHANNEL_MAX, blocks);
+            if (ch >= RMT_CHANNEL_MAX) {
+                M5_LIB_LOGE("RMT(v1) No room on RX channel for %u memory blocks", blocks);
+                return false;
+            }
+
+            _rx_config          = rx_config;
+            _rx_config.channel  = ch;
+            _rx_config.gpio_num = rx_pin();
+
+            dump_rmt_config(_rx_config, "RX");
+
+            auto err = rmt_config(&_rx_config);
+            if (err != ESP_OK) {
+                M5_LIB_LOGE("Failed to config RX %d:%s", err, esp_err_to_name(err));
+                return false;
+            }
+
+            err = rmt_driver_install(_rx_config.channel, cfg.rx.ring_buffer_size, 0);
+            if (err != ESP_OK) {
+                M5_LIB_LOGE("Failed to install RX %d:%s", err, esp_err_to_name(err));
+                return false;
+            }
+
+            if (_adapter_cfg.rx.invert_signal) {
+                // RX input signals are numbered from the first RX-capable channel
+                gpio_matrix_in(_rx_config.gpio_num, RMT_SIG_IN0_IDX + (_rx_config.channel - rmt_rx_first), true);
+            }
+
+            declare_use_rmt_channel(ch, blocks);
+            M5_LIB_LOGI("Retrieve RMT(v1) RX %d/%u blocks:%u", rx_pin(), ch, blocks);
+            apply_rx_pull(rx_pin(), cfg.rx.pull);
+
+            if (rmt_rx_start(_rx_config.channel, true) != ESP_OK) {
+                M5_LIB_LOGE("Failed to start RX");
+                return false;
+            }
+
+            // Discard garbage
+            size_t rx_size{};
+            RingbufHandle_t rb{};
+            rmt_get_ringbuf_handle(_rx_config.channel, &rb);
+            if (rb) {
+                rmt_item32_t* items =
+                    static_cast<rmt_item32_t*>(xRingbufferReceive(rb, &rx_size, 10 / portTICK_PERIOD_MS));
+                if (items) {
+                    vRingbufferReturnItem(rb, items);
+                }
+            }
+        }
+        return true;
+    }
+
+    m5::hal::error::error_t writeWithTransaction(const uint8_t* data, const size_t len, const uint32_t waitMs) override
+    {
+        if (_tx_config.channel == RMT_CHANNEL_MAX) {
+            M5_LIB_LOGE("Invalid channel");
+            return m5::hal::error::error_t::UNKNOWN_ERROR;
+        }
+
+        // m5::utility::log::dump(data, len, false);
+        // dump_items((rmt_item32_t*)data, len / sizeof(rmt_item32_t));
+
+        auto err = rmt_write_items(_tx_config.channel, reinterpret_cast<const gpio::m5_rmt_item_t*>(data),
+                                   len / sizeof(rmt_item32_t), false);
+        if (err != ESP_OK) {
+            M5_LIB_LOGE("Failed to write %d:%s", err, esp_err_to_name(err));
+            return m5::hal::error::error_t::UNKNOWN_ERROR;
+        }
+        if (waitMs) {
+            // M5_LIB_LOGE(">>> wait_tx_done %d,%u", _tx_config.channel, waitMs);
+            err = rmt_wait_tx_done(_tx_config.channel, waitMs);
+            if (err != ESP_OK) {
+                M5_LIB_LOGE("Failed to wait %d:%s", err, esp_err_to_name(err));
+            }
+        }
+        return err == ESP_OK ? m5::hal::error::error_t::OK : m5::hal::error::error_t::UNKNOWN_ERROR;
+    }
+
+    m5::hal::error::error_t readWithTransaction(uint8_t* data, const size_t len)
+    {
+        if (_rx_config.channel == RMT_CHANNEL_MAX) {
+            M5_LIB_LOGE("Invalid channel");
+            return m5::hal::error::error_t::UNKNOWN_ERROR;
+        }
+
+        if (len < 4) {
+            M5_LIB_LOGE("length too small %zu", len);
+            return m5::hal::error::error_t::INVALID_ARGUMENT;
+        }
+
+        RingbufHandle_t rb{};
+        if (rmt_get_ringbuf_handle(_rx_config.channel, &rb) != ESP_OK || rb == nullptr) {
+            M5_LIB_LOGE("Failed to get RX ringbuffer");
+            return m5::hal::error::error_t::UNKNOWN_ERROR;
+        }
+
+        size_t max_len = len - 2;  // Top of 2bytes is receive length
+        size_t rx_size{};
+        rmt_item32_t* items = static_cast<rmt_item32_t*>(xRingbufferReceive(rb, &rx_size, pdMS_TO_TICKS(50)));
+
+        // dump_items(items, rx_size / sizeof(rmt_item32_t));
+        memcpy(data, "\0\0", 2);
+        if (items && rx_size) {
+            uint16_t rlen = std::min<uint16_t>(rx_size, max_len);
+            memcpy(data, &rlen, sizeof(rlen));
+            memcpy(data + 2, items, rlen);
+        }
+        if (items) {
+            vRingbufferReturnItem(rb, items);
+        }
+        return rx_size ? m5::hal::error::error_t::OK : m5::hal::error::error_t::TIMEOUT_ERROR;
+    }
+
+protected:
+    rmt_config_t _rx_config{}, _tx_config{};
+};
+
+AdapterGPIO::AdapterGPIO(const int8_t rx_pin, const int8_t tx_pin) : AdapterGPIOBase(new GPIOImplV1(rx_pin, tx_pin))
+{
+}
+
+//
+}  // namespace unit
+}  // namespace m5
+#endif
+#if defined(M5_UNIT_UNIFIED_USING_RMT_V2) && defined(RMT_CHANNEL_0)
+#error "RMT v1 is mixed in with RMT v2 even though RMT v2 is used"
+#endif

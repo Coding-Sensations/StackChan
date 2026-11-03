@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 #include "hal.h"
+#include <apps/runtime_lifecycle/session.h>
 #include <algorithm>
 #include <array>
 #include <esp_heap_caps.h>
@@ -63,7 +64,7 @@ std::string Hal::startMicTest(std::function<void(MicTestStatus)> onStatusUpdate)
     size_t recorded_frame_count = 0;
     std::vector<int16_t> input_chunk;
 
-    while (recorded_frame_count < total_frames) {
+    while (recorded_frame_count < total_frames && !runtime_lifecycle::HomeRequested()) {
         const size_t frames_to_read = std::min(total_frames - recorded_frame_count, _mic_test_playback_chunk_frames);
         input_chunk.resize(frames_to_read * input_channels);
         if (!audio_codec->InputData(input_chunk)) {
@@ -90,6 +91,7 @@ std::string Hal::startMicTest(std::function<void(MicTestStatus)> onStatusUpdate)
         return "mic test captured no audio";
     }
 
+    if(runtime_lifecycle::HomeRequested()){std::fill_n(recorded_frames,total_frames,MicTestFrame{});heap_caps_free(recorded_frames);clearupMicTest();return "cancelled";}
     audio_codec->EnableOutput(true);
     onStatusUpdate(MicTestStatus::Playing);
 
@@ -97,7 +99,7 @@ std::string Hal::startMicTest(std::function<void(MicTestStatus)> onStatusUpdate)
     std::vector<int16_t> output_chunk;
     output_chunk.reserve(_mic_test_playback_chunk_frames);
     size_t played_frames = 0;
-    while (played_frames < recorded_frame_count) {
+    while (played_frames < recorded_frame_count && !runtime_lifecycle::HomeRequested()) {
         const size_t frames_to_write = std::min(recorded_frame_count - played_frames, playback_chunk.size());
         for (size_t i = 0; i < frames_to_write; ++i) {
             playback_chunk[i] = recorded_frames[played_frames + i].mic;

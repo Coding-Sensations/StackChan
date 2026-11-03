@@ -1,0 +1,108 @@
+{
+  "result": "PASS",
+  "seconds": 2.6186987910041353,
+  "commands": [
+    {
+      "argv": [
+        "/Users/mikedemott/Homelab/.venv/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "/Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/companion/host/streaming",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit": 0,
+      "tests": 39,
+      "log": "test_cross_process_authority_view_observes_revocation (test_durable_audio_registry.Tests.test_cross_process_authority_view_observes_revocation) ... ok\ntest_read_only_view_has_no_issue_or_revoke_surface (test_durable_audio_registry.Tests.test_read_only_view_has_no_issue_or_revoke_surface) ... ok\ntest_authenticated_existing_grant_and_redacted_repr (test_gateway_admission.Tests.test_authenticated_existing_grant_and_redacted_repr) ... ok\ntest_control_characters_missing_and_overlong_credentials (test_gateway_admission.Tests.test_control_characters_missing_and_overlong_credentials) ... ok\ntest_duplicate_case_insensitive_authority_headers (test_gateway_admission.Tests.test_duplicate_case_insensitive_authority_headers) ... ok\ntest_missing_audio_capability_denied (test_gateway_admission.Tests.test_missing_audio_capability_denied) ... ok\ntest_path_fixture_and_header_bounds (test_gateway_admission.Tests.test_path_fixture_and_header_bounds) ... ok\ntest_revoked_device_denied (test_gateway_admission.Tests.test_revoked_device_denied) ... ok\ntest_wrong_device_or_invalid_grant (test_gateway_admission.Tests.test_wrong_device_or_invalid_grant) ... ok\ntest_existing_session_controls_and_cleanup (test_gateway_connection.ActualSessionTests.test_existing_session_controls_and_cleanup) ... ok\ntest_existing_session_requires_real_protocol_consent (test_gateway_connection.ActualSessionTests.test_existing_session_requires_real_protocol_consent) ... ok\ntest_cancel_cleans_receive_and_audio (test_gateway_connection.Tests.test_cancel_cleans_receive_and_audio) ... ok\ntest_controls_and_binary_dispatch_until_deadline (test_gateway_connection.Tests.test_controls_and_binary_dispatch_until_deadline) ... ok\ntest_duplicate_json_closes_without_dispatch (test_gateway_connection.Tests.test_duplicate_json_closes_without_dispatch) ... ok\ntest_idle_peer_revocation_checked_without_receive (test_gateway_connection.Tests.test_idle_peer_revocation_checked_without_receive) ... ok\ntest_listening_does_not_stream_encoded_silence (test_gateway_connection.Tests.test_listening_does_not_stream_encoded_silence) ... ok\ntest_oversize_wire_rejected_before_session (test_gateway_connection.Tests.test_oversize_wire_rejected_before_session) ... ok\ntest_provider_failure_closes_connection (test_gateway_connection.Tests.test_provider_failure_closes_connection) ... ok\ntest_return_packets_bounded_and_no_drain_when_muted (test_gateway_connection.Tests.test_return_packets_bounded_and_no_drain_when_muted) ... ok\ntest_send_timeout_invalidates_audio (test_gateway_connection.Tests.test_send_timeout_invalidates_audio) ... ok\ntest_durable_hash_restart_and_revocation (test_provisioning.Tests.test_durable_hash_restart_and_revocation) ... ok\ntest_frame_rejects_truncation_trailing_and_bad_endpoint (test_provisioning.Tests.test_frame_rejects_truncation_trailing_and_bad_endpoint) ... ok\ntest_invalid_fields_do_not_consume_code (test_provisioning.Tests.test_invalid_fields_do_not_consume_code) ... ok\ntest_owner_and_route_gate_before_code_consumption (test_provisioning.Tests.test_owner_and_route_gate_before_code_consumption) ... ok\ntest_busy_device_does_not_open_second_provider (test_remote_gateway.Tests.test_busy_device_does_not_open_second_provider) ... ok\ntest_full_offline_provisioning_websocket_and_revoke (test_remote_gateway.Tests.test_full_offline_provisioning_websocket_and_revoke) ... ok\ntest_production_no_adapter_returns_503 (test_remote_gateway.Tests.test_production_no_adapter_returns_503) ... ok\ntest_rejects_insecure_production_and_external_fixture_binds (test_remote_gateway.Tests.test_rejects_insecure_production_and_external_fixture_binds) ... ok\ntest_separate_api_persona_is_not_existing_mira (test_remote_gateway.Tests.test_separate_api_persona_is_not_existing_mira) ... ok\ntest_unverified_identity_denied_before_arm (test_remote_gateway.Tests.test_unverified_identity_denied_before_arm) ... ok\ntest_duplicate_preserves_epoch_and_pending (test_streaming.Tests.test_duplicate_preserves_epoch_and_pending) ... ok\ntest_interruption_rejects_late_packet_and_reports_unknown_stop (test_streaming.Tests.test_interruption_rejects_late_packet_and_reports_unknown_stop) ... ok\ntest_playback_and_independent_sequences (test_streaming.Tests.test_playback_and_independent_sequences) ... ok\ntest_provider_memory_boundary (test_streaming.Tests.test_provider_memory_boundary) ... ok\ntest_replay_mutes_and_requires_new_turn (test_streaming.Tests.test_replay_mutes_and_requires_new_turn) ... ok\ntest_requires_ack_and_consent (test_streaming.Tests.test_requires_ack_and_consent) ... ok\ntest_revocation_and_watchdog (test_streaming.Tests.test_revocation_and_watchdog) ... ok\ntest_tls_and_duplicate_fields (test_streaming.Tests.test_tls_and_duplicate_fields) ... ok\ntest_wire_bounds_and_direction (test_streaming.Tests.test_wire_bounds_and_direction) ... ok\n\n----------------------------------------------------------------------\nRan 39 tests in 0.717s\n\nOK\n"
+    },
+    {
+      "argv": [
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-isysroot",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk",
+        "-isystem",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/usr/include/c++/v1",
+        "-I",
+        "/Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/firmware/main/companion",
+        "/Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/companion/host/boot-tests/test_provisioning_frame.cpp",
+        "-o",
+        "/var/folders/1_/85m0gzgx34dgj2mjfjz4r8qc0000gn/T/stackchan-provisioning-check-yi985x2n/decoder-test"
+      ],
+      "exit": 0,
+      "log": ""
+    },
+    {
+      "kind": "cross-language decoder/window fixture",
+      "exit": 0,
+      "log": "PASS cross-language frame, truncations, expiry, consent gate, binding, replay\n"
+    },
+    {
+      "argv": [
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-isysroot",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk",
+        "-isystem",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/usr/include/c++/v1",
+        "-I",
+        "/Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/firmware/main/companion",
+        "/Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/companion/host/boot-tests/test_provisioning_receiver.cpp",
+        "-o",
+        "/var/folders/1_/85m0gzgx34dgj2mjfjz4r8qc0000gn/T/stackchan-provisioning-check-yi985x2n/decoder-test"
+      ],
+      "exit": 0,
+      "log": ""
+    },
+    {
+      "kind": "cross-language decoder/window fixture",
+      "exit": 0,
+      "log": "PASS receiver fragmentation, default deny, device binding, expiry, overflow, trailing bytes, close\n"
+    }
+  ],
+  "source_sha256": {
+    "companion/host/streaming/test_durable_audio_registry.py": "5b104fe734bc9aca01e42139e9138f7dd669f54ce8fe0661a2f7ff99525f9ace",
+    "companion/host/streaming/firmware_compile.py": "8c0ebf37baac62cf92728ff6106591111b6bccc7f08ef6a8034023d94ceaafaf",
+    "companion/host/streaming/test_provisioning.py": "80441557a1ff9c0fdbb12d1c34d4216092fc206609afce89ad3c731832fe137c",
+    "companion/host/streaming/remote_gateway.py": "2d204701856605f4b3982dfde4cf529c18c036e82c5183e82129b5200c29096c",
+    "companion/host/streaming/run_loopback.py": "be8e7363de273e22266c9bc68481a991e78b16142aa9658cc56998967d194aed",
+    "companion/host/streaming/test_streaming.py": "8e91bf61eb8eec3465e1090e78e6617d2ef0c05e2a819434c2b843b6cc3e1196",
+    "companion/host/streaming/gateway_admission.py": "723ff2218595e48978ce4c947b2c1e65dbcc43794f0e491fcd56135b586649ad",
+    "companion/host/streaming/gateway_connection.py": "6696a15afe07562be29cca73952d4ffca9f3614e2cfcdc8697ee50afc089caec",
+    "companion/host/streaming/test_gateway_connection.py": "22889bf222d75631987974b6bbd2573f65893259cd0fe2924c4bf67e85b15926",
+    "companion/host/streaming/streaming_session.py": "4748a1d0dc94682b1b582de83cbf858fb0050aa77393e0630cc6caf736fd8f99",
+    "companion/host/streaming/durable_audio_registry.py": "c33f8772d7747f42e25dbbe851434ed2b3bc5ca3283a57acd29d70e0b74f17fd",
+    "companion/host/streaming/verify.py": "227f577015c2aa787f3cf6c557ea8018e9f6bfbf03f96b14a49980d079df9dcd",
+    "companion/host/streaming/provisioning.py": "8cf187352fe69aece1de13a00c6c86e9a114d958fb0e3101cd26084ff4a4f704",
+    "companion/host/streaming/test_remote_gateway.py": "28e125c4b68f0e382a4182d33e13b8dce9a304f93b9b7cd8f3a3489ccf716cd2",
+    "companion/host/streaming/test_gateway_admission.py": "2d97cb2c1580a31b085abd1563c46a7648f552c2143f0b249258fc02bbc7eed4",
+    "firmware/main/companion/provisioning_frame.hpp": "12b81b1036aa18c4767cf7b3f93a0f54bcba5c8eda65b7284dbac32c7d274cc3",
+    "firmware/main/companion/provisioning_receiver.hpp": "b12bfb538e5fe08999e1610d710b0a64261ff8a62ffd3261e1f73f0ae75a01ad",
+    "firmware/main/companion/boot.cc": "e4f7149ed163579ae72355fb514a1346adaac3d40dd8e3f1e447c7e1b649502c",
+    "firmware/main/CMakeLists.txt": "8f9a846cb289d2b665f317d2d4ad3bc0d589e4ab30f1ab44f316fd00af87b779",
+    "companion/host/boot-tests/test_provisioning_receiver.cpp": "d0f2e4c46ea1d2cf52dd5d75b178392b7255bd70fd61d5226d685284398213c6",
+    "companion/host/boot-tests/test_provisioning_frame.cpp": "99fa2e4501de7ed2254e2b678277b363d7cec93359ab8ebe981c51c3ea00aedc"
+  },
+  "homelab_revision": "f8f47b8e26cee976ff208722f7c6e667fe19a4aa",
+  "runtime_python": "3.14.7",
+  "websockets": "17.2 project-local",
+  "listener_scope": "finite localhost synthetic fixtures only; all closed",
+  "storage": "temporary synthetic SQLite only, removed after tests",
+  "credential_scope": "in-memory synthetic fixtures only; no real grants",
+  "provider_requests": false,
+  "audio_IO": false,
+  "device_IO": false,
+  "live_deployment": false,
+  "firmware_build_or_flash": false,
+  "temporary_cpp_artifacts_removed": true
+}

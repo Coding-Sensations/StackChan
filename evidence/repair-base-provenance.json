@@ -1,0 +1,109 @@
+{
+  "base": "832730492ab9ae68d693ce6c2e7b024aba3c8d82",
+  "receipt_chain": {
+    "/Users/mikedemott/Developer/AgentWork/Codex/2026-10-13/task-11/pr-preparation/physical-resume/ACTUAL-DEPLOYMENT-READBACK-CHECKS.json": "aa0861a2b2eaa83949d4068f2c3972b113cda013127f68b1cea605bad2381a7b",
+    "/Users/mikedemott/Developer/AgentWork/Codex/2026-10-13/task-11/pr-preparation/physical-resume/ACTUAL-DEPLOYMENT-READBACK-PINS.json": "e658e97c73e02a957e854948a8310b51ff792033f1e87ba4f68f515b5c814632",
+    "/Users/mikedemott/Developer/AgentWork/Codex/2026-10-13/task-11/pr-preparation/physical-resume/READBACK2-PINS.json": "0ad42a575b22150ec14cf9cf3c33d11c621614cad967582dfd0dd7b43f387389"
+  },
+  "historical_readback_image": "477ae3846bbb19922c87bdfbaba03821faf83fc9631401bc1bb0cc337b51c72b",
+  "historical_readback_utc": "2026-10-15T21:30:24.649323+00:00",
+  "current_physical_identity_verified": false,
+  "source_comparison": [
+    {
+      "file": "firmware/main/apps/app_launcher/app_launcher.cpp",
+      "base_sha256": "512fdfef41e3bf658927c023c676454d83c15b11400b8df8c0101e8ace283ba3",
+      "readback_source_pin": "512fdfef41e3bf658927c023c676454d83c15b11400b8df8c0101e8ace283ba3",
+      "matches": true
+    },
+    {
+      "file": "firmware/main/apps/app_launcher/category_routes.hpp",
+      "base_sha256": "f75c7930d66fa8bfe7ef859aee8a418f6287b84e8e2813364a64ff7c6c2895c9",
+      "readback_source_pin": "f75c7930d66fa8bfe7ef859aee8a418f6287b84e8e2813364a64ff7c6c2895c9",
+      "matches": true
+    },
+    {
+      "file": "firmware/main/apps/app_launcher/view/effect_catalog/effect_catalog.cpp",
+      "base_sha256": "5f20dd82c1866cd69c5f48ce49211b5a5636400e7d2a0c736acdcaeb224f52a9",
+      "readback_source_pin": "5f20dd82c1866cd69c5f48ce49211b5a5636400e7d2a0c736acdcaeb224f52a9",
+      "matches": true
+    },
+    {
+      "file": "firmware/main/apps/app_launcher/view/effect_catalog/effect_catalog.hpp",
+      "base_sha256": "6de28be9d69fe9ed94c187d543c21c19d20cdc31b3dc6a4c67432deb687a0211",
+      "readback_source_pin": "6de28be9d69fe9ed94c187d543c21c19d20cdc31b3dc6a4c67432deb687a0211",
+      "matches": true
+    },
+    {
+      "file": "firmware/main/apps/app_launcher/view/effect_catalog/generate_catalog.py",
+      "base_sha256": "54b8739bb49323e28cefb27864c729f7315b7e2b00b08dda52dc6e9828f5f810",
+      "readback_source_pin": "54b8739bb49323e28cefb27864c729f7315b7e2b00b08dda52dc6e9828f5f810",
+      "matches": true
+    },
+    {
+      "file": "firmware/main/apps/app_launcher/view/effect_catalog/raster.hpp",
+      "base_sha256": "533240e7a6d8b3274d958c4c111c980f8ec7eb3de9cab2d6a42ffcda68bd76a9",
+      "readback_source_pin": "533240e7a6d8b3274d958c4c111c980f8ec7eb3de9cab2d6a42ffcda68bd76a9",
+      "matches": true
+    },
+    {
+      "file": "firmware/main/apps/app_launcher/view/screensaver.cpp",
+      "base_sha256": "60a3800ceca5b67197636a304f3ab3dd20d44db937f8de29dc2252d2ba54005c",
+      "readback_source_pin": "60a3800ceca5b67197636a304f3ab3dd20d44db937f8de29dc2252d2ba54005c",
+      "matches": true
+    },
+    {
+      "file": "firmware/main/apps/app_setup/app_setup.cpp",
+      "base_sha256": "107ae86aa892bd73e817ab746c90070954a3f7670179164382cae5855b816dc3",
+      "readback_source_pin": "107ae86aa892bd73e817ab746c90070954a3f7670179164382cae5855b816dc3",
+      "matches": true
+    },
+    {
+      "file": "firmware/main/apps/app_setup/workers/screensaver_setup.cpp",
+      "base_sha256": "72ea20a961b11db5c851c098935d40d9c23311e74147612d000aad4be17dd555",
+      "readback_source_pin": "72ea20a961b11db5c851c098935d40d9c23311e74147612d000aad4be17dd555",
+      "matches": true
+    },
+    {
+      "file": "firmware/main/apps/stock_agent/stock_agent.cc",
+      "base_sha256": "547e601f2ab0a987b86ef3b6b74480f068f3a321fb89dcfd5962c2b24755f446",
+      "readback_source_pin": "547e601f2ab0a987b86ef3b6b74480f068f3a321fb89dcfd5962c2b24755f446",
+      "matches": true
+    },
+    {
+      "file": "firmware/main/apps/stock_shell/feature_apps.cc",
+      "base_sha256": "c011508fe6f3efc739a2940d337a279a0802d5b00e8795c13e37e7dce5ea826b",
+      "readback_source_pin": "c011508fe6f3efc739a2940d337a279a0802d5b00e8795c13e37e7dce5ea826b",
+      "matches": true
+    },
+    {
+      "file": "firmware/main/apps/stock_shell/navigation.cc",
+      "base_sha256": "44415393f5a63d856d24aa508aa3c2c55f28a2cc4dcc54e22b163ce2d1a7057d",
+      "readback_source_pin": "44415393f5a63d856d24aa508aa3c2c55f28a2cc4dcc54e22b163ce2d1a7057d",
+      "matches": true
+    },
+    {
+      "file": "firmware/main/apps/stock_shell/navigation.h",
+      "base_sha256": "d9559ec92876f93b5934b830f44fea83f7ac7b78a13ce9fc6b16498a0ed3ae86",
+      "readback_source_pin": "d9559ec92876f93b5934b830f44fea83f7ac7b78a13ce9fc6b16498a0ed3ae86",
+      "matches": true
+    },
+    {
+      "file": "firmware/main/apps/stock_shell/stock_apps.cc",
+      "base_sha256": "a55cb5b4728e2ecebcf7af05e8c24b91c75569048611725eda58543a78de1f7e",
+      "readback_source_pin": "a55cb5b4728e2ecebcf7af05e8c24b91c75569048611725eda58543a78de1f7e",
+      "matches": true
+    },
+    {
+      "file": "firmware/main/companion/direct_usb_pcm/usb_pcm_app.cc",
+      "base_sha256": "a018a48c82f80ae2c2f8b136df0f610123eeecc0397c50c826e5a8b9d9397a6a",
+      "readback_source_pin": "a018a48c82f80ae2c2f8b136df0f610123eeecc0397c50c826e5a8b9d9397a6a",
+      "matches": true
+    },
+    {
+      "file": "firmware/main/companion/direct_usb_pcm/usb_pcm_app.h",
+      "base_sha256": "e0718f484fc0f927934ff07b6120c112e7d820d355d6b1897d6223041f05342f",
+      "readback_source_pin": "e0718f484fc0f927934ff07b6120c112e7d820d355d6b1897d6223041f05342f",
+      "matches": true
+    }
+  ]
+}

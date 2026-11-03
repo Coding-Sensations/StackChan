@@ -108,16 +108,27 @@ class LanServerEndpoint {
 /// The firmware receives the endpoint in an `AppLanAddress` message; DNS-SD/mDNS discovery is not used.
 /// Application messages remain plaintext and keep the target MAC prefix.
 class LocalAreaNetworkService {
-  LocalAreaNetworkService._() : _decrypt = RsaUtil.decryptStackChanBlue;
+  LocalAreaNetworkService._()
+    : _decrypt = RsaUtil.decryptStackChanBlue,
+      _addressLookup = _localIpv4Addresses,
+      _bindListener = _bindIpv4Listener;
 
   @visibleForTesting
-  LocalAreaNetworkService.forTesting(this._decrypt);
+  LocalAreaNetworkService.forTesting(this._decrypt, {
+    Future<List<String>> Function()? addressLookup,
+    Future<HttpServer> Function()? bindListener,
+  }) : _addressLookup = addressLookup ?? _localIpv4Addresses,
+       _bindListener = bindListener ?? _bindIpv4Listener;
 
   static final instance = LocalAreaNetworkService._();
 
   static const webSocketPath = '/ws';
 
   final String Function(String) _decrypt;
+  final Future<List<String>> Function() _addressLookup;
+  final Future<HttpServer> Function() _bindListener;
+
+  static Future<HttpServer> _bindIpv4Listener() => HttpServer.bind(InternetAddress.anyIPv4, 0);
   final _messages = StreamController<LocalAreaNetworkMessage>.broadcast();
   final _connections = StreamController<bool>.broadcast();
   final _endpoints = StreamController<LanServerEndpoint?>.broadcast();
@@ -275,12 +286,15 @@ class LocalAreaNetworkService {
     if (target == _runningTarget &&
         (target.isEmpty ||
             (_server != null && _boundGeneration == _generation))) {
+      // The anyIPv4 listener survives interface changes. Refresh addresses
+      // without dropping an otherwise valid listener or device connection.
+      if (target.isNotEmpty) await _announceEndpoint(_server!.port, _generation);
       return;
     }
     await _stop();
     if (target.isEmpty || target != _desiredTarget || !_foreground) return;
     final generation = _generation;
-    final server = await HttpServer.bind(InternetAddress.anyIPv4, 0);
+    final server = await _bindListener();
     _server = server;
     _runningTarget = target;
     _boundGeneration = generation;
@@ -301,17 +315,25 @@ class LocalAreaNetworkService {
 
   /// Hands the endpoint to the caller when the listener is ready for delivery to the firmware.
   ///
-  /// An address lookup failure only skips this announcement; the established local service is unaffected.
+  /// Missing addresses withdraw a stale advertisement; the listener stays bound.
   Future<void> _announceEndpoint(int port, int generation) async {
-    final addresses = await _localIpv4Addresses();
+    final addresses = await _addressLookup();
     if (_disposed || generation != _generation || _server == null) return;
     if (addresses.isEmpty) {
+      if (_endpoint != null) {
+        _endpoint = null;
+        if (!_endpoints.isClosed) _endpoints.add(null);
+      }
       debugPrint(
         'LAN endpoint has no routable IPv4 address; announcement skipped',
       );
       return;
     }
-    _endpoint = LanServerEndpoint(port: port, addresses: addresses);
+    final previous = _endpoint;
+    if (previous != null && previous.port == port &&
+        previous.addresses.length == addresses.length &&
+        List.generate(addresses.length, (i) => previous.addresses[i] == addresses[i]).every((same) => same)) return;
+    _endpoint = LanServerEndpoint(port: port, addresses: List.unmodifiable(addresses));
     debugPrint(
       'LAN endpoint announced port=$port addresses=${addresses.join(',')}',
     );

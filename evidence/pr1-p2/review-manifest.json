@@ -1,0 +1,17 @@
+{
+  "base": "4a24491761ffab19f3df758c93ebbdada4c29ddc",
+  "branch": "codex/pr1-p2-fixes",
+  "findings": [
+    4289943058,
+    4289943064
+  ],
+  "files": {
+    "companion/host/boot-tests/run_stock_restoration_checks.py": "4eef8d08fcf440ba1e139777ff3e5885abfea3e540d64eaf8c139613584399a8",
+    "companion/host/boot-tests/test_pr1_review_regressions.py": "691ab56d4152d636ce94db4baea24f96b979d66065a209f0c9491076eb03a114",
+    "companion/host/boot-tests/test_readonly.cpp": "afb4e62c4abd96f312df6df1f39cc4732cddc0f5390414dee542236ffa56239c",
+    "companion/host/boot-tests/test_tools_ui.cpp": "de9b74ca3b4116b76ebe65cc3cf76c761bb03cb039c2998c7f655b644224dd8b",
+    "companion/host/boot-tests/verify_stock_menu_hierarchy.py": "6cf6dc04e8ab6d97951db5b5adae3073f27dbcffaa9fadabe87198f37c5bb503",
+    "firmware/main/apps/app_launcher/view/effect_catalog/effect_catalog.cpp": "f54cb91cbbfd85cc12c932cc9c3b471ddd7d7d4526db8d51c5c0a59b67302e08",
+    "firmware/main/apps/app_launcher/view/effect_catalog/generate_catalog.py": "830d65e21ae05b0a2bde870d787b95c34b8f503a29cc7a1227cef13fb6c46985"
+  }
+}

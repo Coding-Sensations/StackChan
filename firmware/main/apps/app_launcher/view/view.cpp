@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 #include "view.h"
+#include "../focus_policy.hpp"
 #include <mooncake_log.h>
 #include <assets/assets.h>
 #include <functional>
@@ -288,7 +289,6 @@ static constexpr int _icon_gap = 320;
 static constexpr int _loop_copies       = 5;
 static constexpr int _center_copy_index = 2;
 
-static int _last_clicked_icon_pos_x = -1;
 static std::unique_ptr<DynamicBgColor> _dynamic_bg_color;
 static std::unique_ptr<PageIndicator> _page_indicator;
 static std::unique_ptr<DynamicIconLabel> _dynamic_icon_label;
@@ -305,7 +305,7 @@ LauncherView::~LauncherView()
     _dynamic_icon_label.reset();
 }
 
-void LauncherView::init(std::vector<mooncake::AppProps_t> appPorps)
+void LauncherView::init(std::vector<mooncake::AppProps_t> appPorps,std::optional<int> preferredAppID)
 {
     mclog::tagInfo(_tag, "init");
 
@@ -344,10 +344,8 @@ void LauncherView::init(std::vector<mooncake::AppProps_t> appPorps)
 
             // Icon click callback
             auto app_id = props.appID;
-            auto pos_x  = icon_x;
-            _icon_panels.back()->onClick().connect([&, app_id, pos_x]() {
+            _icon_panels.back()->onClick().connect([&, app_id]() {
                 _clicked_app_id          = app_id;
-                _last_clicked_icon_pos_x = pos_x;
             });
 
             // Keep track of data for helpers
@@ -441,25 +439,13 @@ void LauncherView::init(std::vector<mooncake::AppProps_t> appPorps)
     int base_offset_rounds = _center_copy_index * appPorps.size();
     int default_start_x    = base_offset_rounds * _icon_gap;
 
-    // If warm boot was requested
-    if (GetHAL().getWarmRebootTarget() >= 0) {
-        auto app_index = GetHAL().getWarmRebootTarget();
-        mclog::tagInfo(_tag, "warm boot was requested, app index: {}", app_index);
-        app_index = uitk::clamp(app_index, 0, static_cast<int>(appPorps.size()) - 1);
-
-        // Restore to center set
-        restore_icon_pos_x = (base_offset_rounds + app_index) * _icon_gap;
-        need_restore       = true;
-        GetHAL().clearWarmRebootRequest();
-    }
-
-    if (_last_clicked_icon_pos_x != -1) {
-        // Just restore where they left off, it should be in a valid range
-        // mclog::tagInfo(_tag, "navigate to last clicked icon, pos x: {}", _last_clicked_icon_pos_x);
-        restore_icon_pos_x       = _last_clicked_icon_pos_x;
-        need_restore             = true;
-        _last_clicked_icon_pos_x = -1;
-    }
+    std::vector<int> focus_ids;
+    for(const auto& props:appPorps)focus_ids.push_back(props.appID);
+    const int warm_index=GetHAL().getWarmRebootTarget();
+    const auto selected=launcher_focus::Select(focus_ids,preferredAppID,warm_index);
+    restore_icon_pos_x=(base_offset_rounds+selected.index)*_icon_gap;
+    need_restore=selected.immediate;
+    if(warm_index>=0)GetHAL().clearWarmRebootRequest();
 
     if (need_restore) {
         _panel->scrollBy(-restore_icon_pos_x, 0, LV_ANIM_OFF);

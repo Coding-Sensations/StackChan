@@ -1,0 +1,86 @@
+{
+  "result": "WRITTEN_AND_VERIFIED; CUSTOM_SCREEN_USER_CONFIRMED",
+  "authorization": {
+    "question_id": "Sentinel_e078488362608191964b0b7cb15a2465",
+    "owner_approval_id": "Sentinel_635aba1cc38c819193341e47b895b7d9",
+    "owner_text": "Approval for all that you still need"
+  },
+  "device_mac": "80:45:6b:56:14:04",
+  "port": "/dev/cu.usbmodem31201",
+  "preflight": "PASS fresh identity/16MB/security/layout and artifact hashes",
+  "writes": [
+    {
+      "offset": "0x20000",
+      "file": "/Users/mikedemott/Developer/AgentWork/StackChan/.tools/custom-boot-182752bf8543/stack-chan.bin",
+      "bytes": 2577504,
+      "sha256": "182752bf85437a1f3828c0ab286e8b052b2fe07bcfa21a654caa30346b7ae2fe",
+      "sector_erase_range": "[0x20000,0x296000)"
+    },
+    {
+      "offset": "0xd000",
+      "file": "/Users/mikedemott/Developer/AgentWork/StackChan/.tools/custom-boot-182752bf8543/ota_data_initial.bin",
+      "bytes": 8192,
+      "sha256": "7d2c7ac4888bfd75cd5f56e8d61f69595121183afc81556c876732fd3782c62f",
+      "sector_erase_range": "[0xd000,0xf000)"
+    }
+  ],
+  "verification": "Both verify_flash digests matched exact files before reset",
+  "stages": {
+    "write": {
+      "stage": "write",
+      "exit": 0,
+      "seconds": 30.234481292005512,
+      "log": "/tmp/stackchan-write.log"
+    },
+    "verify": {
+      "stage": "verify",
+      "exit": 0,
+      "seconds": 4.653173375001643,
+      "log": "/tmp/stackchan-verify.log"
+    },
+    "reboot": {
+      "stage": "reboot",
+      "exit": 0,
+      "seconds": 0.2082831659936346,
+      "log": "/tmp/stackchan-reboot.log"
+    }
+  },
+  "reboot_attempts": 1,
+  "post_reset_observation": {
+    "serial_observation_only": true,
+    "reset_requested": false,
+    "window_seconds": 10,
+    "screen_visually_observed": false,
+    "lines": [
+      "ESP-ROM:esp32s3-20210327",
+      "Build:Mar 27 2021",
+      "rst:0x15 (USB_UART_CHIP_RESET),boot:0x22 (DOWNLOAD(USB/UART0))",
+      "Saved PC:0x40048ee5",
+      "waiting for download"
+    ],
+    "received_bytes": 152,
+    "opened": true
+  },
+  "screen_verified": true,
+  "remote_mira_audio_ready": false,
+  "settings_and_calibration": "NVS outside both erased/write ranges; custom init does not erase NVS. Credential-bearing NVS was not read, so byte-for-byte device-state verification not claimed.",
+  "other_partitions": "not targeted by writes",
+  "whole_chip_erase": false,
+  "backup_performed": false,
+  "next_step": "Leave muted; prepare remote gateway and trusted grant provisioning. Pairing/audio not verified.",
+  "evidence_directory": "/Users/mikedemott/Developer/AgentWork/StackChan/notes/limited-flash-evidence",
+  "screen_verification_method": "user physical observation; not tool visual capture",
+  "screen_observation": {
+    "status": "USER_OBSERVED_CUSTOM_BOOT_SCREEN",
+    "source_message_id": "Sentinel_3fc76a3036e08191857785f0813b27c4",
+    "reported_at_utc": "2026-10-09T04:26:52Z",
+    "reported_text": "mira companion muted pair a trusted host camera and motion inactive allow this conversation connect and mute",
+    "screen_acceptance": true,
+    "touch_acceptance": false,
+    "pairing_verified": false,
+    "audio_verified": false,
+    "camera_motion_activated": false,
+    "agent_device_operations_after_report": "none; source-only work",
+    "next_user_step": "Leave muted; no supported end-user pairing flow is connected yet."
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "base": "832730492ab9ae68d693ce6c2e7b024aba3c8d82",
+  "branch": "codex/current-navigation",
+  "manifest": "handoff-review-v4-manifest.json",
+  "manifest_sha256": "9a8a7380506d4d48e9bf81037adf40b95de0e53409dab950bbb2a73543c7340f",
+  "source_hash_count": 74,
+  "source_hashes_match": true,
+  "complete_source_patch": "handoff-final.patch",
+  "patch_sha256": "22e7c01be69071f6a8181b134677411b07152d1119edfd3f5bd97cdba205418e",
+  "full_build_exit": 0,
+  "full_build_log": "handoff-build-final.log",
+  "host_tests": "13/13 passed, no skips",
+  "host_test_log": "handoff-host-tests.txt",
+  "independent_review": "handoff-v4-independent-review.md",
+  "independent_tests": "13/13 passed, no skips",
+  "saved_mira_network_handoff_source_complete": true,
+  "direct_saved_mira_entry": "source tests and review complete; physical behavior unverified",
+  "flash": false,
+  "publication": false,
+  "device_actions": false,
+  "current_installed_image_verified": false,
+  "screensaver_names_known": false,
+  "stack-chan.bin": {
+    "bytes": 4725552,
+    "sha256": "f713520c466e071f84281787f71aeab7b4bddc6b9b3a3f3dac18fa4188965e2f"
+  },
+  "stack-chan.elf": {
+    "bytes": 104451824,
+    "sha256": "804119fdce18228de64accf677caa6ff4e7cb00dff348d42240327091a43b64c"
+  }
+}

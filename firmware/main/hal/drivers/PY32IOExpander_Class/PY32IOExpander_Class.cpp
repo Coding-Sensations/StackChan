@@ -360,4 +360,16 @@ void PY32IOExpander_Class::refreshLeds()
     writeRegister8(REG_LED_CFG, val | (1 << 6));
 }
 
+esp_err_t PY32IOExpander_Class::submitLedFrameChecked(const uint8_t* bytes, size_t size)
+{
+    if (!_initialized || !bytes || size != 24) return ESP_ERR_INVALID_STATE;
+    uint8_t config = 0;
+    auto error = readRegister(REG_LED_CFG, &config, 1);
+    if (error != ESP_OK) return error;
+    if ((config & 0x3F) != 12) return ESP_ERR_INVALID_STATE;
+    error = writeRegister(REG_LED_RAM_START, bytes, size);
+    if (error != ESP_OK) return error;
+    return writeRegister8(REG_LED_CFG, config | (1 << 6));
+}
+
 }  // namespace m5

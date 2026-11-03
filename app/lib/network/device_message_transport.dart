@@ -18,11 +18,15 @@ class DeviceMessageTransport {
   final RemoteDeviceSender remote;
 
   void send(MsgType type, {required String deviceMac, Uint8List? data}) {
-    if (!local.sendConnectedMessage(
+    final sentLocally = local.sendConnectedMessage(
       type,
       deviceMac: deviceMac,
       payload: data,
-    )) {
+    );
+    // These messages also clear server-side subscriptions, even when the
+    // device receives them directly over LAN (Avatar and Camera page exit).
+    final clearsSubscription = type == MsgType.offCamera || type == MsgType.offPhoneScreen;
+    if (!sentLocally || clearsSubscription) {
       remote(type, data: data);
     }
   }

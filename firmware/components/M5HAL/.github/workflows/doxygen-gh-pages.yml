@@ -1,0 +1,27 @@
+name: Deploy Doxygen docuemnt on GitHub Pages
+# NOTE: docs/ (Doxyfile, doxy.sh) が未整備のため release トリガーを一時的に外している。
+#       M5HAL 改修時に docs/ を整備し、ドキュメント生成も合わせて整備する。その際 release を戻す。
+on: [workflow_dispatch]
+# branches:
+#   - main
+#   - master
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Make document
+        uses: m5stack/M5Utility/.github/actions/doxygen@develop
+        with:
+          doxygen_version: 1.11.0
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          folder: docs/html
+          config_file: docs/Doxyfile

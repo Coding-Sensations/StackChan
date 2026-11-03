@@ -80,6 +80,7 @@ protected:
 
 class ToastManager : public mooncake::BasicAbility {
 public:
+    ~ToastManager() override;
     void onCreate() override;
     void onRunning() override;
 
@@ -87,6 +88,8 @@ protected:
     int _current_toast_index = 0;
     std::vector<std::unique_ptr<Toast>> _toast_list;
 };
+
+void reset_toast_runtime();
 
 void pop_a_toast(std::string_view msg, ToastType type = ToastType::Info, uint32_t durationMs = 1600);
 

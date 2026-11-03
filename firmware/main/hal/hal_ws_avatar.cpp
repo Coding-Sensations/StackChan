@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: MIT
  */
 #include "hal.h"
+#include <apps/runtime_lifecycle/session.h>
 #include <stackchan/stackchan.h>
 #include "board/hal_bridge.h"
 #include <mooncake.h>
@@ -36,8 +37,10 @@ static const std::string _setting_device_name_key = "device_name";
 
 class WebSocketAvatar {
 public:
-    ~WebSocketAvatar()
+    ~WebSocketAvatar() { Shutdown(); }
+    void Shutdown()
     {
+        if (_shutdown_started.exchange(true)) return;
         _stopping = true;
         if (_call_response_connection >= 0) GetHAL().onWsCallResponse.disconnect(_call_response_connection);
         if (_call_end_connection >= 0) GetHAL().onWsCallEnd.disconnect(_call_end_connection);
@@ -45,7 +48,6 @@ public:
         stopRemoteTask();
         _websocket.reset();
     }
-
     enum class DataType : uint8_t {
         Opus              = 0x01,
         Jpeg              = 0x02,
@@ -468,6 +470,7 @@ private:
     TaskHandle_t _remote_task         = nullptr;
     SemaphoreHandle_t _remote_stopped = nullptr;
     std::atomic_bool _stopping{false};
+    std::atomic_bool _shutdown_started{false};
     std::atomic_bool _remote_connected{false};
     std::atomic_uint32_t _remote_generation{0};
     std::atomic_uint32_t _last_heartbeat_time{0};
@@ -601,6 +604,7 @@ public:
 
     void onDestroy() override
     {
+        if(_service)_service->Shutdown();
         _service.reset();
     }
 
@@ -614,6 +618,7 @@ void Hal::startWebSocketAvatarService(std::function<void(std::string_view)> onSt
     mclog::tagInfo(_tag, "start websocket avatar service");
 
     startNetwork(onStartLog);
+    if(runtime_lifecycle::HomeRequested())return;
 
     onStartLog("Connecting to\nserver...");
     mooncake::GetMooncake().extensionManager()->createAbility(std::make_unique<WebsocketAvatarWorker>());

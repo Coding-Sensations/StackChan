@@ -1,0 +1,21 @@
+{
+  "upstream_sdk": {
+    "local_git_head": "729d0c8b3113c0cdbd7efb3b8aad8a313839a1bd",
+    "license": "Apache-2.0; no character-art rights claimed",
+    "scope": "exact SDK files, frozen protocol/codec source manifests and compatibility headers; not clean-checkout or hermetic OS/dylib qualification",
+    "copied_files": {
+      "muse_voice_call_core.c": "30ef108676c1cbd7b2f8a30c3d1bf826871977b2abad1bf2d462008ee6d8f633",
+      "muse_voice_call_core.h": "1e68bfd1a203e3a90496db2733d6a002397ebffa87f8d2c9699b6a816bf2cd49",
+      "LICENSE-Apache-2.0.txt": "0353a8ae950232a70f0379a4b8a10b661b2f3e3a598e9411332fc0d4f98947fa"
+    }
+  },
+  "protocol_preparation": {
+    "sibling": "muse-voice-protocol-v2-prep-20261031",
+    "voice_protocol_sha256": "623831cfea36210bb94fcf95e8b2f30f27a63a1ca0bd2f03faafa251b11a5e22",
+    "source_tree_sha256": "fa41fdbf13205fb5cb0de328598f259eb71861efe457284fe05e5da4aa53035d"
+  },
+  "native_voice_owner": false,
+  "runtime_startup_hook": false,
+  "credential_access": false,
+  "artwork_copied": false
+}

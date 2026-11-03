@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 #include "hal.h"
+#include <apps/runtime_lifecycle/session.h>
+#include <companion/station_authority.hpp>
 #include <stackchan/stackchan.h>
 #include <mooncake.h>
 #include <mooncake_log.h>
@@ -45,8 +47,8 @@ void Hal::startSntp()
 
 void Hal::startNetwork(std::function<void(std::string_view)> onLog)
 {
-    // A network diagnostic may already have connected saved Wi-Fi. Starting
-    // the active station again emits no new Connected event, so reuse it.
+    if(companion::network::Authority().Current()!=companion::network::Owner::Vendor||!companion::network::Authority().CanAcquire(companion::network::Owner::Vendor)){if(onLog)onLog("Network ownership is unavailable; return Home.");return;}
+    // Diagnostics may already have connected saved Wi-Fi; do not wait for a new event.
     if (WifiManager::GetInstance().IsConnected()) {
         mclog::tagInfo(_tag, "network already connected");
         startSntp();
@@ -107,21 +109,18 @@ void Hal::startNetwork(std::function<void(std::string_view)> onLog)
     const uint32_t started_at = millis();
     board.StartNetwork();
 
-    while (!network_connected && !WifiManager::GetInstance().IsConnected()) {
-        // WifiBoard normally handles a 60s timeout. Keep this caller bounded
-        // even if station startup or the board timer fails to emit an event.
+    while (!network_connected && !WifiManager::GetInstance().IsConnected() && !runtime_lifecycle::HomeRequested()) {
         if (setup_required || uint32_t(millis() - started_at) >= 65000) {
             board.SetNetworkEventCallback(nullptr);
-            if (onLog) {
-                onLog("WiFi unavailable. Open StackChan World to set up WiFi.");
-            }
+            if (onLog) onLog("WiFi unavailable. Open StackChan World to set up WiFi.");
             requestAppSetup();
         }
-        GetHAL().delay(50);
+        GetHAL().delay(20);
     }
     mclog::tagInfo(_tag, "network connected");
     board.SetNetworkEventCallback(nullptr);
 
+    if(runtime_lifecycle::HomeRequested())return;
     startSntp();
 }
 
@@ -143,4 +142,10 @@ WifiStatus Hal::getWifiStatus()
         return WifiStatus::Medium;
     }
     return WifiStatus::Low;
+}
+
+void Hal::forgetNativeNetwork()
+{
+    // Lifecycle callers still invalidate their native session here. Link state
+    // now comes directly from WifiManager; the HAL no longer caches it.
 }

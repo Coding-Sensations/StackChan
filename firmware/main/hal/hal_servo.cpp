@@ -36,6 +36,7 @@ public:
 
     void init() override
     {
+        if (!bounded_legacy_available()) return;
         reset_runtime_limits();
         set_angle_limit(_config.angleLimit);
         get_zero_pos_from_nvs();
@@ -44,6 +45,7 @@ public:
 
     void get_zero_pos_from_nvs()
     {
+        if (!bounded_legacy_available()) return;
         _zero_pos     = _config.defaultZeroPos;
         bool is_valid = false;
 
@@ -73,6 +75,7 @@ public:
 
     void set_angle_impl(int angle) override
     {
+        if (!bounded_output_current()) return;
         int mapped_angle = _zero_pos + angle * 16 / 5 / 10;  // 一步对应 0.3125度, 0.3125 = 5/16
         mapped_angle     = uitk::clamp(mapped_angle, _runtime_raw_pos_limit.x, _runtime_raw_pos_limit.y);
 
@@ -82,14 +85,21 @@ public:
             return;
         }
 
+        if (!bounded_output_current()) return;
         check_mode(Mode::Position);
-        _scs_bus.WritePos(_config.id, mapped_angle, 20, 0);
+        if (!bounded_output_current()) return;
+        const int written = _scs_bus.WritePos(_config.id, mapped_angle, 20, 0);
+        if (written!=1) bounded_output_fault();
     }
 
     int getCurrentAngle() override
     {
+        if (!bounded_legacy_available() && _current_mode!=Mode::Position) {bounded_output_fault();return 0;}
+        if (!bounded_output_current()) return 0;
         int current_pos = _scs_bus.ReadPos(_config.id);
+        if (!bounded_output_current()) return 0;
         if (!is_raw_pos_valid(current_pos)) {
+            if (!bounded_legacy_available()) {bounded_output_fault();return 0;}
             int fallback_angle = uitk::clamp(Servo::getCurrentAngle(), getAngleLimit().x, getAngleLimit().y);
             mclog::tagWarn(_tag, "id: {} ignore invalid current pos: {}, fallback angle: {}", _config.id, current_pos,
                            fallback_angle);
@@ -104,13 +114,16 @@ public:
 
     bool is_moving_impl() override
     {
+        if (!bounded_output_current()) return false;
         int moving = _scs_bus.ReadMove(_config.id);
+        if (!bounded_output_current()) return false;
         // mclog::tagInfo(_tag, "id: {} moving: {}", _id, moving);
         return moving != 0;
     }
 
     void setTorqueEnabled(bool enabled) override
     {
+        if (!bounded_legacy_available()) return;
         Servo::setTorqueEnabled(enabled);
         _scs_bus.EnableTorque(_config.id, enabled ? 1 : 0);
         // mclog::tagInfo(_tag, "id: {} set torque: {}", _id, enabled);
@@ -118,13 +131,16 @@ public:
 
     bool getTorqueEnabled() override
     {
+        if (!bounded_output_current()) return false;
         int torque_enable = _scs_bus.ReadToqueEnable(_config.id);
+        if (!bounded_output_current()) return false;
         // mclog::tagInfo(_tag, "id: {} torque enable: {}", _id, torque_enable);
         return torque_enable > 0;
     }
 
     void setCurrentAngleAsZero() override
     {
+        if (!bounded_legacy_available()) return;
         int current_pos = _scs_bus.ReadPos(_config.id);
         if (!is_raw_pos_valid(current_pos)) {
             mclog::tagWarn(_tag, "id: {} ignore invalid zero calibration pos: {}, keep zero pos: {}", _config.id,
@@ -143,6 +159,7 @@ public:
 
     void resetZeroCalibration() override
     {
+        if (!bounded_legacy_available()) return;
         _zero_pos = _config.defaultZeroPos;
         reset_runtime_limits();
 
@@ -154,6 +171,7 @@ public:
 
     void rotate(int velocity) override
     {
+        if (!bounded_legacy_available()) return;
         velocity = uitk::clamp(velocity, -1000, 1000);
 
         if (!_config.enablePwmMode) {
@@ -173,6 +191,22 @@ private:
     Vector2i _runtime_raw_pos_limit;
     int _zero_pos      = 0;
     Mode _current_mode = Mode::Position;
+#if STACKCHAN_BOUNDED_MOTION
+    bool _mode_transition_failed = false;
+    bool bounded_position_mode_ready() override
+    {
+        if (_current_mode!=Mode::Position || _mode_transition_failed || !bounded_output_current()) return false;
+        // PWMMode writes zero to both words; SwitchMode(Position) restores them.
+        // Require this board's exact configured range, not an assumed cache.
+        const int minimum=_scs_bus.readWord(_config.id,SCSCL_MIN_ANGLE_LIMIT_L);
+        const bool minimum_ok=_scs_bus.getLastError()==0 && _scs_bus.getState()==0;
+        if (!bounded_output_current() || !minimum_ok) return false;
+        const int maximum=_scs_bus.readWord(_config.id,SCSCL_MAX_ANGLE_LIMIT_L);
+        const bool maximum_ok=_scs_bus.getLastError()==0 && _scs_bus.getState()==0;
+        if (!bounded_output_current() || !maximum_ok) return false;
+        return minimum==_config.rawPosLimit.x && maximum==_config.rawPosLimit.y && minimum<maximum;
+    }
+#endif
 
     static constexpr uint32_t kStallFeedbackIntervalMs = 50;
     static constexpr int kStallMinTargetDeltaRaw       = 8;
@@ -226,22 +260,30 @@ private:
             return false;
         }
 
+        if (!bounded_output_current()) return true;
         const uint32_t now = GetHAL().millis();
         if (now - _last_stall_check_tick < kStallFeedbackIntervalMs) {
             return false;
         }
         _last_stall_check_tick = now;
 
-        if (_scs_bus.FeedBack(_config.id) < 0) {
+        const int feedback = _scs_bus.FeedBack(_config.id);
+        if (!bounded_output_current()) return true;
+        if (feedback < 0) {
+            if (!bounded_legacy_available()) {bounded_output_fault();return true;}
             reset_stall_detection();
             return false;
         }
 
         const int current_raw_pos = _scs_bus.ReadPos(-1);
+        if (!bounded_output_current()) return true;
         const int current_abs     = abs_int(_scs_bus.ReadCurrent(-1));
+        if (!bounded_output_current()) return true;
         const int load_abs        = abs_int(_scs_bus.ReadLoad(-1));
+        if (!bounded_output_current()) return true;
 
         if (!is_raw_pos_valid(current_raw_pos)) {
+            if (!bounded_legacy_available()) {bounded_output_fault();return true;}
             reset_stall_detection();
             return false;
         }
@@ -309,8 +351,11 @@ private:
         stop_motion_at_angle(angle);
         reset_stall_detection();
 
+        if (!bounded_output_current()) return;
         check_mode(Mode::Position);
-        _scs_bus.WritePos(_config.id, raw_pos, 20, 0);
+        if (!bounded_output_current()) return;
+        const int written = _scs_bus.WritePos(_config.id, raw_pos, 20, 0);
+        if (written!=1) bounded_output_fault();
 
         mclog::tagWarn(_tag,
                        "id: {} stall detected, raw: {}, angle: {}, dir: {}, current: {}, load: {}, limit: [{}, {}]",
@@ -323,7 +368,18 @@ private:
             return;
         }
 
-        _scs_bus.SwitchMode(_config.id, static_cast<uint8_t>(targetMode));
+        // SwitchMode contains multiple vendor register transactions. A bounded
+        // owner may only use already-position mode, never enter that sequence.
+        if (!bounded_legacy_available()) {bounded_output_fault();return;}
+        if (!bounded_output_current()) return;
+        const int mode_result=_scs_bus.SwitchMode(_config.id, static_cast<uint8_t>(targetMode));
+#if STACKCHAN_BOUNDED_MOTION
+        // Actual vendor PWM returns its ACK (1); position restoration returns 0.
+        _mode_transition_failed=mode_result!=(targetMode==Mode::PWM ? 1 : 0);
+#else
+        (void)mode_result;
+#endif
+        if (!bounded_output_current()) return;
         _current_mode = targetMode;
     }
 };

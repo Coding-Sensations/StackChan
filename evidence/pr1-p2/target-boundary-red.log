@@ -1,0 +1,45 @@
+FF.F
+======================================================================
+FAIL: test_checked_in_catalog_preserves_fractional_velocity_colors (__main__.ReviewRegressions.test_checked_in_catalog_preserves_fractional_velocity_colors)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/test_pr1_review_regressions.py", line 64, in test_checked_in_catalog_preserves_fractional_velocity_colors
+    self.check_euler_pixels(CATALOG, Path(tmp))
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/test_pr1_review_regressions.py", line 60, in check_euler_pixels
+    self.assertEqual(rendered.returncode, 0, rendered.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : fractional Euler velocity colors: 0011 0011
+
+
+======================================================================
+FAIL: test_menu_check_accepts_the_actual_screensaver_row (__main__.ReviewRegressions.test_menu_check_accepts_the_actual_screensaver_row)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/test_pr1_review_regressions.py", line 81, in test_menu_check_accepts_the_actual_screensaver_row
+    self.assertEqual(checked.returncode, 0, checked.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/verify_stock_menu_hierarchy.py", line 14, in <module>
+    assert menu_labels((repo/setup).read_text())==menu_labels(original(setup).decode())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+
+======================================================================
+FAIL: test_regenerated_catalog_preserves_fractional_velocity_colors (__main__.ReviewRegressions.test_regenerated_catalog_preserves_fractional_velocity_colors)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/test_pr1_review_regressions.py", line 77, in test_regenerated_catalog_preserves_fractional_velocity_colors
+    self.check_euler_pixels(catalog, tmp)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/test_pr1_review_regressions.py", line 60, in check_euler_pixels
+    self.assertEqual(rendered.returncode, 0, rendered.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : fractional Euler velocity colors: 0011 0011
+
+
+----------------------------------------------------------------------
+Ran 4 tests in 4.276s
+
+FAILED (failures=3)

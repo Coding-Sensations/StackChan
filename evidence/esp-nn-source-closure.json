@@ -1,0 +1,92 @@
+{
+  "cause": "Vendor *.s ignore matched uppercase .S; referenced pinned source files were omitted from Git",
+  "source": "Existing preserved build cache; every byte matched checked-in SOURCE-PINS.json digest",
+  "files": [
+    {
+      "path": "third_party/espressif__esp-nn/src/pooling/esp_nn_avg_pool_s8_esp32s3.S",
+      "sha256": "29674586b03d8441e90f857ebba1c553e3aa048892cb681d55cea65d5e4d8e0b"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/pooling/esp_nn_max_pool_s8_esp32s3.S",
+      "sha256": "9305c4d20de3792fa4d471e155819a6ffeda90d7a62fbb08ea6a7d7e66876018"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/basic_math/esp_nn_mul_s8_esp32s3.S",
+      "sha256": "3d4dcfb094a4cec7f451a4b69cc859c372f737c088cc36f6ef068c8e643f130b"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/basic_math/esp_nn_add_s8_esp32s3.S",
+      "sha256": "e4aeec89f10d911afd0455c886f8a974252bba9a77e55e252d0a59ea648871b6"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/fully_connected/esp_nn_fully_connected_per_ch_s8_esp32s3.S",
+      "sha256": "a873b7461447ada1df2ed25b7072585a674032bc7c18b7e1f511806766b1b0d8"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/fully_connected/esp_nn_fully_connected_s8_esp32s3.S",
+      "sha256": "dbde07a645d32c994925efd13cb4450cc351cbdddc022d573199350c19abc869"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/activation_functions/esp_nn_relu_s8_esp32s3.S",
+      "sha256": "1f87fd84b76dc2ab9796661437e4f7afa04206e10453d9cf89b40e9654844448"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/common/esp_nn_common_functions_esp32s3.S",
+      "sha256": "8a9adbe29e310a223193a76d42cca9961b87dd6c1d9fd9c8d2f770e740219745"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/common/esp_nn_multiply_by_quantized_mult_ver1_esp32s3.S",
+      "sha256": "d1f05580094876677c92adf978155978938680c8ebcc0c78b0cbbba5a1435c59"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/common/esp_nn_multiply_by_quantized_mult_esp32s3.S",
+      "sha256": "ab3c8a85d55c1350a4c38dbebdcb3f9fcef9d5ebaa3eda57e9901a34869f56c2"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s16_mult1_3x3_no_pad_esp32s3.S",
+      "sha256": "f113eab683d482454c99db5fdc27e35431d1e60b35ca6fa9610c2e6ea5ced6d7"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_s16_mult4_1x1_esp32s3.S",
+      "sha256": "c0bbb32a96b7dca67758eb08872d9f0019b801556d8045872a662818e69e9440"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_s8_filter_aligned_input_padded_esp32s3.S",
+      "sha256": "9b52360a9b21a23f93197d42fbb70181e6a404e39b71bab846ba40b1fd62cb79"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s16_mult8_esp32s3.S",
+      "sha256": "bc648610bca5c85bf59117df266403d813a3186c534bc00461bf27f5ab3e1859"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_s16_mult8_esp32s3.S",
+      "sha256": "605ebf5c9d96b1d6fc2984e63723dbbcadf23d72da93f996e6f32c79128b9780"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_s8_mult8_1x1_esp32s3.S",
+      "sha256": "233cf143d5a59f2e9da755b16452fc07be8b16de9723bb3efeadc38343640b99"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s16_mult4_esp32s3.S",
+      "sha256": "210094cb8b81a080d299f7b7db714db6568945fc9ffc99ce8a5df4cbee6e122e"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s16_mult8_3x3_esp32s3.S",
+      "sha256": "75491a86477a773642c10dcb803c71a2cd725f576dcbd4e5ec4de025cacd0a8e"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s16_mult1_esp32s3.S",
+      "sha256": "19cfa691b8615be3bc4caa7dc0d7be40d4825660e67357d28d89e67a1150164e"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s16_mult1_3x3_esp32s3.S",
+      "sha256": "e0a236c3996993461c30406b9a160406adea5a202050d86547af289e9e57f08b"
+    },
+    {
+      "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s8_mult1_3x3_padded_esp32s3.S",
+      "sha256": "74d084efc7d2a058274e48ac3ae713cab84e70ddc2f33f170101a9ea535a3385"
+    }
+  ],
+  "firmware_profile_changed": false,
+  "device_changes": false
+}

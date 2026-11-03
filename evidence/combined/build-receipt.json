@@ -1,0 +1,57 @@
+{
+  "base": "4a24491761ffab19f3df758c93ebbdada4c29ddc",
+  "branch": "codex/combined-navigation-p2",
+  "source_candidates": [
+    "f48377d40178c263186d067f47deb0daf49fa330",
+    "f558a5deaa3b2532764a83e7096841b0ccc2f7ac"
+  ],
+  "source_manifest_sha256": "f4c29386e42e947eda8101c69594447ddccf78e132f30a39fca1972ef5a52719",
+  "source_test_hash_count": 79,
+  "all_source_hashes_match_review": true,
+  "production_overlaps": [
+    "firmware/main/apps/app_launcher/view/effect_catalog/effect_catalog.cpp",
+    "firmware/main/apps/app_launcher/view/effect_catalog/generate_catalog.py"
+  ],
+  "textual_conflicts": 0,
+  "semantic_resolution": [
+    "companion/host/boot-tests/verify_stock_menu_hierarchy.py",
+    "companion/host/boot-tests/test_pr1_review_regressions.py"
+  ],
+  "navigation_CTest": "13/13 passed, no skips",
+  "stock_restoration_groups": "13/13 passed, includes4 focused P2 regressions",
+  "independently_repeated": "navigation13, stock13, renderer regeneration byte equality",
+  "full_firmware_configure_build_link_exit": 0,
+  "fresh_build_directory": "firmware/build-combined",
+  "SDK": "ESP-IDF v5.5.4",
+  "sdkconfig_sha256": "d77e3ba0aca9f2a088a5d5b2c4ebefe49c21cfe21530976cce2c7bf38366e911",
+  "sdkconfig_matches_narrowed_build": true,
+  "inherited_pinned_assembly_inputs": 21,
+  "assembly_input_hashes_verified": true,
+  "self_contained_bare_checkout_claim": false,
+  "artifacts": {
+    "stack-chan.bin": {
+      "bytes": 4725152,
+      "sha256": "9d0aa3d6e813097bc245499e0cd11c7f9a9457d322a8eb91cada1bfb882b8d1c"
+    },
+    "stack-chan.elf": {
+      "bytes": 104518560,
+      "sha256": "3e54523c3c7efa934630bcb455559095215971d9ef69aa34848af7d9b1df4452"
+    }
+  },
+  "partition_bytes": 5177344,
+  "partition_remaining_bytes": 452192,
+  "full_logs": {
+    "/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/combined-validation/configure.log": "dda5e732cfc3f5d342855f090c1a20f367ae7a63691ce09ba1bdaebf86ff8083",
+    "/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/combined-validation/full-build.log": "e29af6799c8a7c5086e0cfda5b729bba54e494f53308d6729ed2a0bacbb031e9"
+  },
+  "current_installed_image_verified": false,
+  "historical_readback_used_as_current_proof": false,
+  "physical_Home_preview_WiFi_teardown_verified": false,
+  "publication": false,
+  "merge": false,
+  "flash": false,
+  "hardware_activation": false,
+  "permission_changes": false,
+  "screensaver_assets_removed": false,
+  "separate_mute_fix_included": false
+}

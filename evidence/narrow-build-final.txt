@@ -1,0 +1,35 @@
+[ 99%] Building ASM object esp-idf/main/CMakeFiles/__idf_main.dir/__/__/5.ogg.S.obj
+[ 99%] Building ASM object esp-idf/main/CMakeFiles/__idf_main.dir/__/__/6.ogg.S.obj
+[ 99%] Building ASM object esp-idf/main/CMakeFiles/__idf_main.dir/__/__/7.ogg.S.obj
+[ 99%] Building ASM object esp-idf/main/CMakeFiles/__idf_main.dir/__/__/8.ogg.S.obj
+[ 99%] Building ASM object esp-idf/main/CMakeFiles/__idf_main.dir/__/__/9.ogg.S.obj
+[ 99%] Building ASM object esp-idf/main/CMakeFiles/__idf_main.dir/__/__/activation.ogg.S.obj
+[ 99%] Building ASM object esp-idf/main/CMakeFiles/__idf_main.dir/__/__/err_pin.ogg.S.obj
+[ 99%] Building ASM object esp-idf/main/CMakeFiles/__idf_main.dir/__/__/err_reg.ogg.S.obj
+[ 99%] Building ASM object esp-idf/main/CMakeFiles/__idf_main.dir/__/__/upgrade.ogg.S.obj
+[ 99%] Building ASM object esp-idf/main/CMakeFiles/__idf_main.dir/__/__/welcome.ogg.S.obj
+[ 99%] Building ASM object esp-idf/main/CMakeFiles/__idf_main.dir/__/__/wificonfig.ogg.S.obj
+[ 99%] Building ASM object esp-idf/main/CMakeFiles/__idf_main.dir/__/__/exclamation.ogg.S.obj
+[ 99%] Building ASM object esp-idf/main/CMakeFiles/__idf_main.dir/__/__/low_battery.ogg.S.obj
+[ 99%] Building ASM object esp-idf/main/CMakeFiles/__idf_main.dir/__/__/popup.ogg.S.obj
+[ 99%] Building ASM object esp-idf/main/CMakeFiles/__idf_main.dir/__/__/success.ogg.S.obj
+[ 99%] Building ASM object esp-idf/main/CMakeFiles/__idf_main.dir/__/__/vibration.ogg.S.obj
+[ 99%] Building ASM object esp-idf/main/CMakeFiles/__idf_main.dir/__/__/camera_shutter.ogg.S.obj
+[ 99%] Building ASM object esp-idf/main/CMakeFiles/__idf_main.dir/__/__/new_notification.ogg.S.obj
+[ 99%] Linking C static library libmain.a
+[ 99%] Built target __idf_main
+[ 99%] Generating esp-idf/esp_system/ld/sections.ld
+[ 99%] Built target __ldgen_output_sections.ld
+[ 99%] Building C object CMakeFiles/stack-chan.elf.dir/project_elf_src_esp32s3.c.obj
+[100%] Linking CXX executable stack-chan.elf
+[100%] Built target stack-chan.elf
+[100%] Generating binary image from built executable
+esptool.py v4.12.0
+Creating esp32s3 image...
+Merged 2 ELF sections
+Successfully created esp32s3 image.
+Generated /Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-narrow-navigation/firmware/build-narrow/stack-chan.bin
+[100%] Built target gen_project_binary
+stack-chan.bin binary size 0x481990 bytes. Smallest app partition is 0x4f0000 bytes. 0x6e670 bytes (9%) free.
+[100%] Built target app_check_size
+[100%] Built target app

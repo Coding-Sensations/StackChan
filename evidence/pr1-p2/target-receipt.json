@@ -1,0 +1,11 @@
+{
+  "compiler": "/Users/mikedemott/Developer/AgentWork/StackChan/.tools/espressif/tools/xtensa-esp-elf/esp-14.2.0_20260121/xtensa-esp-elf/bin/xtensa-esp32s3-elf-g++",
+  "source": "/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/firmware/main/apps/app_launcher/view/effect_catalog/effect_catalog.cpp",
+  "source_sha256": "f54cb91cbbfd85cc12c932cc9c3b471ddd7d7d4526db8d51c5c0a59b67302e08",
+  "source_derived_call": "std::abs",
+  "float_return_type_probe_passed": true,
+  "full_catalog_translation_unit_compile_passed": true,
+  "object_sha256": "02b40dc6772d11e3ae3a4ead882bc780cb829fcc3b3d59d644a404a6229284de",
+  "full_firmware_link": false,
+  "hardware_execution": false
+}

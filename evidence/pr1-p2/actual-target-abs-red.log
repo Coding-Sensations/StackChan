@@ -1,0 +1,3 @@
+/tmp/stackchan-pr1-abs-target-probe.cpp:3:61: error: static assertion failed: unqualified abs truncates fractional float on this target
+    3 | static_assert(std::is_floating_point<decltype(abs(-0.5f))>::value, "unqualified abs truncates fractional float on this target");
+      |               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~

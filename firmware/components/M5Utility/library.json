@@ -1,0 +1,25 @@
+{
+    "name": "M5Utility",
+    "description": "Library for other M5 libraries and products",
+    "keywords": "m5stack, m5utility, utility, stl, container, crypto",
+    "authors": {
+        "name": "M5Stack",
+        "url": "https://www.m5stack.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/m5stack/M5Utility.git"
+    },
+    "dependencies": {},
+    "version": "0.3.1",
+    "frameworks": "*",
+    "platforms": "*",
+    "headers": "M5Utility.h",
+    "license": "MIT",
+    "export": {
+        "exclude": [
+            "docs/html",
+            "extras"
+        ]
+    }
+}

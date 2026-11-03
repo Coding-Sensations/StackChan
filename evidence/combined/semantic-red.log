@@ -1,0 +1,19 @@
+.F..
+======================================================================
+FAIL: test_menu_check_accepts_the_actual_screensaver_row (__main__.ReviewRegressions.test_menu_check_accepts_the_actual_screensaver_row)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-combined-navigation-p2/companion/host/boot-tests/test_pr1_review_regressions.py", line 81, in test_menu_check_accepts_the_actual_screensaver_row
+    self.assertEqual(checked.returncode, 0, checked.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-combined-navigation-p2/companion/host/boot-tests/verify_stock_menu_hierarchy.py", line 20, in <module>
+    assert menu_labels((repo/setup).read_text())==expected_setup
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+
+----------------------------------------------------------------------
+Ran 4 tests in 4.647s
+
+FAILED (failures=1)

@@ -1,0 +1,18 @@
+{
+  "license": "MIT",
+  "upstream_revision": "1b5765599fba8aaad1811d9a79358ccc7051f5f3 factory dependency lock",
+  "variants": [
+    {
+      "source": "firmware/xiaozhi-esp32/main/settings.cc",
+      "source_sha256": "bf0ca7df6906c698a1d4ab5f1238bfb37347ea54a25b170eab9c9b45804032bd",
+      "variant": "readonly_settings.cc",
+      "reason": "Companion boot preserves NVS and existing identity; fetched source remains unchanged"
+    },
+    {
+      "source": "firmware/xiaozhi-esp32/main/boards/common/board.cc",
+      "source_sha256": "3d2a47138619234b2700659fe762e9b34a3aca02ee73d35ea5d43ba22cc18b6d",
+      "variant": "readonly_board.cc",
+      "reason": "Companion boot preserves NVS and existing identity; fetched source remains unchanged"
+    }
+  ]
+}

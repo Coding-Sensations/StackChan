@@ -1,0 +1,28 @@
+{
+  "result": "PASS",
+  "argv": [
+    "/Users/mikedemott/Homelab/.venv/bin/python",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "/Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/companion/host/streaming",
+    "-p",
+    "test_gateway_connection.py",
+    "-v"
+  ],
+  "exit": 0,
+  "seconds": 1.003844583996397,
+  "tests": 11,
+  "network_listener": false,
+  "audio_IO": false,
+  "credentials": "in-memory synthetic fixtures only",
+  "provider_requests": false,
+  "source_sha256": {
+    "gateway_connection.py": "6696a15afe07562be29cca73952d4ffca9f3614e2cfcdc8697ee50afc089caec",
+    "test_gateway_connection.py": "22889bf222d75631987974b6bbd2573f65893259cd0fe2924c4bf67e85b15926",
+    "streaming_session.py": "4748a1d0dc94682b1b582de83cbf858fb0050aa77393e0630cc6caf736fd8f99"
+  },
+  "log": "test_existing_session_controls_and_cleanup (test_gateway_connection.ActualSessionTests.test_existing_session_controls_and_cleanup) ... Executing <Task pending name='Task-2' coro=<ActualSessionTests.test_existing_session_controls_and_cleanup() running at /Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/companion/host/streaming/test_gateway_connection.py:88> wait_for=<Future pending cb=[Task.task_wakeup()] created at /Users/mikedemott/.local/share/uv/python/cpython-3.14.7-macos-aarch64-none/lib/python3.14/asyncio/base_events.py:460> cb=[_run_until_complete_cb() at /Users/mikedemott/.local/share/uv/python/cpython-3.14.7-macos-aarch64-none/lib/python3.14/asyncio/base_events.py:181] created at /Users/mikedemott/.local/share/uv/python/cpython-3.14.7-macos-aarch64-none/lib/python3.14/asyncio/runners.py:110> took 0.109 seconds\nok\ntest_existing_session_requires_real_protocol_consent (test_gateway_connection.ActualSessionTests.test_existing_session_requires_real_protocol_consent) ... ok\ntest_cancel_cleans_receive_and_audio (test_gateway_connection.Tests.test_cancel_cleans_receive_and_audio) ... ok\ntest_controls_and_binary_dispatch_until_deadline (test_gateway_connection.Tests.test_controls_and_binary_dispatch_until_deadline) ... ok\ntest_duplicate_json_closes_without_dispatch (test_gateway_connection.Tests.test_duplicate_json_closes_without_dispatch) ... ok\ntest_idle_peer_revocation_checked_without_receive (test_gateway_connection.Tests.test_idle_peer_revocation_checked_without_receive) ... ok\ntest_listening_does_not_stream_encoded_silence (test_gateway_connection.Tests.test_listening_does_not_stream_encoded_silence) ... ok\ntest_oversize_wire_rejected_before_session (test_gateway_connection.Tests.test_oversize_wire_rejected_before_session) ... ok\ntest_provider_failure_closes_connection (test_gateway_connection.Tests.test_provider_failure_closes_connection) ... ok\ntest_return_packets_bounded_and_no_drain_when_muted (test_gateway_connection.Tests.test_return_packets_bounded_and_no_drain_when_muted) ... ok\ntest_send_timeout_invalidates_audio (test_gateway_connection.Tests.test_send_timeout_invalidates_audio) ... ok\n\n----------------------------------------------------------------------\nRan 11 tests in 0.751s\n\nOK\n"
+}

@@ -1,0 +1,36 @@
+{
+  "source_parent": "d91704e2ffa265b72898c2427c41a34b4bc3da98",
+  "preserved_h01_source": "cb2511fd99880355c1fe6887a4ea612f1fdb1b84",
+  "review_findings": [
+    "native startup must not block heartbeat loop",
+    "retry exact retained cleanup before admission",
+    "retain one in-flight socket close through timeout/cancellation"
+  ],
+  "additional_h01_closure": [
+    "elapsed-time backpressure and fresh-turn reset",
+    "bounded native diagnostics projection",
+    "remembered listener diagnostic events"
+  ],
+  "installed_semantics_preserved": [
+    "public configuration and trust verification",
+    "legacy and directional audio selection",
+    "camera dispatch and checked-stop custody"
+  ],
+  "tests": {
+    "focused_red": 3,
+    "async_cleanup_pass": 24,
+    "targeted_camera_native_pass": 125,
+    "local_streaming_pass": 424,
+    "public_gateway_pass": 5,
+    "public_directional_subcases": 3
+  },
+  "local_unexecuted_prior_sandbox_denial": [
+    "test_remote_gateway",
+    "test_diagnostic_reader_lifecycle"
+  ],
+  "required_private_ci_entrypoint": "unchanged; includes both unexecuted local suites",
+  "actual_app_firmware_CI": "new frozen head must qualify; previous d917 checks are not new-head proof",
+  "source_review": "independent reviewer: no remaining actionable finding",
+  "physical_acceptance": "unrun",
+  "deployment_performed": false
+}

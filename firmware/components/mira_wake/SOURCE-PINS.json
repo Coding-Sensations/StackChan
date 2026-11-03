@@ -1,0 +1,1751 @@
+{
+  "versions": {
+    "espressif__esp-tflite-micro": "1.3.3~1",
+    "espressif__esp-nn": "1.1.2",
+    "esphome__esp-micro-speech-features": "1.2.3"
+  },
+  "packages": {
+    "espressif__esp-tflite-micro": {
+      "id": "42656c04-ce87-451c-91d7-8da35e4cfa22",
+      "version": "1.3.3~1",
+      "created_at": "2025-01-27T16:18:02.553841+00:00",
+      "description": "TensorFlow Lite Micro component for ESP-IDF",
+      "component_hash": "78502e833b227ec15b917222ed046df1a46f2e5d3593d2a77a162012fa9a1aa0",
+      "url": "components/espressif/esp-tflite-micro/1.3.3~1/espressif__esp-tflite-micro-v1.3.3_1.zip",
+      "targets": [],
+      "maintainers": [],
+      "docs": {
+        "readme": "components/espressif/esp-tflite-micro/1.3.3~1/readme.md"
+      },
+      "dependencies": [
+        {
+          "spec": "^1.1.0",
+          "source": "service",
+          "registry_url": "https://components.espressif.com",
+          "is_public": false,
+          "require": true,
+          "name": "esp-nn",
+          "namespace": "espressif",
+          "rules": [],
+          "matches": []
+        },
+        {
+          "spec": ">=4.4",
+          "source": "idf",
+          "registry_url": null,
+          "is_public": false,
+          "require": true,
+          "name": null,
+          "namespace": null,
+          "rules": [],
+          "matches": []
+        }
+      ],
+      "license": {
+        "name": "Apache-2.0",
+        "url": "components/espressif/esp-tflite-micro/1.3.3~1/license.txt"
+      },
+      "homepage": "https://github.com/espressif/tflite-micro-esp-examples",
+      "documentation": "https://github.com/espressif/tflite-micro-esp-examples#readme",
+      "repository": "git://github.com/espressif/esp-tflite-micro.git",
+      "issues": "https://github.com/espressif/tflite-micro-esp-examples/issues",
+      "discussion": null,
+      "examples": [
+        {
+          "id": "27810323-4663-44fa-9e84-65b2a6d41c75",
+          "name": "micro_speech",
+          "url": "9df45e96-39e0-4bd5-8859-828881840c38/examples/27810323-4663-44fa-9e84-65b2a6d41c75.tgz",
+          "docs": {
+            "readme": "components/espressif/esp-tflite-micro/1.3.3~1/examples/micro_speech/readme.md"
+          },
+          "description": "This example demonstrates how to run a 20 kB model that recognizes the keywords \"yes\" and \"no\" from speech data, using a microphone to listen for\u2026"
+        },
+        {
+          "id": "b8dff77e-1dd3-4584-9ebb-2bfaee62515f",
+          "name": "hello_world",
+          "url": "9df45e96-39e0-4bd5-8859-828881840c38/examples/b8dff77e-1dd3-4584-9ebb-2bfaee62515f.tgz",
+          "docs": {
+            "readme": "components/espressif/esp-tflite-micro/1.3.3~1/examples/hello_world/readme.md"
+          },
+          "description": "This example demonstrates the basics of using TensorFlow Lite for Microcontrollers, including the full workflow of training a model to replicate a\u2026"
+        },
+        {
+          "id": "6837cad6-5f90-4ab8-a0a4-e426a32a62db",
+          "name": "person_detection",
+          "url": "9df45e96-39e0-4bd5-8859-828881840c38/examples/6837cad6-5f90-4ab8-a0a4-e426a32a62db.tgz",
+          "docs": {
+            "readme": "components/espressif/esp-tflite-micro/1.3.3~1/examples/person_detection/readme.md"
+          },
+          "description": "This example demonstrates how to use TensorFlow Lite for person detection in images, specifically designed for devices with limited memory such as\u2026"
+        }
+      ],
+      "tags": [],
+      "downloads_total": 0,
+      "checksums": "components/espressif/esp-tflite-micro/1.3.3~1/CHECKSUMS.json",
+      "yanked_at": null,
+      "yanked_message": null,
+      "build_metadata_keys": [
+        "dependencies-*-version-type:string",
+        "files-exclude-type:array-type:string",
+        "version-type:string"
+      ],
+      "info_metadata_keys": [
+        "description-type:string",
+        "documentation-type:string",
+        "issues-type:string",
+        "repository-type:string",
+        "repository_info-commit_sha-type:string",
+        "repository_info-path-type:string",
+        "url-type:string"
+      ]
+    },
+    "espressif__esp-nn": {
+      "id": "0500d19d-dcd3-4afa-b28f-e0930a2dae76",
+      "version": "1.1.2",
+      "created_at": "2025-09-01T11:47:42.341139+00:00",
+      "description": "Optimized NN (Neural Network) functions for Espressif chips",
+      "component_hash": "f4633a02f05fef53b80de65ade1f733ebdef637e4c8b8be4eb11f5e27f6d9f3e",
+      "url": "components/espressif/esp-nn/1.1.2/espressif__esp-nn-v1.1.2.zip",
+      "targets": [],
+      "maintainers": [],
+      "docs": {
+        "readme": "components/espressif/esp-nn/1.1.2/readme.md"
+      },
+      "dependencies": [
+        {
+          "spec": ">=4.2",
+          "source": "idf",
+          "registry_url": null,
+          "is_public": false,
+          "require": true,
+          "name": null,
+          "namespace": null,
+          "rules": [],
+          "matches": []
+        }
+      ],
+      "license": {
+        "name": "Apache-2.0",
+        "url": "components/espressif/esp-nn/1.1.2/license.txt"
+      },
+      "homepage": "https://github.com/espressif/esp-nn",
+      "documentation": null,
+      "repository": "git://github.com/espressif/esp-nn.git",
+      "issues": "https://github.com/espressif/esp-nn/issues",
+      "discussion": null,
+      "examples": [],
+      "tags": [],
+      "downloads_total": 238408,
+      "checksums": "components/espressif/esp-nn/1.1.2/CHECKSUMS.json",
+      "yanked_at": null,
+      "yanked_message": null,
+      "build_metadata_keys": [
+        "dependencies-*-version-type:string",
+        "files-exclude-type:array-type:string",
+        "version-type:string"
+      ],
+      "info_metadata_keys": [
+        "description-type:string",
+        "issues-type:string",
+        "repository-type:string",
+        "repository_info-commit_sha-type:string",
+        "repository_info-path-type:string",
+        "url-type:string"
+      ]
+    },
+    "esphome__esp-micro-speech-features": {
+      "id": "9f9065ae-1281-47a6-a58c-7b796c1fe30c",
+      "version": "1.2.3",
+      "created_at": "2026-04-20T19:17:20.144194+00:00",
+      "description": "Generates TensorFlow micro spectrogram features from audio samples",
+      "component_hash": "2b720b4ed49fa9df14b24f35fd3ec8a012eddde1c8dd4709448e36a581eebd3e",
+      "url": "components/esphome/esp-micro-speech-features/1.2.3/esphome__esp-micro-speech-features-v1.2.3.zip",
+      "targets": [],
+      "maintainers": [
+        "Kevin Ahrendt <kevin.ahrendt@openhomefoundation.org>"
+      ],
+      "docs": {
+        "readme": "components/esphome/esp-micro-speech-features/1.2.3/readme.md"
+      },
+      "dependencies": [
+        {
+          "spec": ">=4.4",
+          "source": "idf",
+          "registry_url": null,
+          "is_public": false,
+          "require": true,
+          "name": null,
+          "namespace": null,
+          "rules": [],
+          "matches": []
+        }
+      ],
+      "license": {
+        "name": "Apache-2.0",
+        "url": "components/esphome/esp-micro-speech-features/1.2.3/license.txt"
+      },
+      "homepage": "https://github.com/kahrendt/ESPMicroSpeechFeatures",
+      "documentation": null,
+      "repository": "git://github.com/esphome-libs/esp-micro-speech-features.git",
+      "issues": null,
+      "discussion": null,
+      "examples": [],
+      "tags": [],
+      "downloads_total": 0,
+      "checksums": "components/esphome/esp-micro-speech-features/1.2.3/CHECKSUMS.json",
+      "yanked_at": null,
+      "yanked_message": null,
+      "build_metadata_keys": [
+        "dependencies-*-type:string",
+        "files-exclude-type:array-type:string",
+        "version-type:string"
+      ],
+      "info_metadata_keys": [
+        "description-type:string",
+        "license-type:string",
+        "maintainers-type:array-type:string",
+        "repository-type:string",
+        "repository_info-commit_sha-type:string",
+        "repository_info-path-type:string",
+        "url-type:string"
+      ]
+    }
+  },
+  "files": {
+    "third_party/espressif__esp-tflite-micro/CMakeLists.txt": "da7ddeecca9575004c5e63178afe54218667c358597a87019dd85279948be194",
+    "third_party/espressif__esp-tflite-micro/LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "third_party/espressif__esp-tflite-micro/.pre-commit-config.yaml": "5bdf908ec4e3c2ef100fdd5a2fed65ecef7f03a125c4326174a367edf0523fd8",
+    "third_party/espressif__esp-tflite-micro/idf_component.yml": "c4a1add2dcae34ffb727b4fa7790ad4d0eb963f39f1b4a159b90bbfc628b3b54",
+    "third_party/espressif__esp-tflite-micro/.gitmodules": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "third_party/espressif__esp-tflite-micro/README.md": "9cf6a2bc237b0acc9a256dae78b8fa2f0a305fa247e4a9fa97d1fc65cc867f09",
+    "third_party/espressif__esp-tflite-micro/.gitignore": "0021cec77b77200e0a62bf3906f10a1623ed951befcc3a382c0c21118d32a718",
+    "third_party/espressif__esp-tflite-micro/scripts/build_examples.sh": "197b0558cd2e949c3e6ac729687eb3413ebdfedb4e340199870298f644e6b279",
+    "third_party/espressif__esp-tflite-micro/scripts/gh_sync_req.txt": "cdd9124bd38221442b28dc7d7d9b10161d50e5ada57f5d61748f2a4731137d47",
+    "third_party/espressif__esp-tflite-micro/scripts/sync_from_tflite_micro.sh": "d53d7e8d6385966d859363a8bab576c0ea70d153c0368320add424969c75942a",
+    "third_party/espressif__esp-tflite-micro/signal/src/fft_auto_scale.h": "32013d6706f08e8009d0f81cb1a4c64db7d2bb5979e9c36dc3bfbd037798e172",
+    "third_party/espressif__esp-tflite-micro/signal/src/irfft_int16.cc": "3f3260bb518fe6d2529eaaf038cb891e4385f16e66a53106e80f13d37546530b",
+    "third_party/espressif__esp-tflite-micro/signal/src/irfft_int32.cc": "e8528d720087a8013127e0352ba6717570abb0124fb399d6f05d69864f7960ec",
+    "third_party/espressif__esp-tflite-micro/signal/src/circular_buffer.h": "67169922ab7df10e4325568ce35358ea79a72372fb626ff3a6602c13587bd58b",
+    "third_party/espressif__esp-tflite-micro/signal/src/filter_bank_spectral_subtraction.h": "7130a6cd956a22b15cfaab6107a9d1b423377f052e321239c10a7717e04614bd",
+    "third_party/espressif__esp-tflite-micro/signal/src/filter_bank_log.cc": "be1c8953daaae14fbb11dd9be53e8711b36e0155070a72be7b0dce5a2be21899",
+    "third_party/espressif__esp-tflite-micro/signal/src/msb_32.cc": "ce1ab52f0bfe82bfab20c9812a29ca6ddaa1d3d5b5054b653de79bbaf53b2215",
+    "third_party/espressif__esp-tflite-micro/signal/src/max_abs.cc": "d335478b01e1bb7ae8a2aeda3c31cc369f17c5e0dc9ff39858efbd1f3363b452",
+    "third_party/espressif__esp-tflite-micro/signal/src/filter_bank_square_root.h": "b040f417ddbe30d1595a29ae44c393811994afe530bd68e30e459120c85c1290",
+    "third_party/espressif__esp-tflite-micro/signal/src/rfft_int16.cc": "58c80f52588049f0fb996e698739e926afcb9bfc7a8c8ec2ce589b659b1620b0",
+    "third_party/espressif__esp-tflite-micro/signal/src/rfft_int32.cc": "7e2e0e728bd9921e2e2f2a451f115df90f6dc9ff15d5b674ec7edc6845b35160",
+    "third_party/espressif__esp-tflite-micro/signal/src/square_root_32.cc": "daedcebf1342287e96792892158e186a0311ddca8e59d82a298309120f2e770b",
+    "third_party/espressif__esp-tflite-micro/signal/src/filter_bank_spectral_subtraction.cc": "95c1771aca9decd1338baf08b5e11458bcbd0eb9abd4bcc827487bcfe51b61a4",
+    "third_party/espressif__esp-tflite-micro/signal/src/msb.h": "694136284885f3f6115fd3f339d9bc3b7f841a822ab6ced8f104fc572a804f73",
+    "third_party/espressif__esp-tflite-micro/signal/src/energy.cc": "709664675e11073d3f10f253ed71885d6227c32facdca5b3ca8a9959d0863ebe",
+    "third_party/espressif__esp-tflite-micro/signal/src/window.h": "1b5af517327f177ce4e2063d45e5f525954786162809bf01ea036ed3b3b55c0a",
+    "third_party/espressif__esp-tflite-micro/signal/src/filter_bank_log.h": "19f4ca161c7e8fc56aefe9995d2f86c02c3e88ec896dcca23888644edbb625ba",
+    "third_party/espressif__esp-tflite-micro/signal/src/max_abs.h": "63fbc3c9955666f241fb8dfe2d217875d74e28c8494235d66519c9d1bbbc7c65",
+    "third_party/espressif__esp-tflite-micro/signal/src/overlap_add.h": "7e1658805768a0ccd6b14850851a160cb7ad7d932ca201da1ead3b82937f78ec",
+    "third_party/espressif__esp-tflite-micro/signal/src/circular_buffer.cc": "241b0f28f4ee30637dd3f7fad4887842501f0653f709d6fbdb63fbbfad23435e",
+    "third_party/espressif__esp-tflite-micro/signal/src/square_root.h": "3cc51b9fb05ef181b43c9b9ed977c05f496ed97e11636794156e0aadb0ae3efd",
+    "third_party/espressif__esp-tflite-micro/signal/src/overlap_add.cc": "9c071a58237a013ac500c71eac03a06251b0296dc2420859ac1881859c64c558",
+    "third_party/espressif__esp-tflite-micro/signal/src/log.h": "d5a78c072e54d27d3f41ff3161b466ada3e94a141f1a5f4247203a19636a5732",
+    "third_party/espressif__esp-tflite-micro/signal/src/filter_bank.h": "e78b12e9c6666251d3f1131ade5943804e1af0b2e2e37f1bcecc2fdcdf543e38",
+    "third_party/espressif__esp-tflite-micro/signal/src/rfft.h": "3cd1322dfef1aa42d882b45734e44b0699e84e1428b62ae1470cfd0d57019356",
+    "third_party/espressif__esp-tflite-micro/signal/src/rfft_float.cc": "b4f4c9fd5efea5b5844cc8aa7cc075150ff658ffd94c76e638188ad68bc160ab",
+    "third_party/espressif__esp-tflite-micro/signal/src/square_root_64.cc": "926fafdb05d086ce987972790401442472dc81a3779e1eb97f03bd2b25848e68",
+    "third_party/espressif__esp-tflite-micro/signal/src/energy.h": "14075973b85c640608d8a2a5f761618956ca2f7192c2f3bd42257d74b3f13d87",
+    "third_party/espressif__esp-tflite-micro/signal/src/msb_64.cc": "881036437530b10c975fede302e8c232cb5702d6bef8603adcdbffac9593987f",
+    "third_party/espressif__esp-tflite-micro/signal/src/pcan_argc_fixed.cc": "8e13e10a827193bd2269d0bf8af9ed4cda719eb2c417f48568b7b382be680c28",
+    "third_party/espressif__esp-tflite-micro/signal/src/irfft_float.cc": "b2774cd064e4c9639927fda0679120927567970fd6ad64688def16b723af8114",
+    "third_party/espressif__esp-tflite-micro/signal/src/filter_bank.cc": "874fca6b599cd5a5455e42ff20ab9116b4e20156c23426e554b37a08c0d81322",
+    "third_party/espressif__esp-tflite-micro/signal/src/pcan_argc_fixed.h": "be6a08d8184763b0549ced25a4474d6a7593cc41125fa084909c8f79398f9c99",
+    "third_party/espressif__esp-tflite-micro/signal/src/irfft.h": "eb8d27afbf25fd3c176ebd35679fa8ab837f22f2f677c8c6d3afcf7220facaf2",
+    "third_party/espressif__esp-tflite-micro/signal/src/filter_bank_square_root.cc": "9b77c408309bc4f532221608eaf2d2f2a541cc270d94234bd08d48c1251c88cf",
+    "third_party/espressif__esp-tflite-micro/signal/src/window.cc": "f2d62c272caa098b0c6fbe8cb8b0396561d71f9ff597f84f7be9bf108dc30c5e",
+    "third_party/espressif__esp-tflite-micro/signal/src/log.cc": "360fb728a0429bb326a8277b3490e2d01ef2feca5b45a9f3f3278cca97cbf2c3",
+    "third_party/espressif__esp-tflite-micro/signal/src/complex.h": "f05bda82c926da40a6de4af5d0f01d1eb29433cdd7f3c324e70525632008f55c",
+    "third_party/espressif__esp-tflite-micro/signal/src/fft_auto_scale.cc": "17d6d9c4b8851e69d9cb9a09951c8857c96532c9d134ab843b6b55d1cf6cbf42",
+    "third_party/espressif__esp-tflite-micro/signal/src/kiss_fft_wrappers/kiss_fft_int32.cc": "11eb1133d4ed8bff757c04ceed1e2b5eef821066c8eb1c0be862ad82550fa08e",
+    "third_party/espressif__esp-tflite-micro/signal/src/kiss_fft_wrappers/kiss_fft_int16.cc": "19df3dfb9617d185bc6b80c17fd2582b048b580652818701b4394a8df45fc223",
+    "third_party/espressif__esp-tflite-micro/signal/src/kiss_fft_wrappers/kiss_fft_int32.h": "e19fb2b9bba31abf3e138c6e4665c214ff4a267b56bf26d3f1119e5d82fc1110",
+    "third_party/espressif__esp-tflite-micro/signal/src/kiss_fft_wrappers/kiss_fft_int16.h": "2bd169bd16af4fefb6601473931754ebfa6a7a1202528d8107fc5f76efb54155",
+    "third_party/espressif__esp-tflite-micro/signal/src/kiss_fft_wrappers/kiss_fft_float.cc": "c44b206d48d958eac3ac006183eaf76b44a207a4a5ab2dd226f938de83b9ff4c",
+    "third_party/espressif__esp-tflite-micro/signal/src/kiss_fft_wrappers/kiss_fft_common.h": "598605bb5cbeedaa5a7ee89d35a6cbaba1e75850f66574693b6f28c3ea4c546a",
+    "third_party/espressif__esp-tflite-micro/signal/src/kiss_fft_wrappers/kiss_fft_float.h": "98d1eef988071244fe3b17d39d7fa3ec5b04655ac9bc29c84efa0d33895de566",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/fft_auto_scale_common.cc": "e3db605b86f59469fd9d107976bc5441e2066a555f0c60322e12d7aed085f824",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/pcan.cc": "d8e3b371b6e7a2325bee4bce500f065ea573a3eb50136f60e2a0330306c11742",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/fft_auto_scale_kernel.h": "86f2b749934aefc51213fa47108ae591dea8994d977ea259f274c21d073c82ad",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/stacker_flexbuffers_generated_data.h": "59a4985b1f308d232d41a04d7dbd784023c5d4720ed150888fdc7a8012deeeb2",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/filter_bank_log.cc": "621208deed929cd19e31430359210894a9279fd5e69e8b72005c16b07e4d0eeb",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/window_flexbuffers_generated_data.h": "22a19e3fe6f7ec03a6a5d9ca7382905aa3efa212d4e0ab7f661f7f6b9101b1cc",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/filter_bank_square_root.h": "0d087b0ae6bef1cb364868d4c1f23e9406c32d6caafd8c9089c5b1cbbf38939b",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/energy_flexbuffers_generated_data.h": "9bb8efba93e3eee107cc6fee4e490a8d16120329ea57aa0bdb7808701169ba17",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/overlap_add_flexbuffers_generated_data.h": "b74ca79024410460cd31697a9ca2d4e113bd8b4c1f8c891cf94b68c0658c2865",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/filter_bank_spectral_subtraction.cc": "633ffac868a10414da860c53379d1ef204c6b146c106e39923a3025ae5298d08",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/energy.cc": "b1c082cb813a33b22ffffc6bff1ca8964d95b3e6c81946c73882d0fe7e8e27b7",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/rfft.cc": "8fca464e946abf877243426597ffd59843d1682ce25c96a37d19f9cd209f8e73",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/delay.cc": "fb4a93546f08fc85061a35bfbae5b0b55fa97bac393567147869e7afb634a004",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/fft_flexbuffers_generated_data.h": "8d3be499ec1f5126790d0831a6281745dd7190fa0634d554f7a1a7b56364aa27",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/framer.cc": "6ce9f7b59530e5258f278c754c9a7add8f8d69ebd1a1aeb2c44999b6b4ae4c07",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/overlap_add.cc": "666c4ea8b71475aaefc85c690931e097183679ced0263db891de057c9f181b7c",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/stacker.cc": "3c09991a374b3381b068fac70d5d3f88a22dd6c81543297f27219a732ecd051a",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/rfft.h": "9b5a5ecd98a06cd8df6e8c43fd5fb8193781f274054253827eedd25abae9aa7f",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/filter_bank_flexbuffers_generated_data.h": "31d96515a2c4f32f7bba33e4724fa4f5c170c981b273a4f649bc46a901dab899",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/filter_bank_log_flexbuffers_generated_data.h": "c2eae242cc8d405c5159545aae0191a8733c16a588619e800cd4f124f7faf80a",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/fft_auto_scale_kernel.cc": "f0c4d93948e8c873be24c5ead1eba21b9863e94f38bb705c3f632e4ca00040b1",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/pcan_flexbuffers_generated_data.h": "f46b7a7ff6a930dffcb96ee1e4513bead687f35ed6136b25356a3039dc547505",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/irfft.cc": "0932d9628fef0ac9b886c2d2f5ce9bf3f220c6ca87c1a343eaa4a727d1ce88b3",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/filter_bank.cc": "157a783dca95f3428c172df82676d7bce2aa16fa5bfb8ec2ca241907cbfc9960",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/irfft.h": "3b2fddfb3b1b13af68a0fe1aea62ea74befaf04042b8222d62d9fb623d4f0c56",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/delay_flexbuffers_generated_data.h": "f58bec7422b619a303ee16af0b76041e0b8c1c7d513ab1b3d4d9ec3b04618002",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/filter_bank_square_root_common.cc": "bd7bcd68a085d48f7a767e08ae92813310c550a53abff25409e3d204c05d67ae",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/framer_flexbuffers_generated_data.h": "a66da554ebd7c33b55c395563e4921ef53608a9ed1776b6bfc5b472b17f14369",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/filter_bank_square_root.cc": "8c1fdfd0548587204fa3f063118662464227ae0fd6d10b49500f4b6bcad91a1e",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/filter_bank_spectral_subtraction_flexbuffers_generated_data.h": "c1062e71d7cd10dc0db8d592c82676f999f679f435875e5d3425da0d52f606e6",
+    "third_party/espressif__esp-tflite-micro/signal/micro/kernels/window.cc": "049c4cd58d713bb4f2e33200af668c08bb6be83d67a566945cc59fc011538690",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/context_util.h": "8a0460daddfc11f43df425bc9fbc39e2a28378b75d715d64f734bd0baaa3d633",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/portable_type_to_tflitetype.h": "d8e83c04d4f52e334650f4b8561eb87ffa962ce7a352c38c4a79b23a64fd967c",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/builtin_ops.h": "78ac84e3366abcc22be656580a3f4e5701902d30769e5749fda5079cce826e3d",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/builtin_op_data.h": "6bf637d5237e20749f3d23d0d334c7cbefd91487d85a20877ffeb1e7368d67a9",
+    "third_party/espressif__esp-tflite-micro/tensorflow/compiler/mlir/lite/schema/schema_utils.h": "4a34cf1e4ecdaa2f85d9f5abe2f384c8e0af16b4134e21d93d4fc067289ce483",
+    "third_party/espressif__esp-tflite-micro/tensorflow/compiler/mlir/lite/schema/schema_generated.h": "71cc56d88cef7b9562aee6e610084cf95935777ceed4c6361bb3b89be54c0125",
+    "third_party/espressif__esp-tflite-micro/tensorflow/compiler/mlir/lite/schema/schema_utils.cc": "f4ba979f14a1c1f18826de0d962fdd04d822c0e5481b14fa06366f90a5e1aaad",
+    "third_party/espressif__esp-tflite-micro/tensorflow/compiler/mlir/lite/core/api/error_reporter.cc": "e2f004443414d47d4ad2fdcf8841bc74f421aaf117a38a5e9b15483fb1c1ad71",
+    "third_party/espressif__esp-tflite-micro/tensorflow/compiler/mlir/lite/core/api/error_reporter.h": "ca143be02b335b888e307ce15acc8ba18f4d9f6a8c98aa5f8de243c46ca27241",
+    "third_party/espressif__esp-tflite-micro/tensorflow/compiler/mlir/lite/core/c/tflite_types.h": "11b64f1ec5e013e39953ffdae21a6cc139ba1ca500a302ebfff76df2681ea4b7",
+    "third_party/espressif__esp-tflite-micro/tensorflow/compiler/mlir/lite/core/c/builtin_op_data.h": "2542dd2b74dfd58c153414b17c3451660c64e3a47c1f9a4cc45d52751e9e1d62",
+    "third_party/espressif__esp-tflite-micro/tensorflow/compiler/mlir/lite/kernels/internal/compatibility_macros.h": "19dff082a7e26c2329592cdb93bcba03f293eb8118fb9eef874664531fe7c1db",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_interpreter.h": "c2b2bc1c033ae2c0494a2eb4718d880f683b08b1cc66620d4c824cfb7734c334",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/compatibility.h": "2c92f42f6ebe307eb64d6763ccf7fb3027456474f58bc9d135038c26888fb779",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_common.h": "991aef4cc22edbacd5ff44a2b5e249aded82d77eb836b10cedb836f67b4d23ed",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/hexdump.cc": "638f640b0726a9fb8c226aedea0a961883b98ce70029fcc2d292e323f6956aac",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/test_helpers.cc": "033febf08d335a7aa67e8192daa0fcc9ac8c259f50b5eb267759a87b14a7de43",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/mock_micro_graph.cc": "7a7230523c4c16c6bcfb6dec8dc15f0afd0956fc49570ecd99fbd701e51c24a5",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_utils.h": "ddcd04259ced520849d87e0c4f6f5b07536cc00fc8c3ec2aa03fa3dc249a928d",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/fake_micro_context.h": "2d3546bd324c68c1daec347a088a3f54cf3260da4ab36f56bdd0c23fb98e639a",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_allocation_info.cc": "b00da906247d2c8ac60db274eb26eb9100db45668eac0b88e05a97634f51b1f9",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_allocation_info.h": "faa6b8aebb776f8c08ae328129d0259df008788c36e0af9b00c8fccb90b4c8fc",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/mock_micro_graph.h": "fdc9a2982482ae72f7a3b47180e5ffc0fd0dcd486e0f03694ca92c6237c45d7d",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_op_resolver.cc": "c680feb7c20f15ec2dfea8ed8fb5677da9cae7acb94854d7ebac2be34029e6f1",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_arena_constants.h": "53cd468cb27ee265ac1be8a3c4ef8f8bc791cc7e46201cac2b9268d45ba2e530",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_mutable_op_resolver.h": "3cd603832b76dd5810130d4e59ffb266b71b403fb1ddd4c9dc154799059e99b7",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_profiler.cc": "4f840ad457405704d1c0bb895d8e0f098fef57e40846846b85372c38d8637997",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_context.cc": "bad0692d87d5e92271066e9be497223f2053e1d027deb89e44e38b2dc74508ef",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_resource_variable.cc": "0532167b340b2da4d609dcc4710001b5323895d6316d4a5e38d96251c886b9a6",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/test_helper_custom_ops.h": "7206abfb20dc79859de62fc0da5cc95d2f9c951bc68dcd4d118a6989b7a3b2d5",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/debug_log.h": "59276961c65a64bc18ab5b1e7fdfcc28726ea75605d7eb067ce6fbf7d8e50566",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/flatbuffer_utils.h": "18f624a7a083d44e0b11d41e2d08f02ca5af458cf175917c4487409aa5774175",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/debug_log.cc": "6ba2aa86d98ba5a39f416685ff34dd76ad25933142bd126c04165140f290b2bb",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/system_setup.cc": "3b845400e6243c403a45fa1488596cd972ece586b6a67a83b95710f529bd2a08",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/test_helper_custom_ops.cc": "3dd3d72e1ae3b3b8e66f8e8adca049792eac7507a64463881a884023a96cb175",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/hexdump_test.cc": "7ce8b3ea81320b9825225e86b839085c03f178da70a5209a09d4dd6989f4432c",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/recording_micro_allocator.h": "2f731cddd70716a0d74ccdd7d713f3929f8ca84aebe107653a5fad17cd7e1a4a",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/test_helpers.h": "de8a21f44bd48900e19af7514bd63d1b7b3fb25fa33aa6f08a0819a24f05c750",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_graph.h": "c24273aed1e7646a3f405b4cd4ea1e50ff44fb17209e8909612595ca5887df3e",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/compression.h": "cee6765b5280f1e70e8f2c89d3cb02134cd546a460e7fafe2b43d59fe1f5eac4",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_log.cc": "9fd5a69c07777ec6256f0fcb43f4dca984538c5ebf95d6533f62e3c538d43743",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_op_resolver.h": "f9b81da6599e5fbe70a34e3299339329cafbe103963b6643c9e0425eba94797b",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/recording_micro_allocator.cc": "26835f67819dea7397f883717fa09c7bc82029a72200ffe7bb448d48ad477b01",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_time.h": "59277a9bc49a18a8c1b13dec938b7748489e6da04aa1668b7a1735476c821563",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_log.h": "a6c3720f1242555d62db00d745f94c2b73dfdffa8e5ce1e9f13a8dd14df21c00",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/system_setup.h": "0a6a0ec5704aee3437fcbc21d23d608d37cb3b8d24abb522dcbcef8869ed0188",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_interpreter_graph.h": "40e2c5e8eebfeeb7d05d8b9872ad4dd4fa85e3c084030077f73bc8b57496d685",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_interpreter_context.cc": "c084acf0c424fffe5fb9786ae449a5e646f6bef45cf37337b0ac714081b9d832",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/static_vector.h": "20aca33250af35623d8def1f7bc4311be0c039e68f960e086a740dd09fe8c957",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_interpreter.cc": "57046af2230e224a1ccbe8be96e181dd165cce21fe6316797e4e35a3c5b749bd",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/span.h": "ea572e32d48786e0eea7e86b79332d9123b9a8aab5b70d6826f131c932da5db7",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/fake_micro_context.cc": "ca60f21d44e21e81529b0900cbd79e5c3038170ad141e01133775e7299d36c94",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_interpreter_graph.cc": "af3486a8661daf2e62c0833fadb49e5f864d47066d47fe08446ce52dbc22903b",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_profiler_interface.h": "43bb776f6a750aea95366d8a7b6844dd85f6f1d2b6ba89b1a2d41ea6290d1f43",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_time.cc": "998dfdd96d388a7386cf8f2f52f0362622b309e1e0ab42cf57640ab089c8d0c1",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_utils.cc": "83c678894e01fbdbe615e248dd970cd55efb7c08553d43430cfc309e7b61cdb5",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_interpreter_context.h": "911363dde1bb47b6d8da2c211cb4af9ec13d48d613159dfa68dcb9383530f05d",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_context.h": "618a8e3e5b547683357df68961362a86b89fe90ad368f1b274b0fec7201d1994",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_allocator.h": "3bc0566c0c519412a0cb8d68039392b696c50bcfe19e1de2d9ea6f4309b94177",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_resource_variable.h": "7752bd179ec27216cf83bf44cd3451d45f2af47e48f8b13275aec22d2028f05d",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_profiler.h": "ed42d07fc69e6ef38e46a25ccdaa5983697cf88200dbf71618176f830b37f0c6",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/memory_helpers.h": "a0a417fc555173f1a13594730a1b2ea4c4e0f45434750c5b0517ed4de4260b35",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/flatbuffer_utils.cc": "f0e173adbe926499b192b7792bdd8031a59630bf2b72a374ed7a70adbc56e5b4",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/recording_micro_interpreter.h": "91f9fdc4eea8f09131ad8755cac3f474d02d97c1e2de2b7b91bb605f060ed25f",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_allocator.cc": "e655ef3dd9afcd40461476e2d4cef042dab7adc1cc0d8c18cd732e952d5e7a74",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/memory_helpers.cc": "0d6073fb76aa043da24419d4baab2718896d0124e6b3ec8533361be803ba764b",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/hexdump.h": "6ab57d7d11c45e39ccec191c22adc9f570fd849f7bfd9ca36d14df1d8b6c01d7",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/kernel_util.h": "7cb9f91308867dc6c5aed51be346d75873d80d31f38390b02220fbb21e045ea5",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/kernel_util.cc": "fe1393cf81120c0e634de5bf1a2ee92ff35c69af979b28bce1a7c8dcd63506ac",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/op_macros.h": "04aa91f5e338db51cba0a9fd84722ee806ed41fe4d64455bfa44bf3a0bd02fd1",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/padding.h": "1fbc93f18980333a2d9af03a8155465b22e7904c9350cf4646c554e781979a01",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/core/macros.h": "717422e00ad7c0ab1a95d0a38fdd61ca8d85d9fc6ed7a7cf9c681fbc18eaf608",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/schema/schema_utils.h": "062abb9add85a619c234e5c80be51e146ac4ff2824fdee3699470c6e36fffff6",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/schema/schema_generated.h": "7fdfcf4a3d6622962c4bc2988a9f3856625784d2d728c450f618816203124458",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/c/c_api_types.h": "db931536bba4487086d7e975f6c6d04d8b32e0d0c5253895c079a5030f99af92",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/c/builtin_op_data.h": "02a7bafd45e95da58ac9deeb592d8b6e099bfc572e943578ca01f4958a8c29ec",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/c/common.h": "d4f74e60f635753bf5dc8ea1200cc5b2a196c8b6004372b2106a4a3f518d18ac",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/core/api/tensor_utils.h": "24b250af3bd66fc5efbf1b51c49832ad542a3e375aaab2318d17569216851699",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/core/api/tensor_utils.cc": "f2db09878112531964e7acd0db39d81040fb0b6b4b8369ac91fb7bd58744ce96",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/core/api/error_reporter.h": "c97ad217292fd8668ca0cc201e286c9474fba0a9a3ee218cae15683a4dd28d08",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/core/api/flatbuffer_conversions.cc": "0e9aa0133a731bb8daf67ff0450061a3531594022e103baab3205ebddda038a4",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/core/api/flatbuffer_conversions.h": "1b6e5aaadda3f9d35b4a1cce07f395d3c7c4975da44a185ee811447426f96830",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/core/c/c_api_types.h": "50440d52b23c6a42e65a6eb7aae1d26a09287f389e52af853144c598817f6e78",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/core/c/common.cc": "9ce1be7f05b78c45f1dcb846f0dfe483380f4cfb2fa81e5afbac8b9c747edf08",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/core/c/builtin_op_data.h": "aa71ae437dbe41c818c90e50068796267312e6aeeded00cb57b6c76e54f3107d",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/core/c/common.h": "21ac2ebaeb10d96248509f15aaa15b9488b206b5ba2658dda94ad8b1c235e967",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/compatibility.h": "2e6c675e7402525d79aef5108b47b03397ead0e57921c9cb337f150916b9725d",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/portable_tensor.h": "94043a6fb8126a69219b1dbb54676b57455760fbce37f4af6571767b1fa0e268",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/min.h": "05843cd4f40199379559fdb516a50009341c7377fc805f489427ae003f353926",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/types.h": "3dea0d8fe3f6b2a0def4ff54e9bd975d9f27d5aa065641466506196d8b287446",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/tensor_utils.cc": "100455b83a76176ede92dd3f7ffad6b64630d50ea28adf32e35778d15547e753",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/common.cc": "ba5308bf76383d600d033c948fe0659710939e6f1f15a800b5413e5fc822ddfa",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/portable_tensor_utils.cc": "bfa09db6110e8c6e6e47abe6347f059b00c166c296eebfdc19d7bf0010772e6b",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/cppmath.h": "94f13d13ba65fb93d3300921c6bbbd7d61680800b0dcf7939726eb3a3eb3a773",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/quantization_util.h": "bc5c6f6dbd03145459e25069adc4c628d5a9ad3e20b15098fa123fe8fa79c5b7",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/portable_tensor_utils.h": "6265c4a5f92eb955eee03fbc642cc2df842a25629b1fc2ad171384273d3f3353",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/common.h": "d6c5a9492bdc6c50d5f0997c411ad99e82b8e03898c6ebbe3daa138ef0106701",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/max.h": "45b05815f488cce9d077089d3e67b63fbf54d87b5574f540160cf0334674eab5",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/strided_slice_logic.h": "3d2bbd34e818cda41fd21111cb0cdd01bb49cc9bca3de135f5b5b5b60b9bffa4",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/tensor_ctypes.h": "fa912130ecb10e28ea79315a26c4abdf051c3aeffd4fe5dce3728612d2c17279",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/tensor_ctypes.cc": "96c56627ce7f799f87f08d98ddb3c69ab9e52e8e8ff490351a9c8dbe5bd3601b",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/runtime_shape.cc": "751fe39569b989c9db5435e34764c7a65ba47a5c574dd541f8f9e2e1594a2095",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/runtime_shape.h": "29d6246a880577a877e580a2d325e1bb10aa674095ae39cc8e7061421ec60516",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/quantization_util.cc": "22e46f15663437c407298f5230545600faa2f6b2f1b46488e20c97ff3a5c96f9",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/optimized/neon_check.h": "b093a98868485ec76d9047d73a2ee66382d9e62ffe9606da1ddfc651969808c3",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/softmax.h": "12400e6d843c6ee635fb90e3a65903e610e017345163d8e9bdd88fa4ca844740",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/quantize.h": "d0df535cd98d7ab448a321d9dd2574ba705313b535fd66704829a8106e677304",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/dequantize.h": "53bda5d519ed9a5fccf6f0e8927fdaa1212c5ecc25e8ee13e98ab3ac56278f60",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/portable_tensor_utils_impl.h": "6672e7756ca364f7b819d4b3175227c2007665364f69a1579c5b56bc04554d70",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/strided_slice.h": "1e9d10b2cdb49988af5dc159027d1b5032e778cba0ccf2815ee413dc4c31f02f",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/floor_div.h": "36dfada9c7a7a3635656cb483d8134e73f1107cd076f719d4d8a74d90dff4f15",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/fill.h": "5433d240e06fadff348ff25fbe5e7bd463f399aae4d27df9445807e24abf2c4f",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/requantize.h": "9f0951a6ef8e225fc6de1e00b0cdb981a65993627a40912ff7d4060e84d2b30e",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/leaky_relu.h": "73262caa611fce813c4e1d21166580ec81261fafbcbc539ba35007381e355e88",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/floor_mod.h": "b29af1e7c4dc641838e1ee2531e5bc41710c8395497ffb6262b9d350426e71c0",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/logistic.h": "f36cfb31bc3ff13a6a6502d4ea3f6a9b186e06b38b4a305b8f2fafa843c1556a",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/fully_connected.h": "9faa1e5bcf2897044d04bde5f26cabbaf9914d13035373e2a784afdda4ab0626",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/broadcast_args.h": "e1346afacdd417cdf714ea674710a92c6e77db8dc09fcd6f6ef2362ac96bd73c",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/prelu.h": "de713b2730f7e237bfcc9aaa4a3ea672c63acdd1a20cc7f8995918bac42db14d",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/round.h": "7e8716665b35a4e6e52d8ef4f8230fac19a2f6a10cc282ddea1e31734c57dd78",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/sub.h": "34cab3d7812c6d6f5e898655c6b66287d9a6680998785d1a43742d26531f0ccf",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/add_n.h": "16fde8f031580ac353f663f1b3977b1e25e863775d29484d6f7fc5c546aa0428",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/slice.h": "4e6e772600ea8bd0a65ed4450ca946ae299d4f6924eccfb83c8f35917d5ab7b7",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/pad.h": "ba3f0f44df77393e459bd2bde78baaeefa0af03b6cbeffa67e09d8761d9e2606",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/add.h": "9e7d747c9ccd7d55458e80c3ca43351c6eaec713c23c24948422ef939f30a128",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/l2normalization.h": "f3d32808513b02286231e3c90d2c9fdaeb8f08334c891eb159a90875ad1b22e8",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/portable_tensor_utils.cc": "651d08d457d1f7faf121487f0e128ea4246bfb879d7e61577e733e0588144d61",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/log_softmax.h": "dca1dcebc492f4a822a699f8bffb9e468c86166975346cd5e970d22666a7ce9f",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/arg_min_max.h": "3667d988c1ab8a34701747db0ac5dac387d5e445df7f2091dffc0211fd101bf0",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/broadcast_to.h": "60c8d2c2e516a37db8f6ba9123e1eabccd3ee22578f6eac904276a8c1eb87579",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/ceil.h": "b9e5000c8d981df9e0556168dfd6bfe4ddd49bb94f57e2b1550c7d089feac89c",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/hard_swish.h": "2aaaaa61215bf61f28fb24f8e2654ad7bb4f6d12e4381cec38ba4435be136161",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/resize_nearest_neighbor.h": "08dd8e22912fc10eed2839e79c3f3644732f3cc565e4954af69995bfaf2beb4e",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/concatenation.h": "7358db2cfbc3d3a7272ba640d7ecdd10683115758b1c4ee26f34ccb1eda2a6bc",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/depthwiseconv_uint8.h": "b34087aac91150e83ea7210491044723b6e67e81dbbfbdeb7e8c7d2ddde74fa6",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/tanh.h": "701a0f290dcfab846b80d51c19a4e96247f11993e8f84e5208adc6a81316e9b3",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/lstm_cell.h": "1e335580c1565863b7ff1ca51e1a6f80db56cec27cc74578237d3ee8f2171897",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/space_to_batch_nd.h": "e1165835b2ac099648b48c2a6f42e396b1301bf8558b242ec390456c21d57de6",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/mul.h": "526b639368759dd5eab5594f75408fa6d03ac07236319cd1b27ca54f1c3c0e3f",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/portable_tensor_utils.h": "9650c31400d8361daf734d219aa0dd1116ef5b2ebd2be9016819cf068abe1b20",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/elu.h": "b3e58d35af6bc256c03677e2990f50a770c483fb0adceeb60d5e4a7cd50fa740",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/cumsum.h": "bf26ad269f8c2ce9439ee0b67ca8efda7bee442a4d80261de95f94e89984e54f",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/reduce.h": "15163a07de448c530e317a63935e987f25403326a13e7d84d67c95cda58f2927",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/depthwiseconv_float.h": "6883cb0552169c04bf292ae179b6b60f2b41019766525d33894ea8439e3959f6",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/process_broadcast_shapes.h": "716d8c3e4d77d23fba51e0252b60f6abe92a7c8d6fe15ec59f2bfc66839385d6",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/space_to_depth.h": "da7d22156f07df81323910ce671aef6e368d38ed106628ae88920f8d30437c99",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/batch_to_space_nd.h": "6fb199c6b0caaff05a7b65b1c7ee406e42b9a52b5afb204bef4e581c921940b0",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/maximum_minimum.h": "bb06a47401f6728c776f4cc2fb4d2a722df3f123e19141d00326c4257bbf3dc5",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/exp.h": "f167b366a0fa1eedfcb8a21ee276a8b2b997e5dea522a98816669bfe0a6fb077",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/pooling.h": "615659a7a9b35846fabcead8297b2979a296860c7e78d0995ae150782c80ad33",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/neg.h": "fd040a5a028cf89902c30ed53e170dc00b60c07ea29515b324f9c44698927989",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/comparisons.h": "e4508905984d7fdd941a1f5ce64b8ccfdb128bf9789527a599287e2460301d2d",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/transpose_conv.h": "3d54a1a3c918f16fc699f1202aab0f4b4a4b7dc01ebfa761e1ea5301927e081c",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/resize_bilinear.h": "6983f6ce0bdb59d3d51cc4dd7671f312f4219fa20ea83fcb14f059b8fd42cebc",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/batch_matmul.h": "e85cf847b8ed1d67a3408e414f94f32a0df68ed1b252c0e259adc3b750c8528f",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/comparisons.cc": "6dd907edd4f01e27ddc62d0114d7bc94d0397f016068d3f0c54eda74fd9124ca",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/transpose.h": "7cef1fbf8b013ad4243b3ba0afebe54b4593e2a4a41eeba24a4c7a6e0375d437",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/depth_to_space.h": "adeca61ced6b481d3099756b5a14613cf284c06dd2c6a68cf60ae71e775f49ed",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/conv.h": "e6f41ccd262ed10d001a58beb2125284c8b32cd10385d3689c6397783698174f",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/floor.h": "86c188449b1162b07b4507f6a474b0a3866d438ff3030bf38aec1439b8826157",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/binary_function.h": "75a045f8b1dffb3e95524f9bcd3f90caeb750bb0031f55ad74a86c738d95494c",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/div.h": "66d9af231a783c49c52504f1e08c27baaed44ede100a636aaeb63e256d7e3dd4",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/select.h": "f9686beabd7f3a6f0a6d8226833cca51b14f46f61e07603a8eb1ab4ccf9c1be1",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h": "98d0e11ff47bb32e3485f3f891be77cf733f6a47d52b6fc236d437fc581a069c",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/logistic.h": "e30dacc18e0a5dfa880bf5dc2581916df07f18735c5c9f766b7ead5ce0434365",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/fully_connected.h": "5df0c0505ef4741f3bad1c8eb003226ed26234c5cfa8091ec9a21c73ba7223de",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/add.h": "2ae61fab5fdb874271e7d3d2bf03d7c11c5903270a7e4abf13b44d96e12e8dd8",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/l2normalization.h": "34ffc000cd5f61acce4245352d5540da1f73a7768002ac92bd6b82465b76f817",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/tanh.h": "2ecd3a564bcdc5d1e2ad148d4a977117d75cc5e27fa131a182f7a8c22d510480",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/mul.h": "eb47e9375383e79b2cb79ca333cb86a2856b6444042b6ad91afa7feaa2ca660f",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/mean.h": "6ff08c6080ea4e15f732a370ede81101702f4cd7b6281590ca38a57cfb64a282",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/pooling.h": "4b09724e3d628ffa579efeb88624a7962ffd895d7d8ce16a4e1f65f18ac74bca",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/transpose_conv.h": "5b13e593e319a96eb1a04aabd33812c813f776ef66722ef70d2ac84ccd9a2643",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/integer_ops/conv.h": "370f80020b9aa44e61bb3a0a0d081c035432f99aaf1cb66c6c3d072700a4bec8",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/elu.cc": "7d5faecdcd47966318acf0ab2f64bf366a5bc6223e214bacb6ca9172c2f98f0c",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/concatenation.cc": "04c0f87fce4ca84cd076a5f1541a97b6b313fc92564d628a49784d5564f60d32",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/softmax.h": "c00dc5b3ee396a420342c72b5f87acb7169b0943393c063c451941e631917610",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/quantize.h": "bf637576e58a579f4828f42556f0d426a15203bbb722aa8e94977b4ca4844662",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/dequantize.h": "0c0ad81718a89e69a80b68a9ccc435319f03f9af2182c907cfc23bac06e58f55",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/squeeze.cc": "37ce2989d3c1757c64366ff1c44b6b500141dca5f525de632dea914ba1b8a4e0",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/ethosu.h": "90a9ae49a5123ab3572bd9c3a7b59b55bbf0094c51768701f20ef3289e17bdba",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/read_variable.cc": "94900fe756eaca9fb934be75ca26ca22190f91aca4b1f03b705ad2599547ef06",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/svdf_common.cc": "445992fb1302798eac5c4b2afeabd037cccca1f077dd65d3918574167ef0c0b3",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/batch_to_space_nd.cc": "4d7a95b7c1d3f98e74f236336600b9eca6971143879e2f5923c2a45dc66dddd0",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/strided_slice.h": "4c906a751bb82201dad651e2a7b4dc124adfd2e5ba2738949408a95dc2bff0dd",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/depthwise_conv.h": "6be441ffa9ce1377a3c461dcddbd179c3221ad399468801339da2e1de1a6c8c8",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/kernel_runner.h": "7efd746dcf46900ae02c5ebcfbde625de10317e98159406c04c87461c6404998",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/select.cc": "0282c58ca4b8198b522b20c493400b495c31af97a4f23c2b6385b4f44d2e55f3",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/fully_connected_common.cc": "388bf81053aac4ce6d031e4995631deebeda020b3e02a9a80351074ebcfa960d",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/broadcast_to.cc": "0f6a7d95bf629820d5c01642fbc90945ec56faa58b3b41169567ce0cf662a34d",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/cumsum.cc": "67727893f1a42f333a1515c93731f1f6c14db6b404e65b63c28717bc31babd04",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/conv.cc": "a7e43fd79f9f6628c58eb3f4d44b3e051b2b0a482b6362bcd09c8761deeec4bd",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/leaky_relu_common.cc": "c36f244624bb7fa90ffb2052152a4d71c6f20a37f37520346c92ef5e7eae906e",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/depthwise_conv.cc": "b809cf4816b1d9deed9b856c14e5080fbbfbd3935ca37721d2d1cc4d7597dc0d",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/l2_pool_2d.cc": "8c318837264c50a4b62f9ef84671ac660e0905d689150c15855d7aeb29ec0bd1",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/depthwise_conv_common.cc": "4156f5c33a9be5882091f03ec0d656b73a8617fb84bcc0bbe54dc0138c15650c",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/floor_mod.cc": "d4c2ec884eaea92a99228cce7b11162f6b31a58b368d690c959e178b89a2fa7a",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/circular_buffer.h": "a01b46a3b9127df8121d5ab15357c00e9b137d2b7f3632ec6174451a76c3496a",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/if.cc": "4dffb2c59655d7c87dbc0b2f6fe5e1b33db9e869807856a828b06f3c84ac2efa",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/exp.cc": "1a16a19a8a5ecbd05acc5e5d10e5c8464db36a5f22e16739331cbef4357ea456",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/mul_common.cc": "db4422f231914adcb96984154d62c3b39964bad6d26b4ad4deb53e20c7175a55",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/space_to_batch_nd.cc": "9e0b1d4a00605d1522c252ce7b8eedc7de97e25e9166d15eb59045fc90e17b06",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/unidirectional_sequence_lstm.h": "2d241eeb696f14af107d3f665df96770aadd6a4caf11c366374d8dccb0cc2b8a",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/leaky_relu.h": "3e11bc9fd2f47dc62129f521065ab48c070ed4bf91de63fc23870f64c4111573",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/circular_buffer_flexbuffers_generated_data.h": "f5d3fda40b4837e18c07b638148f9427c2c3cbb6a42312a91b123a62479479c8",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/strided_slice_common.cc": "807e3b3c03ddba6227dbe59c72c74d694ab85abd9f19e852d9586c281d2e82a8",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/softmax.cc": "be647853491f05370e6d02ea78b417443f97161e3d428efd5f541fefe9acf3d8",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/var_handle.cc": "9d0eddb398bf91d9da3b5b384cd6bb188848cdf817c4c63d87ad011cc3465fe6",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/logistic.h": "0f6a8d57fdd4861711fd574a04631259d624442c5ba8f2d23505bf734d828a79",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/round.cc": "8019f638e8cfc8bcc4b75f98b0a3c86b6848f9ea753bc987a181e47082987520",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/kernel_util.h": "0787d546ccc8b3ce49c1464df91c82e998e82ea1f03abd805971f26c346170b3",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/conv_common.cc": "8756a28794baf1ed67d2b88f080e5f22318e95d6bfcac10984f8fb3c96a048be",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/strided_slice.cc": "288af83930d5776013cc394f39ff50e6173394d08ab077dc0d7e442ae024f637",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/fully_connected.h": "b1eb084cb38473b10983fb5f7cdd9b685390ca8c703a64c4008b2cb83b33a393",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/prelu.cc": "d777005044abf06c47f0d2e27f9971e0f612d2f85954bae5db51d37cce41d112",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/unidirectional_sequence_lstm.cc": "578a562508694e0b53de48eb27129a6330449860ed868ea7e8352e3152620771",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/split.cc": "dcd81ab267e19193568c359a023a7d0155722e00c7c65719bf92eb35650ff888",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/svdf.h": "30aa2999c4387f6407582dacfa076f5e39be53f397fa9f9e0d62b678fa9f91f2",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/transpose.cc": "86a7cbf8d7f5e1dd262e0a1e21719dda287b73eaa79236579c356a501ccffd6b",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/assign_variable.cc": "0fe59e385e07763b568996cd607a30e5ca4be199b43b685301f2b745af9f7297",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/kernel_util.cc": "623e7882a0911c65dd7389bf3484972d52b17626c74471e46c29046bcc12c7fa",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/expand_dims.cc": "16af06d9a8fd39cc9f45fe6cc18e4f2adb4f40bb26f847ea96a6c50ece5c7916",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/prelu.h": "5d01350bd63f03f433b1829c50adfa09ccad116ffaa36ae03a0251285c034afd",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/dequantize_common.cc": "8723c453ab365ea1ca93792a205008d491f617971069533dfad8b9d830409e07",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/sub.h": "11e069fbba7952d5c39fe26c79e067c917a94e0a2ad458c38b597a7e938ad4e9",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/transpose_conv.cc": "791119cae0a4344856fc7c206e5fe2ef3ac38b0312578bbb94769ed4d142911d",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/while.cc": "b6f28699d5f6051f5790118c4e312baf096cb2d569d7e695264bce84b2c720e6",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/fully_connected.cc": "d3aecaca3a30e76c0fd3aa9319b32f6896d20468d74260093d7ed73429a3d0bb",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/pad.cc": "1a99fad0facde3a6a5c077ba2145570b792d02acf0177af0e70c5b1ff22eaa02",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/pad.h": "d4e7893a9cc54b1979c0ac634bbbd9a499a5d4cc9229b2dbc7bf1d299ae77059",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/lstm_eval.h": "0348a4d3337d62b1a1ee89d6dff98e7abcc69ccd43e6695795a2f7493e5c36dc",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/add.h": "dbc778ebf4cd7121a2c220c84f5a57c95110f35059e8ccd3baa91cb514f1960f",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/sub_common.cc": "155ad1f60cd369eb6b90103a1e569e072dcdfa76219e5935717064ab10797eae",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/mul.cc": "5694f6bb766231846391aeb9ad81f8dfb112ca8bd18283ef208b6dfa6ed31b59",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/dequantize.cc": "582be38df40796292f41dd78eafc68a276f8ab9a1886e320466004b031e97dc1",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/resize_nearest_neighbor.cc": "0e4ff3b71ffd00527ef0d7e38bd2a6fac63655e01ce2b10234950156eb16f644",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/unpack.cc": "5f228dbb05a7e1c3a4bf66c9498dca1fa6ee481d53b28241f17425fc8aa8261f",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/arg_min_max.cc": "7323d79702d9ad6e2a4f143b96592a1da2d917e953fa203945274ba398f4a8fc",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/activation_utils.h": "90980ea75cb02800fe547f035d31b522f91f9c05cada10d1e5c9b66e4dd688fa",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/shape.cc": "071258134ea98426827adbcb30bc83e583e9b9d3802fca1ae8cd2daefbcfea95",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/hard_swish.h": "655d46de260712aa96aaab3cf03cbed5036387648a5d1605bc3ee40df2ad7991",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/gather_nd.cc": "b7a5aa983f16def67c98048caa171cf182d07e0d731d1d7d556e95cb6748d880",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/lstm_shared.h": "34e09ba7e3e51f28561951bd0fd50cfbaf1622c30cb7a7fa331d9599a44714c2",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/circular_buffer.cc": "830e4b1966fb077974130986fd748c2671148b2a10e47fb3e80be5a9eaeda908",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/decompress_common.cc": "b1a869f8490c46f57550fa89a1c07e913143bb46f0293ebcc473917573c33ed7",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/prelu_common.cc": "0c823160311cac4eb6672d6530ea81b7e223a42009760ec1e05991d1013b2c21",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/sub.cc": "21c058be7b947832ad94baa8b5cfca12a390c5d1feac7aa99f15892a509482ee",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/activations_common.cc": "6bb9df2a07587908023ab9f674b6873250999c2f33c35b777f48b50aa5b88aea",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/reshape.cc": "b5a1748cb85ca364e95c27e94f2302fbf8fb9755dc9b5ba6493db4202250cc79",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/zeros_like.cc": "d3c44c69fff70a0ef9900e96e19f044f358bfe4bb8bbbf5053c9654ba3be4333",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/depth_to_space.cc": "7bcab14d47e34a475e9a3692ebffb09a8f25410d70ded94be31d67b8dfebceb3",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/mul.h": "f613b7f5fee7edfcb9a7bd0e612bee77a482aeee1f234bcd9ba90f18a2e6d1ed",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/activations.cc": "e0caa1bf0d5db2ed0d632cbf7a6948dc053d97aefdc8b210021a224aaa2f8970",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/detection_postprocess.cc": "1fb1e8ced51859737d3b4311a14bcd793d0a7af9fbfd69aeb6c8492c3806b9ea",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/micro_tensor_utils.h": "3b8d67700f8c0b694df285483e87019cf065321f56cc254c03d1643b42ddd81c",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/conv_test.h": "47484f3628f9f0f3ecd7061e22acab35dfb48e312b8b23c2af35365c15878c39",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/logistic.cc": "7641b4365feee8955a84b3e14a7809bcefe2cc54d591ccbb3f4eb2fae3a7b792",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/reshape.h": "9c0fb060ed3cdee42f0bf573ec1f223c8dda03c3fea21aa86d4160baa4df1bcb",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/detection_postprocess_flexbuffers_generated_data.h": "d1b66be0888fc913027a59885a05da6bc782e3010e0b940f7e3ff5b7a03ed983",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/reduce_common.cc": "8878f6cd7e7072db3d0b1a8479f2fa4fc87de00bea3e1298b6dbd975da320a33",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/softmax_common.cc": "8c1e1f78b1e5b00553d6634e210e04073f8ab323c378a614bb54ed88375da353",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/decompress.h": "299175c8f591e92dffcec0585b344d606b1b93c75bab7b316d529da93f6de21c",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/reduce.h": "60b3caaaa4edb909faf327d14cfc170286c717200a8473e11871932b3a8ac192",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/call_once.cc": "27a9e4a5a654f4e71a28512f4b1065fc6d1f0a60170b5fd1ea16af163dd2805f",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/squared_difference.cc": "22f8ae6e5906740d8ca119a35a643b4828f5e3a0f24c3d891e72646682f48e84",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/quantize_common.cc": "3f40db7c25a97b8df306bc703bd8e80eec5c5f33d543e00add15cdcc3918f275",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/ceil.cc": "852b3fe90c71aa0bfb74b0a44213b77747880a138bceffc7d5b70586cfc9090b",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/add_n.cc": "a3694b4ecc5b552ab7b5d28aafea6a2632aeb7e0a44002d00b34f66aded8f0b0",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/hard_swish.cc": "0a0df788fa0277ffee5fb1931d65a532d6fcf848db3c1ee073b68d16689c65c6",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/add_common.cc": "afd427c7498f0bf6688d7e170eb7184bd27fb87ceca42d0695cc1408a17025cf",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/lstm_eval.cc": "13947c03abae9d2dedfbb11163f18dc4a26b4244cf44f56dac3b173c7fd978ce",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/elementwise.cc": "4ddd2431dddc3e75cb4a12bf5bb7465c6766c983cb74de3ae3a1629e44df826c",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/pooling.cc": "327f4f757c7c8862c75c8fdf9ee8113251304e45f7ecd2227e2348d857885cce",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/floor.cc": "09cc5fb9e6cb10ae0603cdd9e0b541ddfe06dc30d8dd49d7698547ef78863ffa",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/log_softmax.cc": "35a03f44130687758a890bdb1a775f8df17584d2c5a1943e6a454429a9c4cc1c",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/cast.cc": "388e7b6e978b35355e2696b40470d0ef0d3160495850fde720d8564c038bcc2e",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/logical.h": "622361b68000ac49b16d12a66b0d5ebb55302ccaaf250bd22ba113c40a4586a1",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/svdf.cc": "0a40e1293962666d5d0417cfbb215845bff3f3364a392f444b309aeac3c6c5e4",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/pooling.h": "5ee987e57eeb0e6d362cac0bedbb775236ef74425b8f9f39dc6a2267d97b7b5a",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/gather.cc": "156800ee9c0bce283defae15d51a7207dc0b51134e3f9182fbcd2047cd8969c8",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/circular_buffer_common.cc": "3cec9cd2274eb76404cc3dbbbec9653cf177df4d1bd86e2264eb2328c5b5feb2",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/micro_tensor_utils.cc": "df5badaab644dfd0ff5adae2f4412fa8463be2fbdd359da77b536e5c4db2fd3d",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/mirror_pad.cc": "789434b43123568a2732cb6964e5bd989204ffff8d3b0ea2b6796f2f16824ed1",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/broadcast_args.cc": "b1d90fa4b0bcfacd2dad719228ff7ec783e913c7a72cfc79a0409edacaa44d0d",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/maximum_minimum.cc": "edcb830e4f4d31eaee2f71e170988af4ffef6dc11e48a0f445c430acc91020e7",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/ethosu.cc": "d9a837807c1c4018c845ae1ed1306ef8d3182eecb598203c38a72c57ef94155a",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/pack.cc": "44fa418b9965d8e820bc264dec05a99ba84b90829c42868863b4d9e5d38da458",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/transpose_conv.h": "e3ae3d0c77883f8c012f03e55e2b0a4e2e1ffa5b709dc80135db092b279f8d50",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/split_v.cc": "47b1a426045ff55a6b4b2613390c0deffd8b12a74db15de04cde350f8edd247f",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/activations.h": "a87834fc6d70ce2099e50b993bed82aebd26a8422c6ff5bd7e0c822cd37f1b7a",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/batch_matmul.cc": "e04734193918afc98988bbe44e1002f6e85f4fcc7e19388d2e32bb8adf498346",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/logistic_common.cc": "86c5ac5eff6aebbe934fe382115ede620033c6264336fe61dc71da8ccb81f707",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/slice.cc": "cdbf35fde43b19d191911067ef2732fff9d9f68461086a641688bc5d1c081e01",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/fill.cc": "031daba4dfbea812a0a33018ff6ae46ab1402ad03a5e2bba8d3ae05ca716ce6e",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/batch_matmul.h": "94dd311f119318c609476a3d0ce52dd68fb693b9c57c9f5e452b2fcd9ed2a8b7",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/space_to_depth.cc": "614f840cf43a7dd11001fd035be64bf47786b2655140d0b92c97300d04fd73b9",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/leaky_relu.cc": "5f06c947031cf2117075c43b5fd8c96bc32a1980107cce5739e9dccae1b9c822",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/comparisons.cc": "d451476250b618f51525deadeb2fce8c5b5f531c82b9f4117f6f37bd824f8a9b",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/lstm_eval_common.cc": "2d96f09c035f289b747d73aaa3074259a4293fd88c6368d800a82271d6ae5cd8",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/reduce.cc": "5f9f063329c1581f7934f65edeb6efd80a843575cb539a41a7f4374034369f7f",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/quantize.cc": "aaa8994e063c701fea205d34cb8de13845b7cfeee9b172ad541d71f0a5d5b175",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/div.cc": "b80039c51ba22d1c2e476a263eadc08cfdb17856f0d7bc37b9766e840b13a582",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/conv.h": "1da8f409eea4a9233d7f1785ae37d22de040c6f5c16040ca3d0c4a7ba1f26454",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/lstm_eval_test.h": "4b813f307891b6565db06a39e2b744de7644e47573b3d065469dcb0595d82b71",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/logical.cc": "f3f04290c1803421244736720fac6392525634827d56474b7b7e476bd89c2aca",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/embedding_lookup.cc": "93c34b4d3618ecfefcfd1b1af3d76ab2fa0f274067af951647d0711c19999b0e",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/tanh.cc": "45772e6c76cb64bb2f603e45a179de5cec92c20a0c85753ffecbc80f872152d8",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/logical_common.cc": "deb79df1d96e36b7cf68031c09f5dd97e161d89db715f24bc2915a4b344d7b4e",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/l2norm.cc": "2cb7b4aff68cd96a1d556cc214c73eb05352646be07e63c67588f080c3ea0702",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/resize_bilinear.cc": "fbe47917822f28f737f8fe1c06c18158d7acb5bb12eff87686657673ceed4ad0",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/pooling_common.cc": "56276e7a7193899eb49912466e33682cf165dde758447d1ca8524e823804a4b2",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/neg.cc": "1b6674d687e740eaedeb6d375ee5a25420482b99075143428d116d30a4236f05",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/micro_ops.h": "d04d4815396caa8149a7a8c656f06d998b3427c8c9c4337f7bcb3c8a2f5eba8a",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/reshape_common.cc": "9d663e8c6aa907b925272f05b07ed985620693d5954436070d0160f8a8bb3381",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/hard_swish_common.cc": "70e3bc6b7da0df957f8229ba26285061932467385ad605d0d247609dbc790060",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/kernel_runner.cc": "d4754b8d2e094743890e91e937023909c602e1597f907ad1edb28a663c8d23a9",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/decompress.cc": "b3fce21053f67ffab8ac4bcdf1dad128a50529cbee499e2d97de686688f89856",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/add.cc": "b87ae4e629a1efbaa8aaf71631a6149b41979f368613da4c2b48c70d95c9f764",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/floor_div.cc": "413226b60372d9732cc92564289f58e48b0334fb1a10984f00e9604d072ce922",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/tflite_bridge/flatbuffer_conversions_bridge.h": "7091dc11186e3263e3f7f7c92ba7a10ffca9fa7e9375c2408529433041c72d3b",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/tflite_bridge/micro_error_reporter.h": "d415f2c42af7a664f7d81ca543d81aa85cec120bcbb9f8119a451a891f36edb6",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/tflite_bridge/micro_error_reporter.cc": "9d49da87fb31d4011c962472d47a7095d6b147b713a4c1d12cdc5738d904da66",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/tflite_bridge/flatbuffer_conversions_bridge.cc": "cf9ac3595c0da260746ea7a7d152f3e3904c68f13666361ad35660b0b4fe31bb",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/testing/micro_test.h": "f7435a32751795e67b74de781a2600b54a0b0f4acbb43eda934cd314526ebcbb",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/arena_allocator/non_persistent_arena_buffer_allocator.cc": "b7874e9c5b9c291e75709203036c0a1c7711033d2c89d34b93967a1ef59bc929",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/arena_allocator/single_arena_buffer_allocator.h": "19642bf29da1f8e480e0708f38fcf65f4a369d044e7a2f4df35b15bf182afd83",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/arena_allocator/non_persistent_arena_buffer_allocator.h": "3c553ab1f925a25dd4565dbd2061be8ea74c738636cf2dc019d2d596e4453375",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/arena_allocator/persistent_arena_buffer_allocator.h": "3cbaf7d8532716a59968ba65af6ed3fda2d56e5c127853981a3a1ee5ddb83395",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/arena_allocator/recording_single_arena_buffer_allocator.cc": "318e7ab492d81559daa812f2899720b8aeb830f36a649dc5d5be62a3865bb978",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/arena_allocator/persistent_arena_buffer_allocator.cc": "1b89bc29d6c4cffa079ea48f872ac70a7eebc2c668ba3379dbe6197119b750b3",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/arena_allocator/recording_single_arena_buffer_allocator.h": "37bc65a36d9f8ed8417eecca17cb73e46e0e1aa9674809f1a5857fd71834d218",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/arena_allocator/single_arena_buffer_allocator.cc": "187f3dae1e6a12d4b7fbe95631163d729f401afcad65da5f739f50c596433f83",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/arena_allocator/ibuffer_allocator.h": "6a3bba1f555cd5a33ebe36018fb43e84aff1676db7bb8983dd4c4c595dae695d",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/memory_planner/greedy_memory_planner.h": "f2ec00aaed7d100680de44547ac1c3f020647658cbb2b909e54a272905428533",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/memory_planner/greedy_memory_planner.cc": "b38b674d807cde7837b907b9fe3b87e3904396373de3df0f8c290f807da21553",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/memory_planner/non_persistent_buffer_planner_shim.cc": "187cf9cdfe32697937656c832b85659251df3ab151f0ea71572bb4d41ca79388",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/memory_planner/non_persistent_buffer_planner_shim.h": "e93d63804aab945fdeedacfb7d8d3b45d4a148b4f746f356b8ce2434c14053a2",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/memory_planner/linear_memory_planner.cc": "2989c5478771e7fe0e95035964499679700054e7ed6af072bb2f240b6570f009",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/memory_planner/micro_memory_planner.h": "af02aff633f44ceffe902c8eedf9222571075cb988a02de18603cb37928ecb45",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/memory_planner/memory_plan_struct.h": "c36aecc54bb0044ed19026ced9ede615ae481ec94aa135278430c9f9f0137a4d",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/memory_planner/linear_memory_planner.h": "736af30621fc8a44aeac2101fe80fe9da3e26cfca5bd5f361de20fddbd6a3309",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/esp_nn/conv.cc": "ad23206be129138496a2e958b5abab57be05a3b01f00b7d1b1235b4523612527",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/esp_nn/depthwise_conv.cc": "1d4078ea7249c3792508d3ee9983283061833417da0ceec0f24f1d4e57a89520",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/esp_nn/softmax.cc": "644c4ba5784c51f437df9db9b99ba5b96e68d34e3e2b9978e7d2e5b4cbcb2bf4",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/esp_nn/fully_connected.cc": "c23b68b0dceb783a37fa9eda5c3a4c4b53ae8977abde0f8f32c67f7ae2acce98",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/esp_nn/mul.cc": "6641752c7bfe22df3348902f24e01b5142f27cd71e3966c5a32c1b300257cbae",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/esp_nn/README.md": "090475225fe819d466f1f8e0d014d8cfc08479ddcacfd5183b9b1a5d110f58c3",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/esp_nn/pooling.cc": "ee246b54a5f8f34d2dcd58b7a724b25448fb97ae2b4740c918007826e7240069",
+    "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/esp_nn/add.cc": "7a3345906a55dfeeef5789cc074afae229fa38932c640dbb2f100c29099a9b34",
+    "third_party/espressif__esp-tflite-micro/third_party/gemmlowp/LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "third_party/espressif__esp-tflite-micro/third_party/kissfft/kiss_fft.c": "63ca2dc3c534833c52da1b17cfa6c2918c2a0b98a109f15fe90c29f1750a7a65",
+    "third_party/espressif__esp-tflite-micro/third_party/kissfft/_kiss_fft_guts.h": "dd5c9aecd44f4b1587a02424167fff8f70b5963537f10acfb5d87b6320319319",
+    "third_party/espressif__esp-tflite-micro/third_party/kissfft/kiss_fft.h": "a56e45e711bfa07376b4221329715dc2472a7ba9135478c196de5291cb7b0129",
+    "third_party/espressif__esp-tflite-micro/third_party/kissfft/COPYING": "ddd1400f963747b305bfa39e21206e58805a1c650451e2ee5ce81ed86bc0b1ab",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/grpc.h": "1f70c3d9717d5730cdcf6a40a393d5e3e9d7670e14b113c5df3244554e7b38c6",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/code_generator.h": "01eb3d35c58f4eed0c5d463e04924fd231b789cfe1935eb9f6fb79d6f434c7a5",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/idl.h": "b23da2df9c5bd4a2109d060322651005cf74dd53ad04e75707de8542adbc4a7f",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/verifier.h": "cf80b2a455a3fe913286efbc63735a1fb7daee980689e21ef572b79de4796e30",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/reflection_generated.h": "6a9f1f9c0d64df67e6067d973524ab40e1e8c28cd1c8e99d8699b6d62c65e789",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/registry.h": "229fc098bc2cb65d3abf991f25695e151220115587a4078ec7591742bf9d109c",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/flatbuffers.h": "a00ce9610586dac436efe0b6d27b3aa12eaaf397c04c17c7c7452d5afabd0144",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/struct.h": "6a799f26e99ca576ef2c9f4b06ce1993eccfe43821025a041224d3c7c2b11bda",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/file_manager.h": "fa0c6e689b7550098990a78cc1e2ed96ee5e72e2dc33771f3f35e2fc8680816a",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/buffer.h": "10c1e7db57f0a291eb48fbfc718a0ff0ee3b7a3f226c38168a361c1d9c32a39c",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/allocator.h": "19b1e7e9439ed7c7fdc61c04c99a14d33fc11295b590b6d0b1557ffcae4e4a59",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/flexbuffers.h": "6e8b2f0a3c818419b87a320aa01b561d58e25959fd7075550131949cfb4310dc",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/minireflect.h": "4587927d1abfe129b92a30503a2cbb720c5710aa5318dd4bd7000ddce375d9d2",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/array.h": "7a2111cc9670a5ed62502e5cc89216867e81df952dbfb7b3179c17ed2d5425fd",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/default_allocator.h": "ddb8e76c0b0d8f0df5d8616323d98f89e3d57a8b738ee984e1e30258fa27ac5f",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/util.h": "4b4d5f288f9e23fa39c747ab55dc879dc7fa146059a4d7bafa184d7ea0187981",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/code_generators.h": "d3a38cb5a981113d12a0ff045dd9f91557bda6ae24b6ce5d069072a786cedb11",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/stl_emulation.h": "bbe393c66e26f522a24ee47f740b7829f4daf383c5a718d60852b29156543b3e",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/table.h": "6e08518accda07f5abba53fc86132264a579597b97f02dcfa4b9130188e1c6ee",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/detached_buffer.h": "a1f9f14b250fb787dda10357e8b15b4bf972ca346bc57ad04ff1ce870ce59d8f",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/buffer_ref.h": "e846dd9096c4c66b649811e63797770e240b0d2a8d5e7cfdd9be805f956080ba",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/vector.h": "2d692ea07743cf10220d5d7d26f1993790f53e82456603c09db2a2fde1809245",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/vector_downward.h": "7bccddc6f48718a9457f71ece5542f90f7f8674134c92e8f5f5261d5333d3f33",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/flatbuffer_builder.h": "25b23859f6d7a81ce823b707c84c13138af07d7fc51e3023a46f6861289f12c4",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/hash.h": "c8ef6b8b751f7f180fe773644f3075d43a4e2d8e57d2d2ee4c283cae387e0169",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/reflection.h": "7fa3873b1781d738f1ddddeea095c0df7481b9395ec6bc08a6993362eca749d0",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/flex_flat_util.h": "96de66fbed8d2d46350429455d68c117fe08c566edf48491257a7cbf4539266e",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/string.h": "4b3f50a27dfca8225656d3397ca0bf73431f26aff9ccb34ebdf4dde471fc401b",
+    "third_party/espressif__esp-tflite-micro/third_party/flatbuffers/include/flatbuffers/base.h": "23f57b4bfd6735a49e31402cf76dea8bd2c3a1a95e746b76258d02996299db54",
+    "third_party/espressif__esp-tflite-micro/third_party/kissfft/tools/kiss_fftr.c": "71d0aaf7a49c7c6bc1f1a20e53a5b490ce52d1b2800b2db1e864e4bf82548826",
+    "third_party/espressif__esp-tflite-micro/third_party/kissfft/tools/kiss_fftr.h": "4495841cc3b614b8211666dd4178e092ee0507a1999d20346c782ba04a88c5c5",
+    "third_party/espressif__esp-tflite-micro/third_party/gemmlowp/internal/detect_platform.h": "78451995ae47a6b3b773724a32f8a2c73a05274daf73a2df6e901f950ce5607f",
+    "third_party/espressif__esp-tflite-micro/third_party/gemmlowp/fixedpoint/fixedpoint_neon.h": "700e958c35f4a844d8d766abe30959b4e3e2305511146a28054748e125af6f40",
+    "third_party/espressif__esp-tflite-micro/third_party/gemmlowp/fixedpoint/fixedpoint_sse.h": "45b34bfddf24fabf60afb6a47f510b11c293a0ba4a782473018369427b82ab83",
+    "third_party/espressif__esp-tflite-micro/third_party/gemmlowp/fixedpoint/fixedpoint.h": "7e9cc245b8d32a39cb6df8bc84b4138fce96569a68c50a60968d5f358f76b962",
+    "third_party/espressif__esp-tflite-micro/third_party/ruy/ruy/profiler/instrumentation.h": "6c5b1469b1ee43ad6de59899b3f022f459d01a0840e531a54fb363980152de59",
+    "third_party/espressif__esp-nn/CMakeLists.txt": "10ad25bd664df3ea2675c7b7faa6c642a4af9f17fa94c8417a71dca477093d7d",
+    "third_party/espressif__esp-nn/LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "third_party/espressif__esp-nn/idf_component.yml": "61632f7da1c998d7f08d45d9300ff58cb7d860de0d44cb44b05deaf4be53241d",
+    "third_party/espressif__esp-nn/README.md": "46a640fda31cf5743cd30744ec0ec00a0c99d73d7170ab088dc7b0925b1b49ff",
+    "third_party/espressif__esp-nn/.gitignore": "c5cc970d4d7bf2864ef31fd01aa9903245a61aee39c676336ba74ff5b735add7",
+    "third_party/espressif__esp-nn/CONTRIBUTING.md": "56e1b14677222ea13ac746686418bef8a1bed6fdd16b04127140477def5fd23d",
+    "third_party/espressif__esp-nn/Kconfig.projbuild": "621ca6557b50fbde5458fa127927208b083ee2dbdd5acee6610bb41d8aab51a7",
+    "third_party/espressif__esp-nn/include/esp_nn_esp32s3.h": "ec5f9b4d1a091855fe2dbdddd22c24e529d669136c46ab73bfbdb4dc80cd75a2",
+    "third_party/espressif__esp-nn/include/esp_nn_generic_opt.h": "589b344ad430ec20f31983005776c596d869f9dc139e4eab7aad2729a748ed5b",
+    "third_party/espressif__esp-nn/include/esp_nn_defs.h": "acf83dfb68c296c7a45a65a0ffb01ee8f903611b02745156a5ea87495f24d0fa",
+    "third_party/espressif__esp-nn/include/esp_nn_ansi_headers.h": "f978a69d4402e6f840ee2bf1bcb4d5aa269a07037a9e60eb6725eaab8c4d871b",
+    "third_party/espressif__esp-nn/include/esp_nn.h": "7db4ddff4316074a1be32c2610dc048cde9c121829553600fcf6cf3b7fdd1680",
+    "third_party/espressif__esp-nn/include/esp_nn_ansi_c.h": "a855e5d725e568af539a7a74d400385ba48d77aeeb55cd4812f981633b6f7cc5",
+    "third_party/espressif__esp-nn/include/esp_nn_esp32p4.h": "0f865e2d931d7382f9d7544caffb1fa6d9ce76b5fea116532787a438252f76b6",
+    "third_party/espressif__esp-nn/src/pooling/esp_nn_avg_pool_s8_esp32s3.S": "29674586b03d8441e90f857ebba1c553e3aa048892cb681d55cea65d5e4d8e0b",
+    "third_party/espressif__esp-nn/src/pooling/esp_nn_max_pool_s8_esp32s3.S": "9305c4d20de3792fa4d471e155819a6ffeda90d7a62fbb08ea6a7d7e66876018",
+    "third_party/espressif__esp-nn/src/pooling/esp_nn_avg_pool_ansi.c": "5e55b50cc0acb67724733513774ff752c2ad13bdf05e4a3d68b64b8954a94caf",
+    "third_party/espressif__esp-nn/src/pooling/esp_nn_max_pool_ansi.c": "498f27f0defb3f1efa9825d1192788b94e31b893ea6fd59644ba333bab3e6774",
+    "third_party/espressif__esp-nn/src/basic_math/esp_nn_mul_s8_esp32s3.S": "3d4dcfb094a4cec7f451a4b69cc859c372f737c088cc36f6ef068c8e643f130b",
+    "third_party/espressif__esp-nn/src/basic_math/esp_nn_mul_ansi.c": "0465753e542957d7ef3af3225a7900ee2f8d8c7521933fcbe8a959cea8ca3f0d",
+    "third_party/espressif__esp-nn/src/basic_math/esp_nn_add_ansi.c": "2c0f4ac9164dde001c27a208def41e82715c2a53fdaa60682031e0e9e39d0d42",
+    "third_party/espressif__esp-nn/src/basic_math/esp_nn_add_s8_esp32s3.S": "e4aeec89f10d911afd0455c886f8a974252bba9a77e55e252d0a59ea648871b6",
+    "third_party/espressif__esp-nn/src/fully_connected/esp_nn_fully_connected_per_ch_s8_esp32s3.S": "a873b7461447ada1df2ed25b7072585a674032bc7c18b7e1f511806766b1b0d8",
+    "third_party/espressif__esp-nn/src/fully_connected/esp_nn_fully_connected_ansi.c": "ed4be526ab29f035d7f9e0a25af61ecc86fcf0059143589914ebea2bd67ed51c",
+    "third_party/espressif__esp-nn/src/fully_connected/esp_nn_fully_connected_s8_esp32s3.S": "dbde07a645d32c994925efd13cb4450cc351cbdddc022d573199350c19abc869",
+    "third_party/espressif__esp-nn/src/activation_functions/esp_nn_relu_s8_esp32s3.S": "1f87fd84b76dc2ab9796661437e4f7afa04206e10453d9cf89b40e9654844448",
+    "third_party/espressif__esp-nn/src/activation_functions/esp_nn_relu_ansi.c": "0ef12c9a797eda542874b1ec39f27f7496a58e720cd4bb52f21c2000f7307d0c",
+    "third_party/espressif__esp-nn/src/common/esp_nn_common_functions_esp32s3.S": "8a9adbe29e310a223193a76d42cca9961b87dd6c1d9fd9c8d2f770e740219745",
+    "third_party/espressif__esp-nn/src/common/esp_nn_multiply_by_quantized_mult_ver1_esp32s3.S": "d1f05580094876677c92adf978155978938680c8ebcc0c78b0cbbba5a1435c59",
+    "third_party/espressif__esp-nn/src/common/common_functions.h": "5898d95a58ded8b62d9494463ec64627f8601c27304500e61c3cee9c12a03a88",
+    "third_party/espressif__esp-nn/src/common/esp_nn_multiply_by_quantized_mult_esp32s3.S": "ab3c8a85d55c1350a4c38dbebdcb3f9fcef9d5ebaa3eda57e9901a34869f56c2",
+    "third_party/espressif__esp-nn/src/softmax/esp_nn_softmax_opt.c": "ec5b04b76fde10274b59aad728b05482c44aecf44e3034d426d0563ff859a87b",
+    "third_party/espressif__esp-nn/src/softmax/esp_nn_softmax_ansi.c": "1770c0ed103fc07bc5f4c228d0b545afa0a22f86c0fddcd16c0b4605221e21a7",
+    "third_party/espressif__esp-nn/src/softmax/softmax_common.h": "41c50b7fac7667c179c790f31d1780ab1def96ea63dde564ceaeed0967fe739f",
+    "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s16_mult1_3x3_no_pad_esp32s3.S": "f113eab683d482454c99db5fdc27e35431d1e60b35ca6fa9610c2e6ea5ced6d7",
+    "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_s16_mult4_1x1_esp32s3.S": "c0bbb32a96b7dca67758eb08872d9f0019b801556d8045872a662818e69e9440",
+    "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_s8_filter_aligned_input_padded_esp32s3.S": "9b52360a9b21a23f93197d42fbb70181e6a404e39b71bab846ba40b1fd62cb79",
+    "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_esp32p4.c": "646124d1c7170ee2f8681b36f25bfacd4df1f77edc7d545836cfcbcd3cfce86f",
+    "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s16_mult8_esp32s3.S": "bc648610bca5c85bf59117df266403d813a3186c534bc00461bf27f5ab3e1859",
+    "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_opt.c": "333f8c7b4a8a70f444c9d63e7251dce8c3cef2d6518807102b004864e83be0bc",
+    "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_ansi.c": "cdad2b6c3c74c99a6214131d4c047a25331d01129a915616acbff936647cb687",
+    "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_s16_mult8_esp32s3.S": "605ebf5c9d96b1d6fc2984e63723dbbcadf23d72da93f996e6f32c79128b9780",
+    "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_ansi.c": "ff82cf2705ff40281cdaa7e686ae8e39fbee6e2a52424b22b40b6b451026a258",
+    "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_s8_mult8_1x1_esp32s3.S": "233cf143d5a59f2e9da755b16452fc07be8b16de9723bb3efeadc38343640b99",
+    "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s16_mult4_esp32s3.S": "210094cb8b81a080d299f7b7db714db6568945fc9ffc99ce8a5df4cbee6e122e",
+    "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s16_mult8_3x3_esp32s3.S": "75491a86477a773642c10dcb803c71a2cd725f576dcbd4e5ec4de025cacd0a8e",
+    "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_opt.c": "a8867292fa9060cb3847d41f1f57ed805e6eadb19016618883fdb8775992d47b",
+    "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_esp32s3.c": "d007360f58709a0da11a0d5381368e6a0fc69b2c47fccc4cd1f8b105d7e96806",
+    "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s16_mult1_esp32s3.S": "19cfa691b8615be3bc4caa7dc0d7be40d4825660e67357d28d89e67a1150164e",
+    "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s16_mult1_3x3_esp32s3.S": "e0a236c3996993461c30406b9a160406adea5a202050d86547af289e9e57f08b",
+    "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s8_esp32s3.c": "b9b4522076b702069ab2ac50f3157ad52b2667f8eb71e7d97083e6422026e44e",
+    "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s8_mult1_3x3_padded_esp32s3.S": "74d084efc7d2a058274e48ac3ae713cab84e70ddc2f33f170101a9ea535a3385",
+    "third_party/esphome__esp-micro-speech-features/CMakeLists.txt": "0355a258eb97d467dfc21575e05e7cd5c7defdc4ab1c6220a865a2a484dc4472",
+    "third_party/esphome__esp-micro-speech-features/LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "third_party/esphome__esp-micro-speech-features/idf_component.yml": "1685186ee44d046218b7dd98a1d785100f3036f089de4a6437157b7e6bfd4434",
+    "third_party/esphome__esp-micro-speech-features/README.md": "807d9f9c95b0347afbb116b59bca3e3ed7b8dca107677965dea7ab8b50a7342d",
+    "third_party/esphome__esp-micro-speech-features/library.json": "74f56d6c0a4d6f955b8f8dd961566ca5ff0c8ec23fba0230292b4f291ce4377e",
+    "third_party/esphome__esp-micro-speech-features/.gitignore": "ba6d3f7b37aae374e53ff355f53fa54da1ce40699efece7aa999d4f8a3c078b6",
+    "third_party/esphome__esp-micro-speech-features/include/frontend.h": "4cceb5b319dccbb45fd52fe105f1a37a73631bd68b6f73ad9fda52a3c16154ec",
+    "third_party/esphome__esp-micro-speech-features/include/frontend_util.h": "3aeb153ac431ff6b645882b0653015596ed921829ccf575bdad4603ce0802df5",
+    "third_party/esphome__esp-micro-speech-features/src/fft.h": "7d3c5fb8c09185ef3ea9a7dc8831b3d9197235fb02a02b59172b04cc44aa3a2f",
+    "third_party/esphome__esp-micro-speech-features/src/log_lut.c": "88d316def7060db8210ad607ccd934b893ca9242ac179a1b8e224ccf69d0a589",
+    "third_party/esphome__esp-micro-speech-features/src/filterbank.h": "ee44c3eef219d5718ccdb96c3db5669bab8e11d108ede9c301ed9dab19d4fbf1",
+    "third_party/esphome__esp-micro-speech-features/src/pcan_gain_control_util.c": "354628ef93aa9328e7b7ebd7ddbc5454f627e956c814b7cf11d06b6b85d529cc",
+    "third_party/esphome__esp-micro-speech-features/src/kiss_fft.c": "48e99a0d353b3bdcc4e80bebb83311c8888c8878f6c0f4b0dd78474761aadd3a",
+    "third_party/esphome__esp-micro-speech-features/src/noise_reduction.h": "f5f9b8c303f9c28357bf5ba17867b483ee0a2bf9c1732dc740834a7ca6ce66aa",
+    "third_party/esphome__esp-micro-speech-features/src/log_scale.h": "2b51d7ab2ee7686a982d8c385bf8091d81941144438bb8f24e2ffd6cdafe44c0",
+    "third_party/esphome__esp-micro-speech-features/src/frontend.c": "dc72e21bca9a1aa094803ab687a86871fa98781668a3d69cc5f4c3af029829c7",
+    "third_party/esphome__esp-micro-speech-features/src/noise_reduction_util.h": "b8e6a56691a8e5be589d4b9ae257613ee708123a151725bee8c6cff25fb51392",
+    "third_party/esphome__esp-micro-speech-features/src/fft_util.c": "e670eb8ac5711bede0fc9d7df2e7eb0908f977e83cc40f9dc618a109384cb6f4",
+    "third_party/esphome__esp-micro-speech-features/src/kiss_fftr.c": "bd4f2f2c9c5037f0dda187185d843844e3d057790faec7b538f1c61b65b348f7",
+    "third_party/esphome__esp-micro-speech-features/src/filterbank_util.h": "c6be518afe607d5f5e2f6a9bbe20658948d057a35437f31769abc4b488928eba",
+    "third_party/esphome__esp-micro-speech-features/src/window_util.c": "2b818d1f388e7f2c2c3c5ded28a72d0a1d576629f6eee7025e36fa6f1cb70f7a",
+    "third_party/esphome__esp-micro-speech-features/src/log_scale_util.h": "cb50dd9c9e3411b5ee9427592074cda13db5a168201865da9f7b086880c3be33",
+    "third_party/esphome__esp-micro-speech-features/src/_kiss_fft_guts.h": "ca85e03b9e6ff14a514de745738be2c37550a370437a6bb4d088970a657de1c9",
+    "third_party/esphome__esp-micro-speech-features/src/frontend_util.c": "980fbfc85334475c31c9a41cb12e18357c7fc7b4502188785c9e4c79e88902d7",
+    "third_party/esphome__esp-micro-speech-features/src/window.h": "0a95ac78adee5f8d614884e8530284dd6c8f35c7423f1fc2bfe0acfcca9320ad",
+    "third_party/esphome__esp-micro-speech-features/src/pcan_gain_control.h": "6112b7ac4e4404d1cfd394eaa3fa6e9c9b03f8c56f8079e1a3c9f28943388ea8",
+    "third_party/esphome__esp-micro-speech-features/src/log_scale.c": "165f69f4b7b970b9ea5867d65ebef717cef556541ed71c17d9e35f513a42b32a",
+    "third_party/esphome__esp-micro-speech-features/src/pcan_gain_control_util.h": "9213a58ef41d1eada6bb777f84d8e2f2b674daab4788bc322e3f6f8cce9791d7",
+    "third_party/esphome__esp-micro-speech-features/src/filterbank.c": "428a5f63005bf8473c5fb4246f408f8455ec185d4e3123ddf62dbeb61bc9de3a",
+    "third_party/esphome__esp-micro-speech-features/src/noise_reduction.c": "06dee1b811713bda3ab37d30a0d19837942c5e7435c45868e076fb29702217ba",
+    "third_party/esphome__esp-micro-speech-features/src/kiss_fft.h": "96f7074839e3a96ea39a27d45326bbd7e4299fa57f81eaa7dfb56187a6cb42b1",
+    "third_party/esphome__esp-micro-speech-features/src/log_lut.h": "38bc096e21af8494866080d66438454da2382ee910edbd4a36b77eb9e824a3c0",
+    "third_party/esphome__esp-micro-speech-features/src/fft.c": "541e5fe21d3d35580b4049cde49244729f20dfb5745a8928218516ae760d2319",
+    "third_party/esphome__esp-micro-speech-features/src/fft_util.h": "6db6948df4a6335a98716f6f48d5d8d0de6b9631e7f309628c2981660a275b9c",
+    "third_party/esphome__esp-micro-speech-features/src/noise_reduction_util.c": "52739e99b645e8f4cf74cf958266dc33b75833957a8b1115844cacf36b70c76a",
+    "third_party/esphome__esp-micro-speech-features/src/filterbank_util.c": "947a64414dfe3fcc1cc1b307cf9b16e03ef62a96c7216bea1b52689bc47a17ad",
+    "third_party/esphome__esp-micro-speech-features/src/kiss_fftr.h": "097aa834da6794e7cc50b9075fbc19e43bc15396fdbb9c02f18847e1b53613bc",
+    "third_party/esphome__esp-micro-speech-features/src/log_scale_util.c": "f44bcba29b52784959bc3bd4efa36d739716c7b767e08a96d1a2a66e0b49cc0e",
+    "third_party/esphome__esp-micro-speech-features/src/window_util.h": "4c115fee10548e897ef3ff6ea4e47a68f02b1e9adb8a98734d5209bdbcebb3a8",
+    "third_party/esphome__esp-micro-speech-features/src/bits.h": "10251fd508996bf0a3f0af34eed093d3edb83124204c1504db39f35987a015a0",
+    "third_party/esphome__esp-micro-speech-features/src/pcan_gain_control.c": "46a47e8bed169e98dd65876d04e776636ea4f9a8499ede04a58604f93bad1e38",
+    "third_party/esphome__esp-micro-speech-features/src/window.c": "9b2704f92586809866019a69314d0470d0b614ba0123b471283ddb7ce9ccd496",
+    "patches/filterbank_util.c": "74d23babcd8fd75b6d6dc198d3092e56be6da5f32354c9cb0f38dd30c910e638",
+    "patches/micro_resource_variable.cc": "a8d7b1503f41508634efdf531b9ae36402d36d4b9dd1f6eccdba38eee5ffe877"
+  },
+  "selected_groups": {
+    "tflm": [
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/debug_log.cc",
+        "sha256": "6ba2aa86d98ba5a39f416685ff34dd76ad25933142bd126c04165140f290b2bb"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/flatbuffer_utils.cc",
+        "sha256": "f0e173adbe926499b192b7792bdd8031a59630bf2b72a374ed7a70adbc56e5b4"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/memory_helpers.cc",
+        "sha256": "0d6073fb76aa043da24419d4baab2718896d0124e6b3ec8533361be803ba764b"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_allocation_info.cc",
+        "sha256": "b00da906247d2c8ac60db274eb26eb9100db45668eac0b88e05a97634f51b1f9"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_allocator.cc",
+        "sha256": "e655ef3dd9afcd40461476e2d4cef042dab7adc1cc0d8c18cd732e952d5e7a74"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_context.cc",
+        "sha256": "bad0692d87d5e92271066e9be497223f2053e1d027deb89e44e38b2dc74508ef"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_interpreter_context.cc",
+        "sha256": "c084acf0c424fffe5fb9786ae449a5e646f6bef45cf37337b0ac714081b9d832"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_interpreter_graph.cc",
+        "sha256": "af3486a8661daf2e62c0833fadb49e5f864d47066d47fe08446ce52dbc22903b"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_interpreter.cc",
+        "sha256": "57046af2230e224a1ccbe8be96e181dd165cce21fe6316797e4e35a3c5b749bd"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_log.cc",
+        "sha256": "9fd5a69c07777ec6256f0fcb43f4dca984538c5ebf95d6533f62e3c538d43743"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_op_resolver.cc",
+        "sha256": "c680feb7c20f15ec2dfea8ed8fb5677da9cae7acb94854d7ebac2be34029e6f1"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_profiler.cc",
+        "sha256": "4f840ad457405704d1c0bb895d8e0f098fef57e40846846b85372c38d8637997"
+      },
+      {
+        "path": "patches/micro_resource_variable.cc",
+        "sha256": "a8d7b1503f41508634efdf531b9ae36402d36d4b9dd1f6eccdba38eee5ffe877"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_time.cc",
+        "sha256": "998dfdd96d388a7386cf8f2f52f0362622b309e1e0ab42cf57640ab089c8d0c1"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/micro_utils.cc",
+        "sha256": "83c678894e01fbdbe615e248dd970cd55efb7c08553d43430cfc309e7b61cdb5"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/recording_micro_allocator.cc",
+        "sha256": "26835f67819dea7397f883717fa09c7bc82029a72200ffe7bb448d48ad477b01"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/system_setup.cc",
+        "sha256": "3b845400e6243c403a45fa1488596cd972ece586b6a67a83b95710f529bd2a08"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/activations.cc",
+        "sha256": "e0caa1bf0d5db2ed0d632cbf7a6948dc053d97aefdc8b210021a224aaa2f8970"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/activations_common.cc",
+        "sha256": "6bb9df2a07587908023ab9f674b6873250999c2f33c35b777f48b50aa5b88aea"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/add_common.cc",
+        "sha256": "afd427c7498f0bf6688d7e170eb7184bd27fb87ceca42d0695cc1408a17025cf"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/add_n.cc",
+        "sha256": "a3694b4ecc5b552ab7b5d28aafea6a2632aeb7e0a44002d00b34f66aded8f0b0"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/arg_min_max.cc",
+        "sha256": "7323d79702d9ad6e2a4f143b96592a1da2d917e953fa203945274ba398f4a8fc"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/assign_variable.cc",
+        "sha256": "0fe59e385e07763b568996cd607a30e5ca4be199b43b685301f2b745af9f7297"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/batch_matmul.cc",
+        "sha256": "e04734193918afc98988bbe44e1002f6e85f4fcc7e19388d2e32bb8adf498346"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/batch_to_space_nd.cc",
+        "sha256": "4d7a95b7c1d3f98e74f236336600b9eca6971143879e2f5923c2a45dc66dddd0"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/broadcast_args.cc",
+        "sha256": "b1d90fa4b0bcfacd2dad719228ff7ec783e913c7a72cfc79a0409edacaa44d0d"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/broadcast_to.cc",
+        "sha256": "0f6a7d95bf629820d5c01642fbc90945ec56faa58b3b41169567ce0cf662a34d"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/call_once.cc",
+        "sha256": "27a9e4a5a654f4e71a28512f4b1065fc6d1f0a60170b5fd1ea16af163dd2805f"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/cast.cc",
+        "sha256": "388e7b6e978b35355e2696b40470d0ef0d3160495850fde720d8564c038bcc2e"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/ceil.cc",
+        "sha256": "852b3fe90c71aa0bfb74b0a44213b77747880a138bceffc7d5b70586cfc9090b"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/circular_buffer.cc",
+        "sha256": "830e4b1966fb077974130986fd748c2671148b2a10e47fb3e80be5a9eaeda908"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/circular_buffer_common.cc",
+        "sha256": "3cec9cd2274eb76404cc3dbbbec9653cf177df4d1bd86e2264eb2328c5b5feb2"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/comparisons.cc",
+        "sha256": "d451476250b618f51525deadeb2fce8c5b5f531c82b9f4117f6f37bd824f8a9b"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/concatenation.cc",
+        "sha256": "04c0f87fce4ca84cd076a5f1541a97b6b313fc92564d628a49784d5564f60d32"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/conv_common.cc",
+        "sha256": "8756a28794baf1ed67d2b88f080e5f22318e95d6bfcac10984f8fb3c96a048be"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/cumsum.cc",
+        "sha256": "67727893f1a42f333a1515c93731f1f6c14db6b404e65b63c28717bc31babd04"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/decompress.cc",
+        "sha256": "b3fce21053f67ffab8ac4bcdf1dad128a50529cbee499e2d97de686688f89856"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/decompress_common.cc",
+        "sha256": "b1a869f8490c46f57550fa89a1c07e913143bb46f0293ebcc473917573c33ed7"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/depth_to_space.cc",
+        "sha256": "7bcab14d47e34a475e9a3692ebffb09a8f25410d70ded94be31d67b8dfebceb3"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/depthwise_conv_common.cc",
+        "sha256": "4156f5c33a9be5882091f03ec0d656b73a8617fb84bcc0bbe54dc0138c15650c"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/dequantize.cc",
+        "sha256": "582be38df40796292f41dd78eafc68a276f8ab9a1886e320466004b031e97dc1"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/dequantize_common.cc",
+        "sha256": "8723c453ab365ea1ca93792a205008d491f617971069533dfad8b9d830409e07"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/detection_postprocess.cc",
+        "sha256": "1fb1e8ced51859737d3b4311a14bcd793d0a7af9fbfd69aeb6c8492c3806b9ea"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/div.cc",
+        "sha256": "b80039c51ba22d1c2e476a263eadc08cfdb17856f0d7bc37b9766e840b13a582"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/elementwise.cc",
+        "sha256": "4ddd2431dddc3e75cb4a12bf5bb7465c6766c983cb74de3ae3a1629e44df826c"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/elu.cc",
+        "sha256": "7d5faecdcd47966318acf0ab2f64bf366a5bc6223e214bacb6ca9172c2f98f0c"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/embedding_lookup.cc",
+        "sha256": "93c34b4d3618ecfefcfd1b1af3d76ab2fa0f274067af951647d0711c19999b0e"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/ethosu.cc",
+        "sha256": "d9a837807c1c4018c845ae1ed1306ef8d3182eecb598203c38a72c57ef94155a"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/exp.cc",
+        "sha256": "1a16a19a8a5ecbd05acc5e5d10e5c8464db36a5f22e16739331cbef4357ea456"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/expand_dims.cc",
+        "sha256": "16af06d9a8fd39cc9f45fe6cc18e4f2adb4f40bb26f847ea96a6c50ece5c7916"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/fill.cc",
+        "sha256": "031daba4dfbea812a0a33018ff6ae46ab1402ad03a5e2bba8d3ae05ca716ce6e"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/floor.cc",
+        "sha256": "09cc5fb9e6cb10ae0603cdd9e0b541ddfe06dc30d8dd49d7698547ef78863ffa"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/floor_div.cc",
+        "sha256": "413226b60372d9732cc92564289f58e48b0334fb1a10984f00e9604d072ce922"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/floor_mod.cc",
+        "sha256": "d4c2ec884eaea92a99228cce7b11162f6b31a58b368d690c959e178b89a2fa7a"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/fully_connected_common.cc",
+        "sha256": "388bf81053aac4ce6d031e4995631deebeda020b3e02a9a80351074ebcfa960d"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/gather.cc",
+        "sha256": "156800ee9c0bce283defae15d51a7207dc0b51134e3f9182fbcd2047cd8969c8"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/gather_nd.cc",
+        "sha256": "b7a5aa983f16def67c98048caa171cf182d07e0d731d1d7d556e95cb6748d880"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/hard_swish.cc",
+        "sha256": "0a0df788fa0277ffee5fb1931d65a532d6fcf848db3c1ee073b68d16689c65c6"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/hard_swish_common.cc",
+        "sha256": "70e3bc6b7da0df957f8229ba26285061932467385ad605d0d247609dbc790060"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/if.cc",
+        "sha256": "4dffb2c59655d7c87dbc0b2f6fe5e1b33db9e869807856a828b06f3c84ac2efa"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/kernel_runner.cc",
+        "sha256": "d4754b8d2e094743890e91e937023909c602e1597f907ad1edb28a663c8d23a9"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/kernel_util.cc",
+        "sha256": "623e7882a0911c65dd7389bf3484972d52b17626c74471e46c29046bcc12c7fa"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/l2_pool_2d.cc",
+        "sha256": "8c318837264c50a4b62f9ef84671ac660e0905d689150c15855d7aeb29ec0bd1"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/l2norm.cc",
+        "sha256": "2cb7b4aff68cd96a1d556cc214c73eb05352646be07e63c67588f080c3ea0702"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/leaky_relu.cc",
+        "sha256": "5f06c947031cf2117075c43b5fd8c96bc32a1980107cce5739e9dccae1b9c822"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/leaky_relu_common.cc",
+        "sha256": "c36f244624bb7fa90ffb2052152a4d71c6f20a37f37520346c92ef5e7eae906e"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/log_softmax.cc",
+        "sha256": "35a03f44130687758a890bdb1a775f8df17584d2c5a1943e6a454429a9c4cc1c"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/logical.cc",
+        "sha256": "f3f04290c1803421244736720fac6392525634827d56474b7b7e476bd89c2aca"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/logical_common.cc",
+        "sha256": "deb79df1d96e36b7cf68031c09f5dd97e161d89db715f24bc2915a4b344d7b4e"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/logistic.cc",
+        "sha256": "7641b4365feee8955a84b3e14a7809bcefe2cc54d591ccbb3f4eb2fae3a7b792"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/logistic_common.cc",
+        "sha256": "86c5ac5eff6aebbe934fe382115ede620033c6264336fe61dc71da8ccb81f707"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/lstm_eval.cc",
+        "sha256": "13947c03abae9d2dedfbb11163f18dc4a26b4244cf44f56dac3b173c7fd978ce"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/lstm_eval_common.cc",
+        "sha256": "2d96f09c035f289b747d73aaa3074259a4293fd88c6368d800a82271d6ae5cd8"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/maximum_minimum.cc",
+        "sha256": "edcb830e4f4d31eaee2f71e170988af4ffef6dc11e48a0f445c430acc91020e7"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/micro_tensor_utils.cc",
+        "sha256": "df5badaab644dfd0ff5adae2f4412fa8463be2fbdd359da77b536e5c4db2fd3d"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/mirror_pad.cc",
+        "sha256": "789434b43123568a2732cb6964e5bd989204ffff8d3b0ea2b6796f2f16824ed1"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/mul_common.cc",
+        "sha256": "db4422f231914adcb96984154d62c3b39964bad6d26b4ad4deb53e20c7175a55"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/neg.cc",
+        "sha256": "1b6674d687e740eaedeb6d375ee5a25420482b99075143428d116d30a4236f05"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/pack.cc",
+        "sha256": "44fa418b9965d8e820bc264dec05a99ba84b90829c42868863b4d9e5d38da458"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/pad.cc",
+        "sha256": "1a99fad0facde3a6a5c077ba2145570b792d02acf0177af0e70c5b1ff22eaa02"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/pooling_common.cc",
+        "sha256": "56276e7a7193899eb49912466e33682cf165dde758447d1ca8524e823804a4b2"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/prelu.cc",
+        "sha256": "d777005044abf06c47f0d2e27f9971e0f612d2f85954bae5db51d37cce41d112"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/prelu_common.cc",
+        "sha256": "0c823160311cac4eb6672d6530ea81b7e223a42009760ec1e05991d1013b2c21"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/quantize.cc",
+        "sha256": "aaa8994e063c701fea205d34cb8de13845b7cfeee9b172ad541d71f0a5d5b175"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/quantize_common.cc",
+        "sha256": "3f40db7c25a97b8df306bc703bd8e80eec5c5f33d543e00add15cdcc3918f275"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/read_variable.cc",
+        "sha256": "94900fe756eaca9fb934be75ca26ca22190f91aca4b1f03b705ad2599547ef06"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/reduce.cc",
+        "sha256": "5f9f063329c1581f7934f65edeb6efd80a843575cb539a41a7f4374034369f7f"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/reduce_common.cc",
+        "sha256": "8878f6cd7e7072db3d0b1a8479f2fa4fc87de00bea3e1298b6dbd975da320a33"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/reshape.cc",
+        "sha256": "b5a1748cb85ca364e95c27e94f2302fbf8fb9755dc9b5ba6493db4202250cc79"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/reshape_common.cc",
+        "sha256": "9d663e8c6aa907b925272f05b07ed985620693d5954436070d0160f8a8bb3381"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/resize_bilinear.cc",
+        "sha256": "fbe47917822f28f737f8fe1c06c18158d7acb5bb12eff87686657673ceed4ad0"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/resize_nearest_neighbor.cc",
+        "sha256": "0e4ff3b71ffd00527ef0d7e38bd2a6fac63655e01ce2b10234950156eb16f644"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/round.cc",
+        "sha256": "8019f638e8cfc8bcc4b75f98b0a3c86b6848f9ea753bc987a181e47082987520"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/select.cc",
+        "sha256": "0282c58ca4b8198b522b20c493400b495c31af97a4f23c2b6385b4f44d2e55f3"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/shape.cc",
+        "sha256": "071258134ea98426827adbcb30bc83e583e9b9d3802fca1ae8cd2daefbcfea95"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/slice.cc",
+        "sha256": "cdbf35fde43b19d191911067ef2732fff9d9f68461086a641688bc5d1c081e01"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/softmax_common.cc",
+        "sha256": "8c1e1f78b1e5b00553d6634e210e04073f8ab323c378a614bb54ed88375da353"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/space_to_batch_nd.cc",
+        "sha256": "9e0b1d4a00605d1522c252ce7b8eedc7de97e25e9166d15eb59045fc90e17b06"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/space_to_depth.cc",
+        "sha256": "614f840cf43a7dd11001fd035be64bf47786b2655140d0b92c97300d04fd73b9"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/split.cc",
+        "sha256": "dcd81ab267e19193568c359a023a7d0155722e00c7c65719bf92eb35650ff888"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/split_v.cc",
+        "sha256": "47b1a426045ff55a6b4b2613390c0deffd8b12a74db15de04cde350f8edd247f"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/squared_difference.cc",
+        "sha256": "22f8ae6e5906740d8ca119a35a643b4828f5e3a0f24c3d891e72646682f48e84"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/squeeze.cc",
+        "sha256": "37ce2989d3c1757c64366ff1c44b6b500141dca5f525de632dea914ba1b8a4e0"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/strided_slice.cc",
+        "sha256": "288af83930d5776013cc394f39ff50e6173394d08ab077dc0d7e442ae024f637"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/strided_slice_common.cc",
+        "sha256": "807e3b3c03ddba6227dbe59c72c74d694ab85abd9f19e852d9586c281d2e82a8"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/sub.cc",
+        "sha256": "21c058be7b947832ad94baa8b5cfca12a390c5d1feac7aa99f15892a509482ee"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/sub_common.cc",
+        "sha256": "155ad1f60cd369eb6b90103a1e569e072dcdfa76219e5935717064ab10797eae"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/svdf.cc",
+        "sha256": "0a40e1293962666d5d0417cfbb215845bff3f3364a392f444b309aeac3c6c5e4"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/svdf_common.cc",
+        "sha256": "445992fb1302798eac5c4b2afeabd037cccca1f077dd65d3918574167ef0c0b3"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/tanh.cc",
+        "sha256": "45772e6c76cb64bb2f603e45a179de5cec92c20a0c85753ffecbc80f872152d8"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/transpose.cc",
+        "sha256": "86a7cbf8d7f5e1dd262e0a1e21719dda287b73eaa79236579c356a501ccffd6b"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/transpose_conv.cc",
+        "sha256": "791119cae0a4344856fc7c206e5fe2ef3ac38b0312578bbb94769ed4d142911d"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/unidirectional_sequence_lstm.cc",
+        "sha256": "578a562508694e0b53de48eb27129a6330449860ed868ea7e8352e3152620771"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/unpack.cc",
+        "sha256": "5f228dbb05a7e1c3a4bf66c9498dca1fa6ee481d53b28241f17425fc8aa8261f"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/var_handle.cc",
+        "sha256": "9d0eddb398bf91d9da3b5b384cd6bb188848cdf817c4c63d87ad011cc3465fe6"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/while.cc",
+        "sha256": "b6f28699d5f6051f5790118c4e312baf096cb2d569d7e695264bce84b2c720e6"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/zeros_like.cc",
+        "sha256": "d3c44c69fff70a0ef9900e96e19f044f358bfe4bb8bbbf5053c9654ba3be4333"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/tflite_bridge/flatbuffer_conversions_bridge.cc",
+        "sha256": "cf9ac3595c0da260746ea7a7d152f3e3904c68f13666361ad35660b0b4fe31bb"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/tflite_bridge/micro_error_reporter.cc",
+        "sha256": "9d49da87fb31d4011c962472d47a7095d6b147b713a4c1d12cdc5738d904da66"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/kernel_util.cc",
+        "sha256": "fe1393cf81120c0e634de5bf1a2ee92ff35c69af979b28bce1a7c8dcd63506ac"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/memory_planner/greedy_memory_planner.cc",
+        "sha256": "b38b674d807cde7837b907b9fe3b87e3904396373de3df0f8c290f807da21553"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/memory_planner/linear_memory_planner.cc",
+        "sha256": "2989c5478771e7fe0e95035964499679700054e7ed6af072bb2f240b6570f009"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/arena_allocator/non_persistent_arena_buffer_allocator.cc",
+        "sha256": "b7874e9c5b9c291e75709203036c0a1c7711033d2c89d34b93967a1ef59bc929"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/arena_allocator/persistent_arena_buffer_allocator.cc",
+        "sha256": "1b89bc29d6c4cffa079ea48f872ac70a7eebc2c668ba3379dbe6197119b750b3"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/arena_allocator/recording_single_arena_buffer_allocator.cc",
+        "sha256": "318e7ab492d81559daa812f2899720b8aeb830f36a649dc5d5be62a3865bb978"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/arena_allocator/single_arena_buffer_allocator.cc",
+        "sha256": "187f3dae1e6a12d4b7fbe95631163d729f401afcad65da5f739f50c596433f83"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/core/c/common.cc",
+        "sha256": "9ce1be7f05b78c45f1dcb846f0dfe483380f4cfb2fa81e5afbac8b9c747edf08"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/core/api/flatbuffer_conversions.cc",
+        "sha256": "0e9aa0133a731bb8daf67ff0450061a3531594022e103baab3205ebddda038a4"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/core/api/tensor_utils.cc",
+        "sha256": "f2db09878112531964e7acd0db39d81040fb0b6b4b8369ac91fb7bd58744ce96"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/common.cc",
+        "sha256": "ba5308bf76383d600d033c948fe0659710939e6f1f15a800b5413e5fc822ddfa"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/quantization_util.cc",
+        "sha256": "22e46f15663437c407298f5230545600faa2f6b2f1b46488e20c97ff3a5c96f9"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/portable_tensor_utils.cc",
+        "sha256": "bfa09db6110e8c6e6e47abe6347f059b00c166c296eebfdc19d7bf0010772e6b"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/tensor_utils.cc",
+        "sha256": "100455b83a76176ede92dd3f7ffad6b64630d50ea28adf32e35778d15547e753"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/tensor_ctypes.cc",
+        "sha256": "96c56627ce7f799f87f08d98ddb3c69ab9e52e8e8ff490351a9c8dbe5bd3601b"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/portable_tensor_utils.cc",
+        "sha256": "651d08d457d1f7faf121487f0e128ea4246bfb879d7e61577e733e0588144d61"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/kernels/internal/reference/comparisons.cc",
+        "sha256": "6dd907edd4f01e27ddc62d0114d7bc94d0397f016068d3f0c54eda74fd9124ca"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/compiler/mlir/lite/core/api/error_reporter.cc",
+        "sha256": "e2f004443414d47d4ad2fdcf8841bc74f421aaf117a38a5e9b15483fb1c1ad71"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/compiler/mlir/lite/schema/schema_utils.cc",
+        "sha256": "f4ba979f14a1c1f18826de0d962fdd04d822c0e5481b14fa06366f90a5e1aaad"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/esp_nn/add.cc",
+        "sha256": "7a3345906a55dfeeef5789cc074afae229fa38932c640dbb2f100c29099a9b34"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/esp_nn/conv.cc",
+        "sha256": "ad23206be129138496a2e958b5abab57be05a3b01f00b7d1b1235b4523612527"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/esp_nn/depthwise_conv.cc",
+        "sha256": "1d4078ea7249c3792508d3ee9983283061833417da0ceec0f24f1d4e57a89520"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/esp_nn/fully_connected.cc",
+        "sha256": "c23b68b0dceb783a37fa9eda5c3a4c4b53ae8977abde0f8f32c67f7ae2acce98"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/esp_nn/mul.cc",
+        "sha256": "6641752c7bfe22df3348902f24e01b5142f27cd71e3966c5a32c1b300257cbae"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/esp_nn/pooling.cc",
+        "sha256": "ee246b54a5f8f34d2dcd58b7a724b25448fb97ae2b4740c918007826e7240069"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/tensorflow/lite/micro/kernels/esp_nn/softmax.cc",
+        "sha256": "644c4ba5784c51f437df9db9b99ba5b96e68d34e3e2b9978e7d2e5b4cbcb2bf4"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/micro/kernels/delay.cc",
+        "sha256": "fb4a93546f08fc85061a35bfbae5b0b55fa97bac393567147869e7afb634a004"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/micro/kernels/energy.cc",
+        "sha256": "b1c082cb813a33b22ffffc6bff1ca8964d95b3e6c81946c73882d0fe7e8e27b7"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/micro/kernels/fft_auto_scale_common.cc",
+        "sha256": "e3db605b86f59469fd9d107976bc5441e2066a555f0c60322e12d7aed085f824"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/micro/kernels/fft_auto_scale_kernel.cc",
+        "sha256": "f0c4d93948e8c873be24c5ead1eba21b9863e94f38bb705c3f632e4ca00040b1"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/micro/kernels/filter_bank.cc",
+        "sha256": "157a783dca95f3428c172df82676d7bce2aa16fa5bfb8ec2ca241907cbfc9960"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/micro/kernels/filter_bank_log.cc",
+        "sha256": "621208deed929cd19e31430359210894a9279fd5e69e8b72005c16b07e4d0eeb"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/micro/kernels/filter_bank_spectral_subtraction.cc",
+        "sha256": "633ffac868a10414da860c53379d1ef204c6b146c106e39923a3025ae5298d08"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/micro/kernels/filter_bank_square_root.cc",
+        "sha256": "8c1fdfd0548587204fa3f063118662464227ae0fd6d10b49500f4b6bcad91a1e"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/micro/kernels/filter_bank_square_root_common.cc",
+        "sha256": "bd7bcd68a085d48f7a767e08ae92813310c550a53abff25409e3d204c05d67ae"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/micro/kernels/framer.cc",
+        "sha256": "6ce9f7b59530e5258f278c754c9a7add8f8d69ebd1a1aeb2c44999b6b4ae4c07"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/micro/kernels/irfft.cc",
+        "sha256": "0932d9628fef0ac9b886c2d2f5ce9bf3f220c6ca87c1a343eaa4a727d1ce88b3"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/micro/kernels/overlap_add.cc",
+        "sha256": "666c4ea8b71475aaefc85c690931e097183679ced0263db891de057c9f181b7c"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/micro/kernels/pcan.cc",
+        "sha256": "d8e3b371b6e7a2325bee4bce500f065ea573a3eb50136f60e2a0330306c11742"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/micro/kernels/rfft.cc",
+        "sha256": "8fca464e946abf877243426597ffd59843d1682ce25c96a37d19f9cd209f8e73"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/micro/kernels/stacker.cc",
+        "sha256": "3c09991a374b3381b068fac70d5d3f88a22dd6c81543297f27219a732ecd051a"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/micro/kernels/window.cc",
+        "sha256": "049c4cd58d713bb4f2e33200af668c08bb6be83d67a566945cc59fc011538690"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/circular_buffer.cc",
+        "sha256": "241b0f28f4ee30637dd3f7fad4887842501f0653f709d6fbdb63fbbfad23435e"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/energy.cc",
+        "sha256": "709664675e11073d3f10f253ed71885d6227c32facdca5b3ca8a9959d0863ebe"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/fft_auto_scale.cc",
+        "sha256": "17d6d9c4b8851e69d9cb9a09951c8857c96532c9d134ab843b6b55d1cf6cbf42"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/filter_bank.cc",
+        "sha256": "874fca6b599cd5a5455e42ff20ab9116b4e20156c23426e554b37a08c0d81322"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/filter_bank_log.cc",
+        "sha256": "be1c8953daaae14fbb11dd9be53e8711b36e0155070a72be7b0dce5a2be21899"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/filter_bank_spectral_subtraction.cc",
+        "sha256": "95c1771aca9decd1338baf08b5e11458bcbd0eb9abd4bcc827487bcfe51b61a4"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/filter_bank_square_root.cc",
+        "sha256": "9b77c408309bc4f532221608eaf2d2f2a541cc270d94234bd08d48c1251c88cf"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/irfft_float.cc",
+        "sha256": "b2774cd064e4c9639927fda0679120927567970fd6ad64688def16b723af8114"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/irfft_int16.cc",
+        "sha256": "3f3260bb518fe6d2529eaaf038cb891e4385f16e66a53106e80f13d37546530b"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/irfft_int32.cc",
+        "sha256": "e8528d720087a8013127e0352ba6717570abb0124fb399d6f05d69864f7960ec"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/log.cc",
+        "sha256": "360fb728a0429bb326a8277b3490e2d01ef2feca5b45a9f3f3278cca97cbf2c3"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/max_abs.cc",
+        "sha256": "d335478b01e1bb7ae8a2aeda3c31cc369f17c5e0dc9ff39858efbd1f3363b452"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/msb_32.cc",
+        "sha256": "ce1ab52f0bfe82bfab20c9812a29ca6ddaa1d3d5b5054b653de79bbaf53b2215"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/msb_64.cc",
+        "sha256": "881036437530b10c975fede302e8c232cb5702d6bef8603adcdbffac9593987f"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/overlap_add.cc",
+        "sha256": "9c071a58237a013ac500c71eac03a06251b0296dc2420859ac1881859c64c558"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/pcan_argc_fixed.cc",
+        "sha256": "8e13e10a827193bd2269d0bf8af9ed4cda719eb2c417f48568b7b382be680c28"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/rfft_float.cc",
+        "sha256": "b4f4c9fd5efea5b5844cc8aa7cc075150ff658ffd94c76e638188ad68bc160ab"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/rfft_int16.cc",
+        "sha256": "58c80f52588049f0fb996e698739e926afcb9bfc7a8c8ec2ce589b659b1620b0"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/rfft_int32.cc",
+        "sha256": "7e2e0e728bd9921e2e2f2a451f115df90f6dc9ff15d5b674ec7edc6845b35160"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/square_root_32.cc",
+        "sha256": "daedcebf1342287e96792892158e186a0311ddca8e59d82a298309120f2e770b"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/square_root_64.cc",
+        "sha256": "926fafdb05d086ce987972790401442472dc81a3779e1eb97f03bd2b25848e68"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/window.cc",
+        "sha256": "f2d62c272caa098b0c6fbe8cb8b0396561d71f9ff597f84f7be9bf108dc30c5e"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/kiss_fft_wrappers/kiss_fft_float.cc",
+        "sha256": "c44b206d48d958eac3ac006183eaf76b44a207a4a5ab2dd226f938de83b9ff4c"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/kiss_fft_wrappers/kiss_fft_int16.cc",
+        "sha256": "19df3dfb9617d185bc6b80c17fd2582b048b580652818701b4394a8df45fc223"
+      },
+      {
+        "path": "third_party/espressif__esp-tflite-micro/signal/src/kiss_fft_wrappers/kiss_fft_int32.cc",
+        "sha256": "11eb1133d4ed8bff757c04ceed1e2b5eef821066c8eb1c0be862ad82550fa08e"
+      }
+    ],
+    "esp_nn": [
+      {
+        "path": "third_party/espressif__esp-nn/src/activation_functions/esp_nn_relu_ansi.c",
+        "sha256": "0ef12c9a797eda542874b1ec39f27f7496a58e720cd4bb52f21c2000f7307d0c"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/basic_math/esp_nn_add_ansi.c",
+        "sha256": "2c0f4ac9164dde001c27a208def41e82715c2a53fdaa60682031e0e9e39d0d42"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/basic_math/esp_nn_mul_ansi.c",
+        "sha256": "0465753e542957d7ef3af3225a7900ee2f8d8c7521933fcbe8a959cea8ca3f0d"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_ansi.c",
+        "sha256": "cdad2b6c3c74c99a6214131d4c047a25331d01129a915616acbff936647cb687"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_opt.c",
+        "sha256": "333f8c7b4a8a70f444c9d63e7251dce8c3cef2d6518807102b004864e83be0bc"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_ansi.c",
+        "sha256": "ff82cf2705ff40281cdaa7e686ae8e39fbee6e2a52424b22b40b6b451026a258"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_opt.c",
+        "sha256": "a8867292fa9060cb3847d41f1f57ed805e6eadb19016618883fdb8775992d47b"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/fully_connected/esp_nn_fully_connected_ansi.c",
+        "sha256": "ed4be526ab29f035d7f9e0a25af61ecc86fcf0059143589914ebea2bd67ed51c"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/softmax/esp_nn_softmax_ansi.c",
+        "sha256": "1770c0ed103fc07bc5f4c228d0b545afa0a22f86c0fddcd16c0b4605221e21a7"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/softmax/esp_nn_softmax_opt.c",
+        "sha256": "ec5b04b76fde10274b59aad728b05482c44aecf44e3034d426d0563ff859a87b"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/pooling/esp_nn_avg_pool_ansi.c",
+        "sha256": "5e55b50cc0acb67724733513774ff752c2ad13bdf05e4a3d68b64b8954a94caf"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/pooling/esp_nn_max_pool_ansi.c",
+        "sha256": "498f27f0defb3f1efa9825d1192788b94e31b893ea6fd59644ba333bab3e6774"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/common/esp_nn_common_functions_esp32s3.S",
+        "sha256": "8a9adbe29e310a223193a76d42cca9961b87dd6c1d9fd9c8d2f770e740219745"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/common/esp_nn_multiply_by_quantized_mult_esp32s3.S",
+        "sha256": "ab3c8a85d55c1350a4c38dbebdcb3f9fcef9d5ebaa3eda57e9901a34869f56c2"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/common/esp_nn_multiply_by_quantized_mult_ver1_esp32s3.S",
+        "sha256": "d1f05580094876677c92adf978155978938680c8ebcc0c78b0cbbba5a1435c59"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/activation_functions/esp_nn_relu_s8_esp32s3.S",
+        "sha256": "1f87fd84b76dc2ab9796661437e4f7afa04206e10453d9cf89b40e9654844448"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/basic_math/esp_nn_add_s8_esp32s3.S",
+        "sha256": "e4aeec89f10d911afd0455c886f8a974252bba9a77e55e252d0a59ea648871b6"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/basic_math/esp_nn_mul_s8_esp32s3.S",
+        "sha256": "3d4dcfb094a4cec7f451a4b69cc859c372f737c088cc36f6ef068c8e643f130b"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_esp32s3.c",
+        "sha256": "d007360f58709a0da11a0d5381368e6a0fc69b2c47fccc4cd1f8b105d7e96806"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s8_esp32s3.c",
+        "sha256": "b9b4522076b702069ab2ac50f3157ad52b2667f8eb71e7d97083e6422026e44e"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_s16_mult8_esp32s3.S",
+        "sha256": "605ebf5c9d96b1d6fc2984e63723dbbcadf23d72da93f996e6f32c79128b9780"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_s8_mult8_1x1_esp32s3.S",
+        "sha256": "233cf143d5a59f2e9da755b16452fc07be8b16de9723bb3efeadc38343640b99"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_s16_mult4_1x1_esp32s3.S",
+        "sha256": "c0bbb32a96b7dca67758eb08872d9f0019b801556d8045872a662818e69e9440"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_conv_s8_filter_aligned_input_padded_esp32s3.S",
+        "sha256": "9b52360a9b21a23f93197d42fbb70181e6a404e39b71bab846ba40b1fd62cb79"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s8_mult1_3x3_padded_esp32s3.S",
+        "sha256": "74d084efc7d2a058274e48ac3ae713cab84e70ddc2f33f170101a9ea535a3385"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s16_mult1_esp32s3.S",
+        "sha256": "19cfa691b8615be3bc4caa7dc0d7be40d4825660e67357d28d89e67a1150164e"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s16_mult1_3x3_esp32s3.S",
+        "sha256": "e0a236c3996993461c30406b9a160406adea5a202050d86547af289e9e57f08b"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s16_mult1_3x3_no_pad_esp32s3.S",
+        "sha256": "f113eab683d482454c99db5fdc27e35431d1e60b35ca6fa9610c2e6ea5ced6d7"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s16_mult8_3x3_esp32s3.S",
+        "sha256": "75491a86477a773642c10dcb803c71a2cd725f576dcbd4e5ec4de025cacd0a8e"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s16_mult4_esp32s3.S",
+        "sha256": "210094cb8b81a080d299f7b7db714db6568945fc9ffc99ce8a5df4cbee6e122e"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/convolution/esp_nn_depthwise_conv_s16_mult8_esp32s3.S",
+        "sha256": "bc648610bca5c85bf59117df266403d813a3186c534bc00461bf27f5ab3e1859"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/fully_connected/esp_nn_fully_connected_s8_esp32s3.S",
+        "sha256": "dbde07a645d32c994925efd13cb4450cc351cbdddc022d573199350c19abc869"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/fully_connected/esp_nn_fully_connected_per_ch_s8_esp32s3.S",
+        "sha256": "a873b7461447ada1df2ed25b7072585a674032bc7c18b7e1f511806766b1b0d8"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/pooling/esp_nn_max_pool_s8_esp32s3.S",
+        "sha256": "9305c4d20de3792fa4d471e155819a6ffeda90d7a62fbb08ea6a7d7e66876018"
+      },
+      {
+        "path": "third_party/espressif__esp-nn/src/pooling/esp_nn_avg_pool_s8_esp32s3.S",
+        "sha256": "29674586b03d8441e90f857ebba1c553e3aa048892cb681d55cea65d5e4d8e0b"
+      }
+    ],
+    "frontend": [
+      {
+        "path": "third_party/esphome__esp-micro-speech-features/src/fft.c",
+        "sha256": "541e5fe21d3d35580b4049cde49244729f20dfb5745a8928218516ae760d2319"
+      },
+      {
+        "path": "third_party/esphome__esp-micro-speech-features/src/fft_util.c",
+        "sha256": "e670eb8ac5711bede0fc9d7df2e7eb0908f977e83cc40f9dc618a109384cb6f4"
+      },
+      {
+        "path": "third_party/esphome__esp-micro-speech-features/src/filterbank.c",
+        "sha256": "428a5f63005bf8473c5fb4246f408f8455ec185d4e3123ddf62dbeb61bc9de3a"
+      },
+      {
+        "path": "patches/filterbank_util.c",
+        "sha256": "74d23babcd8fd75b6d6dc198d3092e56be6da5f32354c9cb0f38dd30c910e638"
+      },
+      {
+        "path": "third_party/esphome__esp-micro-speech-features/src/frontend.c",
+        "sha256": "dc72e21bca9a1aa094803ab687a86871fa98781668a3d69cc5f4c3af029829c7"
+      },
+      {
+        "path": "third_party/esphome__esp-micro-speech-features/src/frontend_util.c",
+        "sha256": "980fbfc85334475c31c9a41cb12e18357c7fc7b4502188785c9e4c79e88902d7"
+      },
+      {
+        "path": "third_party/esphome__esp-micro-speech-features/src/kiss_fft.c",
+        "sha256": "48e99a0d353b3bdcc4e80bebb83311c8888c8878f6c0f4b0dd78474761aadd3a"
+      },
+      {
+        "path": "third_party/esphome__esp-micro-speech-features/src/kiss_fftr.c",
+        "sha256": "bd4f2f2c9c5037f0dda187185d843844e3d057790faec7b538f1c61b65b348f7"
+      },
+      {
+        "path": "third_party/esphome__esp-micro-speech-features/src/log_lut.c",
+        "sha256": "88d316def7060db8210ad607ccd934b893ca9242ac179a1b8e224ccf69d0a589"
+      },
+      {
+        "path": "third_party/esphome__esp-micro-speech-features/src/log_scale.c",
+        "sha256": "165f69f4b7b970b9ea5867d65ebef717cef556541ed71c17d9e35f513a42b32a"
+      },
+      {
+        "path": "third_party/esphome__esp-micro-speech-features/src/log_scale_util.c",
+        "sha256": "f44bcba29b52784959bc3bd4efa36d739716c7b767e08a96d1a2a66e0b49cc0e"
+      },
+      {
+        "path": "third_party/esphome__esp-micro-speech-features/src/noise_reduction.c",
+        "sha256": "06dee1b811713bda3ab37d30a0d19837942c5e7435c45868e076fb29702217ba"
+      },
+      {
+        "path": "third_party/esphome__esp-micro-speech-features/src/noise_reduction_util.c",
+        "sha256": "52739e99b645e8f4cf74cf958266dc33b75833957a8b1115844cacf36b70c76a"
+      },
+      {
+        "path": "third_party/esphome__esp-micro-speech-features/src/pcan_gain_control.c",
+        "sha256": "46a47e8bed169e98dd65876d04e776636ea4f9a8499ede04a58604f93bad1e38"
+      },
+      {
+        "path": "third_party/esphome__esp-micro-speech-features/src/pcan_gain_control_util.c",
+        "sha256": "354628ef93aa9328e7b7ebd7ddbc5454f627e956c814b7cf11d06b6b85d529cc"
+      },
+      {
+        "path": "third_party/esphome__esp-micro-speech-features/src/window.c",
+        "sha256": "9b2704f92586809866019a69314d0470d0b614ba0123b471283ddb7ce9ccd496"
+      },
+      {
+        "path": "third_party/esphome__esp-micro-speech-features/src/window_util.c",
+        "sha256": "2b818d1f388e7f2c2c3c5ded28a72d0a1d576629f6eee7025e36fa6f1cb70f7a"
+      }
+    ]
+  },
+  "omitted": "upstream examples, tests, test_app and WAV inputs; no generated objects, archives, or model assets"
+}

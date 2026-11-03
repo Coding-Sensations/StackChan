@@ -1,0 +1,52 @@
+{
+  "source_hashes": {
+    "run_loopback.py": "be8e7363de273e22266c9bc68481a991e78b16142aa9658cc56998967d194aed",
+    "test_streaming.py": "8e91bf61eb8eec3465e1090e78e6617d2ef0c05e2a819434c2b843b6cc3e1196",
+    "streaming_session.py": "4748a1d0dc94682b1b582de83cbf858fb0050aa77393e0630cc6caf736fd8f99",
+    "audio_wire.hpp": "dd2cc3b47f7526e47620c57a427199afa3ac36c13560c53e62fd1e9d7f7663fb",
+    "verify.py": "227f577015c2aa787f3cf6c557ea8018e9f6bfbf03f96b14a49980d079df9dcd"
+  },
+  "commands": [
+    {
+      "argv": [
+        "/Users/mikedemott/Homelab/.venv/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "/Users/mikedemott/Documents/Codex/2026-10-08/task-3/streaming",
+        "-p",
+        "test_streaming.py",
+        "-v"
+      ],
+      "exit": 0,
+      "seconds": 0.2183988329998101,
+      "sampled_peak_tree_rss_bytes": 163840,
+      "retained_identities": {
+        "14787": "Thu Oct 8 15:34:35 2026"
+      },
+      "cleanup_errors": [],
+      "remaining_group_pids": [],
+      "log": "test_duplicate_preserves_epoch_and_pending (test_streaming.Tests.test_duplicate_preserves_epoch_and_pending) ... ok\ntest_interruption_rejects_late_packet_and_reports_unknown_stop (test_streaming.Tests.test_interruption_rejects_late_packet_and_reports_unknown_stop) ... ok\ntest_playback_and_independent_sequences (test_streaming.Tests.test_playback_and_independent_sequences) ... ok\ntest_provider_memory_boundary (test_streaming.Tests.test_provider_memory_boundary) ... ok\ntest_replay_mutes_and_requires_new_turn (test_streaming.Tests.test_replay_mutes_and_requires_new_turn) ... ok\ntest_requires_ack_and_consent (test_streaming.Tests.test_requires_ack_and_consent) ... ok\ntest_revocation_and_watchdog (test_streaming.Tests.test_revocation_and_watchdog) ... ok\ntest_tls_and_duplicate_fields (test_streaming.Tests.test_tls_and_duplicate_fields) ... ok\ntest_wire_bounds_and_direction (test_streaming.Tests.test_wire_bounds_and_direction) ... ok\n\n----------------------------------------------------------------------\nRan 9 tests in 0.006s\n\nOK\n"
+    },
+    {
+      "argv": [
+        "/Users/mikedemott/Homelab/.venv/bin/python",
+        "-B",
+        "/Users/mikedemott/Documents/Codex/2026-10-08/task-3/streaming/run_loopback.py"
+      ],
+      "exit": 0,
+      "seconds": 0.30226629200478783,
+      "sampled_peak_tree_rss_bytes": 37240832,
+      "retained_identities": {
+        "14803": "Thu Oct 8 15:34:35 2026"
+      },
+      "cleanup_errors": [],
+      "remaining_group_pids": [],
+      "log": "{\"result\": \"PASS\", \"received\": 4, \"returned\": 3, \"interrupt\": true, \"unauthorized_rejected\": true, \"real_device_io\": false, \"credential_scope\": \"in-memory synthetic device only\", \"listener_closed\": true}\n"
+    }
+  ],
+  "result": "PASS",
+  "wall_seconds": 0.5279987499961862
+}

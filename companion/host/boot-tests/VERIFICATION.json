@@ -1,0 +1,63 @@
+{
+  "result": "PASS",
+  "wall_seconds": 1.3180321670006379,
+  "physical_io": false,
+  "handshake_assertions": 8,
+  "commands": [
+    {
+      "argv": [
+        "xcrun",
+        "clang++",
+        "-std=c++17",
+        "-isystem",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1",
+        "-I",
+        "/Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/firmware/main/companion",
+        "/Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/companion/host/boot-tests/test_handshake.cpp",
+        "-o",
+        "/tmp/stackchan-handshake-test"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/tmp/stackchan-handshake-test"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "xcrun",
+        "clang++",
+        "-std=c++17",
+        "-isystem",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/c++/v1",
+        "-I",
+        "/Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/companion/host/boot-tests",
+        "-I",
+        "/Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/firmware/xiaozhi-esp32/main",
+        "/Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/companion/host/boot-tests/test_readonly.cpp",
+        "/Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/firmware/main/companion/readonly_settings.cc",
+        "-o",
+        "/tmp/stackchan-readonly-test"
+      ],
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/tmp/stackchan-readonly-test"
+      ],
+      "exit": 0,
+      "stderr": ""
+    }
+  ],
+  "source_hashes": {
+    "companion/host/boot-tests/test_handshake.cpp": "870c92a4ee34bb5db002632f48a060b96c8229321a204af2234833e359ddbb20",
+    "companion/host/boot-tests/test_readonly.cpp": "519d40257b7a73d1c02f44c02dbfd29063be448d6ccf3f852310ba22bd01a370",
+    "firmware/main/companion/websocket_handshake.hpp": "9093e6fab91918e60977dce8e96f6cb01ae1d2dae7791b45190554fbf43e0781",
+    "firmware/main/companion/readonly_settings.cc": "27d0b2dae014f630f409ce3cee14651e9082daa1f9fca6362b66587e97bdf74b"
+  }
+}

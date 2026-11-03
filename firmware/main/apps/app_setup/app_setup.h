@@ -9,6 +9,7 @@
 #include <mooncake.h>
 #include <cstdint>
 #include <memory>
+#include <functional>
 
 /**
  * @brief 派生 App
@@ -18,6 +19,8 @@ class AppSetup : public mooncake::AppAbility {
 public:
     AppSetup();
 
+    void openInitialWorker(std::function<std::unique_ptr<setup_workers::WorkerBase>()> factory) { _initial_worker = std::move(factory); }
+
     // 重写生命周期回调
     void onCreate() override;
     void onOpen() override;
@@ -25,6 +28,7 @@ public:
     void onClose() override;
 
 private:
+    std::function<std::unique_ptr<setup_workers::WorkerBase>()> _initial_worker;
     std::vector<view::SelectMenuPage::MenuSection> _menu_sections;
     std::unique_ptr<view::SelectMenuPage> _menu_page;
     std::unique_ptr<setup_workers::WorkerBase> _worker;

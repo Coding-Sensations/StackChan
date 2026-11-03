@@ -1,0 +1,215 @@
+name: StackChan CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# PR-controlled code runs only on disposable GitHub-hosted runners.
+# No secrets, self-hosted runners, PR-target events, publishing or hardware IO.
+permissions:
+  contents: read
+
+concurrency:
+  group: stackchan-ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  firmware-host:
+    name: Firmware host tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Record tested revision
+        run: git log -1 --format=fuller
+      - name: Prepare exact host fixture dependencies
+        run: python3 scripts/ci/prepare_host_dependencies.py
+      - run: |
+          cmake -S firmware/tests -B "$RUNNER_TEMP/firmware-tests" -DCMAKE_BUILD_TYPE=Debug
+          cmake --build "$RUNNER_TEMP/firmware-tests" --parallel 2
+          ctest --test-dir "$RUNNER_TEMP/firmware-tests" --output-on-failure --no-tests=error --output-junit "$RUNNER_TEMP/firmware-tests.xml"
+          python3 - "$RUNNER_TEMP/firmware-tests.xml" <<'PYTEST'
+          import sys, xml.etree.ElementTree as ET
+          skipped = ET.parse(sys.argv[1]).findall(".//testcase/skipped")
+          if skipped:
+              raise SystemExit(f"Required firmware fixtures skipped: {len(skipped)}")
+          PYTEST
+
+  companion-python:
+    name: Companion Python offline checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Install exact fixture dependency
+        run: |
+          python3 -m venv "$RUNNER_TEMP/fixture-venv"
+          "$RUNNER_TEMP/fixture-venv/bin/python" -m pip install --require-hashes --only-binary=:all: -r scripts/ci/requirements.txt
+      - name: Run standalone public worker fixtures
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          echo "Full streaming integration requires private HomeLab source; see scripts/ci/DEPENDENCIES.md."
+          "$RUNNER_TEMP/fixture-venv/bin/python" scripts/ci/test_public_python.py
+      - name: Install hash-pinned companion route fixture dependencies
+        run: '"$RUNNER_TEMP/fixture-venv/bin/python" -m pip install --require-hashes --only-binary=:all: -r scripts/ci/requirements-companion-routes.txt'
+      - name: Fail-closed companion route and outbound source fixtures
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: '"$RUNNER_TEMP/fixture-venv/bin/python" scripts/ci/test_companion_routes.py'
+      - name: Public gateway startup and cleanup regressions
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/bridge/host-adapter:${{ github.workspace }}/companion/host:${{ github.workspace }}/companion/host/streaming:${{ github.workspace }}/companion/host/native-audio
+        run: '"$RUNNER_TEMP/fixture-venv/bin/python" -m unittest discover -s companion/host/streaming -p test_gateway_lifecycle_public.py -v'
+      - name: Public trust and custody model fixtures
+        run: |
+          python3 -m unittest discover -s companion/host/offline-public -v
+          python3 companion/host/numeric-ui/script/test_fixture_custody.py
+      - name: App transport and LAN lifecycle regressions without Flutter or device IO
+        run: |
+          archive="$RUNNER_TEMP/dart-sdk.zip"
+          curl --fail --location --retry 2 https://storage.googleapis.com/dart-archive/channels/stable/release/3.13.5/sdk/dartsdk-linux-x64-release.zip -o "$archive"
+          printf '%s  %s\n' 'ea864bc64df30a6b8bdf30b2e32550f7717d9a890de8f40293aeabb924fe232b' "$archive" | sha256sum --check
+          unzip -q "$archive" -d "$RUNNER_TEMP/app-regression-sdk"
+          "$RUNNER_TEMP/app-regression-sdk/dart-sdk/bin/dart" --disable-analytics
+          python3 scripts/ci/test_app_transport.py --dart "$RUNNER_TEMP/app-regression-sdk/dart-sdk/bin/dart"
+
+  companion-swift:
+    name: Companion Swift offline checks
+    runs-on: macos-15-intel
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Compile every offline fixture
+        env:
+          STACKCHAN_OFFLINE_BUILD_ROOT: ${{ runner.temp }}/companion-offline
+        run: bash companion/host/numeric-ui/script/test_offline.sh --compile-only
+      - name: Run pure model fixtures
+        env:
+          STACKCHAN_OFFLINE_BUILD_ROOT: ${{ runner.temp }}/companion-offline
+        run: |
+          "$STACKCHAN_OFFLINE_BUILD_ROOT/AudioEndpointDirectionChecks"
+          "$STACKCHAN_OFFLINE_BUILD_ROOT/StatusChecks"
+          "$STACKCHAN_OFFLINE_BUILD_ROOT/RememberedDeviceChecks"
+          "$STACKCHAN_OFFLINE_BUILD_ROOT/MiraLifecycleChecks"
+          "$STACKCHAN_OFFLINE_BUILD_ROOT/W1LifecycleChecks"
+          "$STACKCHAN_OFFLINE_BUILD_ROOT/WebcamDecoderChecks"
+
+  firmware-esp:
+    name: Firmware ESP32-S3 build
+    runs-on: ubuntu-24.04
+    container: espressif/idf@sha256:b9f2d6ea1c19e0c9f7959bdb74a9e3c775642f9d0f3b841937c5fa3363db892b
+    timeout-minutes: 35
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Compile actual firmware without device access
+        run: |
+          # checkout runs as the host UID; this disposable SDK container runs as root.
+          chown -R "$(id -u):$(id -g)" "$GITHUB_WORKSPACE"
+          git log -1 --format=fuller
+          . /opt/esp/idf/export.sh
+          cd firmware
+          python3 fetch_repos.py
+          # Source-only RAM profile; no runtime or real binding is activated.
+          idf.py -DSTACKCHAN_BUILD_PROFILE=custom -DSTACKCHAN_FEATURE_MANIFEST="$PWD/profiles/muse-ram.json" -DSTACKCHAN_MUSE_RAM_ONLY=ON -DSTACKCHAN_ENABLE_LOCAL_PORTRAITS=OFF build
+          grep -Fx "CONFIG_MBEDTLS_HKDF_C=y" sdkconfig
+          sha256sum repos.json main/idf_component.yml dependencies.lock build/stack-chan.bin
+
+  companion-app:
+    name: Companion macOS app build
+    runs-on: macos-15-intel
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Compile actual unsigned app without launching
+        env:
+          STACKCHAN_UI_BUILD_ROOT: ${{ runner.temp }}/companion-app
+        run: |
+          git log -1 --format=fuller
+          bash companion/host/numeric-ui/script/build_and_run.sh --compile-only
+          shasum -a 256 "$STACKCHAN_UI_BUILD_ROOT/StackChanPairing.app/Contents/MacOS/StackChanPairing"
+
+  secrets:
+    name: Secret history scan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Scan full history with immutable Gitleaks binary
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/gitleaks.tar.gz"
+          curl --fail --location --retry 2 https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz -o "$archive"
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $archive" | sha256sum --check
+          tar -xzf "$archive" -C "$RUNNER_TEMP" gitleaks
+          # Remerge diffs cover changes introduced only by two-parent merge resolutions.
+          # Git cannot reconstruct octopus resolutions; never silently omit that code.
+          unsupported_merges="$(git rev-list --all --min-parents=3 --count)"
+          if [[ "$unsupported_merges" != "0" ]]; then
+            echo "Unsupported octopus merge history requires explicit scan coverage." >&2
+            exit 1
+          fi
+          git log --all --full-history --remerge-diff --max-count=1 --format= >/dev/null
+          scan_log="$RUNNER_TEMP/gitleaks-history.log"
+          report="$RUNNER_TEMP/gitleaks-redacted.json"
+          scan_status=0
+          "$RUNNER_TEMP/gitleaks" git --redact --no-banner --no-color --report-format=json --report-path="$report" --log-opts='--all --full-history --remerge-diff' . 2>&1 | tee "$scan_log" || scan_status=$?
+          # Print only finding locations/fingerprints; never Match or Secret.
+          python3 - "$report" <<'REPORT'
+          import json, pathlib, sys
+          path = pathlib.Path(sys.argv[1])
+          if path.exists():
+              for item in json.loads(path.read_text()):
+                  print(json.dumps({key: item.get(key) for key in
+                        ('RuleID', 'File', 'StartLine', 'Commit', 'Fingerprint')}, sort_keys=True))
+          REPORT
+          if grep -Eq '(^|[[:space:]])(ERR|FTL)([[:space:]]|$)' "$scan_log"; then
+            echo "Secret scanner emitted errors; partial history is not a passing scan." >&2
+            exit 1
+          fi
+          exit "$scan_status"
+
+  required:
+    name: All required checks pass
+    needs: [firmware-host, firmware-esp, companion-python, companion-swift, companion-app, secrets]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Require every lane to succeed
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          results = json.loads(os.environ["RESULTS"])
+          failed = {name: job["result"] for name, job in results.items() if job["result"] != "success"}
+          if failed:
+              raise SystemExit(f"Required lanes did not succeed: {failed}")
+          print("All required checks passed")
+          PY

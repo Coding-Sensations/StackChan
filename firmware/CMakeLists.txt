@@ -19,5 +19,30 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/sdkconfig.defaults.local")
     message(STATUS "StackChan: detected sdkconfig.defaults.local, applying overlay")
 endif()
 
+# Offline qualification may use an already reviewed component cache. No download
+# or cache mutation is performed by this option; local components take priority.
+set(STACKCHAN_OFFLINE_COMPONENT_ROOT "" CACHE PATH "Reviewed offline IDF component cache")
+if(STACKCHAN_OFFLINE_COMPONENT_ROOT)
+    file(GLOB STACKCHAN_OFFLINE_COMPONENTS LIST_DIRECTORIES true "${STACKCHAN_OFFLINE_COMPONENT_ROOT}/*")
+    foreach(STACKCHAN_OFFLINE_COMPONENT IN LISTS STACKCHAN_OFFLINE_COMPONENTS)
+        if(EXISTS "${STACKCHAN_OFFLINE_COMPONENT}/CMakeLists.txt")
+            list(APPEND EXTRA_COMPONENT_DIRS "${STACKCHAN_OFFLINE_COMPONENT}")
+        endif()
+    endforeach()
+endif()
+
+# Resolve before component discovery so optional components can register empty.
+include("${CMAKE_CURRENT_SOURCE_DIR}/build_profiles.cmake")
+
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(stack-chan)
+
+# An explicitly pinned local graph may restore manager-injected edges when a
+# reviewed cache is built offline. This option never downloads or overrides SDK code.
+set(STACKCHAN_OFFLINE_GRAPH "" CACHE FILEPATH "Pinned generated offline dependency links")
+if(STACKCHAN_OFFLINE_GRAPH)
+    if(NOT "$ENV{IDF_COMPONENT_MANAGER}" STREQUAL "0" OR MINIMAL_BUILD OR COMPONENTS OR EXCLUDE_COMPONENTS)
+        message(FATAL_ERROR "Offline graph requires manager disabled and the complete registered component set")
+    endif()
+    include("${STACKCHAN_OFFLINE_GRAPH}")
+endif()

@@ -1,0 +1,105 @@
+{
+  "kind": "schema-shaped synthetic fixtures, not captured runtime proof",
+  "references": {
+    "codex": "https://developers.openai.com/codex/hooks/",
+    "claude": "https://code.claude.com/docs/en/hooks"
+  },
+  "cases": [
+    {
+      "provider": "codex",
+      "payload": {
+        "session_id": "fixture-codex",
+        "hook_event_name": "UserPromptSubmit",
+        "turn_id": "fixture-turn",
+        "cwd": "/fixture",
+        "permission_mode": "default"
+      }
+    },
+    {
+      "provider": "codex",
+      "payload": {
+        "session_id": "fixture-codex",
+        "hook_event_name": "PreToolUse",
+        "turn_id": "fixture-turn",
+        "cwd": "/fixture",
+        "permission_mode": "default",
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "fixture-only-not-executed"
+        }
+      }
+    },
+    {
+      "provider": "codex",
+      "payload": {
+        "session_id": "fixture-codex",
+        "hook_event_name": "PermissionRequest",
+        "turn_id": "fixture-turn",
+        "cwd": "/fixture",
+        "permission_mode": "default",
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "fixture-only-not-executed"
+        }
+      }
+    },
+    {
+      "provider": "codex",
+      "payload": {
+        "session_id": "fixture-codex",
+        "hook_event_name": "Stop",
+        "turn_id": "fixture-turn",
+        "cwd": "/fixture",
+        "permission_mode": "default"
+      }
+    },
+    {
+      "provider": "claude",
+      "payload": {
+        "session_id": "fixture-claude",
+        "hook_event_name": "UserPromptSubmit",
+        "prompt_id": "fixture-turn",
+        "cwd": "/fixture",
+        "permission_mode": "default"
+      }
+    },
+    {
+      "provider": "claude",
+      "payload": {
+        "session_id": "fixture-claude",
+        "hook_event_name": "PreToolUse",
+        "prompt_id": "fixture-turn",
+        "cwd": "/fixture",
+        "permission_mode": "default",
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "fixture-only-not-executed"
+        }
+      }
+    },
+    {
+      "provider": "claude",
+      "payload": {
+        "session_id": "fixture-claude",
+        "hook_event_name": "PermissionRequest",
+        "prompt_id": "fixture-turn",
+        "cwd": "/fixture",
+        "permission_mode": "default",
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "fixture-only-not-executed"
+        }
+      }
+    },
+    {
+      "provider": "claude",
+      "payload": {
+        "session_id": "fixture-claude",
+        "hook_event_name": "Stop",
+        "prompt_id": "fixture-turn",
+        "cwd": "/fixture",
+        "permission_mode": "default"
+      }
+    }
+  ]
+}

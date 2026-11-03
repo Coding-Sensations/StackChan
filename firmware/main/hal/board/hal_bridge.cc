@@ -17,6 +17,9 @@
 #include <mutex>
 #include <assets.h>
 #include <settings.h>
+#ifdef STACKCHAN_COMPANION_BOOT
+#include <companion/settings_policy.hpp>
+#endif
 
 static const char* _tag = "HAL_BRIDGE";
 
@@ -132,6 +135,12 @@ XiaozhiConfig_t get_xiaozhi_config()
         settings.GetInt(_xiaozhi_config_idle_random_movement_key.data(), config.idleRandomMovementLevel);
     config.startAiAgentOnBoot =
         settings.GetBool(_xiaozhi_config_start_ai_agent_on_boot_key.data(), config.startAiAgentOnBoot);
+#ifdef STACKCHAN_COMPANION_BOOT
+    // Preserve/read legacy settings, but require a choice made in this custom
+    // firmware before automatic microphone/cloud/camera/motion activation.
+    Settings boot_settings("companion_boot", false);
+    config.startAiAgentOnBoot = config.startAiAgentOnBoot && boot_settings.GetBool("stock_optin", false);
+#endif
 
     return config;
 }
@@ -143,6 +152,13 @@ void set_xiaozhi_config(const XiaozhiConfig_t& config)
     settings.SetBool(_xiaozhi_config_allow_shutdown_when_charging_key.data(), config.allowShutdownWhenCharging);
     settings.SetInt(_xiaozhi_config_idle_random_movement_key.data(), config.idleRandomMovementLevel);
     settings.SetBool(_xiaozhi_config_start_ai_agent_on_boot_key.data(), config.startAiAgentOnBoot);
+#ifdef STACKCHAN_COMPANION_BOOT
+    if (companion::CurrentSettingsScope() == companion::SettingsScope::AiGeneral) {
+        // Only the real General page's explicit Confirm can grant/revoke opt-in.
+        Settings boot_settings("companion_boot", true);
+        boot_settings.SetBool("stock_optin", config.startAiAgentOnBoot);
+    }
+#endif
 }
 
 void app_play_sound(const std::string_view& sound)

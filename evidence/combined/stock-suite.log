@@ -1,0 +1,30 @@
+{"result": "passed", "setup": "official menu + Screensaver, AI.Agent renamed Stackchan", "launcher": "official registration prefix; Companions visual route checked separately", "tools": "one Tools tile -> selection -> dedicated graphical pages", "device_access": false}
+....
+----------------------------------------------------------------------
+Ran 4 tests in 4.613s
+
+OK
+PASS USB ownership, foreign driver refusal, core affinity, stale FIFO, expiry, bounds and close failure
+firmware install policy tests passed
+PASS 2048 single-merge/directions/no-op/full/overflow; NFC Type2 URI/bounds; NEC decode/timing rejection
+{
+  "result": "passed",
+  "checks": [
+    "menu_hierarchy",
+    "pr1_review_regressions",
+    "shell_teardown",
+    "usb_owner",
+    "menu_navigation",
+    "advanced_config",
+    "firmware_policy",
+    "credentials",
+    "wifi_store",
+    "firmware_migration",
+    "scoped_settings",
+    "tools_ui",
+    "stock_models"
+  ],
+  "source_revision": "4a24491761ffab19f3df758c93ebbdada4c29ddc",
+  "live_network": false,
+  "device_access": false
+}

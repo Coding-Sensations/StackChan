@@ -1,0 +1,18 @@
+Start testing: Oct 19 12:28 PDT
+----------------------------------------------------------
+1/1 Testing: motion_math_test
+1/1 Test: motion_math_test
+Command: "/tmp/stackchan-pr1-p2-host/motion_math_test"
+Directory: /tmp/stackchan-pr1-p2-host
+"motion_math_test" start time: Oct 19 12:28 PDT
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.15 sec
+----------------------------------------------------------
+Test Passed.
+"motion_math_test" end time: Oct 19 12:28 PDT
+"motion_math_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 19 12:28 PDT

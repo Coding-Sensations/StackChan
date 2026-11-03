@@ -24,6 +24,9 @@
 #include <ctime>
 #include <mutex>
 #include <vector>
+#ifdef STACKCHAN_COMPANION_BOOT
+#include <companion/station_authority.hpp>
+#endif
 
 namespace network_diagnostics {
 namespace {
@@ -54,6 +57,9 @@ void logResult(const char* service, const ServiceResult& result)
             break;
         case Status::Failed:
             status = "failed";
+            break;
+        case Status::NotTested:
+            status = "not_tested";
             break;
     }
     // Log only fixed labels and numeric results. Never include URL, headers,
@@ -277,17 +283,40 @@ bool NetworkDiagnostics::start()
 
 void NetworkDiagnostics::run(const std::shared_ptr<State>& state)
 {
+    auto not_tested=[&](const char* wifi_detail,const char* service_detail){
+        std::lock_guard<std::mutex> lock(state->mutex);
+        state->results.wifi=wifi_detail;
+        state->results.xiaozhi=state->results.m5stack={Status::NotTested,service_detail};
+    };
+    if(state->cancelled)return;
+#ifdef STACKCHAN_COMPANION_BOOT
+    auto& authority=companion::network::Authority();
+    const auto station_generation=authority.Generation();
+    auto station_current=[&]{return authority.Accepts(companion::network::Owner::Vendor,station_generation);};
+    // This page is a diagnostic, not a new station owner. It must neither steal
+    // Saved/Mira networking nor present denied driver calls as server failures.
+    if(!station_current()){
+        if(authority.Current()==companion::network::Owner::Saved)
+            not_tested("A companion is using Wi-Fi. Service tests were not started.","Not tested: Wi-Fi belongs to another session.");
+        else if(authority.Current()==companion::network::Owner::None)
+            not_tested("Wi-Fi test not started: no current Wi-Fi session.","Not tested: no current Wi-Fi session.");
+        else
+            not_tested("Wi-Fi is finishing another session. Tests were not started.","Not tested: Wi-Fi cleanup is pending.");
+        return;
+    }
+#else
+    auto station_current=[]{return true;};
+#endif
+    auto changed=[&]{not_tested("Wi-Fi session changed. Service tests stopped.","Not tested: the Wi-Fi session changed.");};
     auto& wifi = WifiManager::GetInstance();
     {
         std::lock_guard<std::mutex> lock(WifiStartupMutex);
         if (state->cancelled) return;
         if (WifiProvisioningActive) {
-            std::lock_guard<std::mutex> results_lock(state->mutex);
-            state->results.wifi = "App Wi-Fi setup is active. Exit Settings to restart, then test again.";
-            state->results.xiaozhi =
-                state->results.m5stack = {Status::Failed, "Finish Change Wi-Fi before testing servers."};
+            not_tested("Wi-Fi setup is active. Service tests were not started.","Not tested: Wi-Fi setup is active.");
             return;
         }
+        if(!station_current()){changed();return;}
         if (!wifi.IsConnected() && !SsidManager::GetInstance().GetSsidList().empty()) {
             // Starting through WifiBoard arms its automatic AP-provisioning
             // timer. A diagnostic must not switch modes after the page closes.
@@ -295,26 +324,23 @@ void NetworkDiagnostics::run(const std::shared_ptr<State>& state)
             config.ssid_prefix = "Xiaozhi";
             config.language    = Lang::CODE;
             if (!wifi.IsInitialized() && !wifi.Initialize(config)) {
-                std::lock_guard<std::mutex> results_lock(state->mutex);
-                state->results.wifi = "Wi-Fi initialization failed. Restart the device and try again.";
-                state->results.xiaozhi =
-                    state->results.m5stack = {Status::Failed, "Wi-Fi is unavailable; server was not tested."};
+                not_tested("Wi-Fi could not be prepared for this test.","Not tested: Wi-Fi preparation failed.");
                 return;
             }
+            if(!station_current()){changed();return;}
             wifi.StartStation();
         }
     }
     const auto wifi_deadline = esp_timer_get_time() + 15000000;
     while (!wifi.IsConnected() && !state->cancelled && esp_timer_get_time() < wifi_deadline &&
            !SsidManager::GetInstance().GetSsidList().empty()) {
+        if(!station_current()){changed();return;}
         vTaskDelay(pdMS_TO_TICKS(100));
     }
     if (state->cancelled) return;
+    if(!station_current()){changed();return;}
     if (!wifi.IsConnected()) {
-        std::lock_guard<std::mutex> lock(state->mutex);
-        state->results.wifi = "Wi-Fi is not connected. Use Change Wi-Fi, then try again.";
-        state->results.xiaozhi =
-            state->results.m5stack = {Status::Failed, "No Wi-Fi connection; server was not tested."};
+        not_tested("Wi-Fi connection was not established for this test.","Not tested: Wi-Fi connection was not established.");
         return;
     }
     wifi_ap_record_t ap{};
@@ -338,6 +364,7 @@ void NetworkDiagnostics::run(const std::shared_ptr<State>& state)
         vTaskDelay(pdMS_TO_TICKS(100));
     }
     if (state->cancelled) return;
+    if(!station_current()){changed();return;}
     Settings settings("wifi", false);
     auto url = settings.GetString("ota_url");
     if (url.empty()) url = CONFIG_OTA_URL;
@@ -346,18 +373,21 @@ void NetworkDiagnostics::run(const std::shared_ptr<State>& state)
                                      {"Client-Id", board.GetUuid()},  {"User-Agent", SystemInfo::GetUserAgent()},
                                      {"Accept-Language", Lang::CODE}, {"Content-Type", "application/json"}};
     auto xiaozhi                  = probe(url, xiaozhi_headers, board.GetSystemInfoJson(), true, state->cancelled);
+    if(!station_current()){changed();return;}
     {
         std::lock_guard<std::mutex> lock(state->mutex);
         state->results.xiaozhi = std::move(xiaozhi);
         state->results.m5stack = {Status::Checking, "Connecting to M5Stack..."};
     }
     if (state->cancelled) return;
+    if(!station_current()){changed();return;}
     auto base = httpUrl(secret_logic::get_server_url());
     while (!base.empty() && base.back() == '/') base.pop_back();
     const auto token = secret_logic::generate_auth_token();
     auto m5stack =
         token.empty() ? ServiceResult{Status::Failed, "Could not generate device authorization."}
                       : probe(base + "/stackChan/device/info", {{"Authorization", token}}, "", false, state->cancelled);
+    if(!station_current()){changed();return;}
     {
         std::lock_guard<std::mutex> lock(state->mutex);
         state->results.m5stack = std::move(m5stack);

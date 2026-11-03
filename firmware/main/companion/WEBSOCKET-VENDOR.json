@@ -1,0 +1,8 @@
+{
+  "vendor": "78/esp-ml307",
+  "license": "Apache-2.0",
+  "source_sha256": {
+    "include/web_socket.h": "6da01f1e761fc1dbbd4f7c6a47860769b3340c73871222d9ed104eb91bdefa57",
+    "src/web_socket.cc": "ea5398bce8e283e1e3cf41da384e11a241afdf88ae5a980b7594fe549d0758fe"
+  }
+}

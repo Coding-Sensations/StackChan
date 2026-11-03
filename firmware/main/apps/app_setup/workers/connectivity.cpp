@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 #include "workers.h"
+#include <apps/network_setup/persistence_gate.h>
+#include <apps/stock_services/policy.h>
 #include <src/misc/lv_area.h>
 #include <src/misc/lv_text.h>
 #include <stackchan/stackchan.h>
@@ -20,6 +22,10 @@ static std::string _tag = "Setup-Connectivity";
 
 WifiSetupWorker::WifiSetupWorker()
 {
+#ifdef STACKCHAN_COMPANION_BOOT
+    if(stock_services::CurrentFeature()==stock_services::Feature::Onboarding)
+        network_setup::BeginOriginalOnboardingSession();
+#endif
     _state       = State::AppDownload;
     _last_state  = State::None;
     _is_first_in = true;
@@ -35,6 +41,10 @@ WifiSetupWorker::WifiSetupWorker()
 
 WifiSetupWorker::~WifiSetupWorker()
 {
+#ifdef STACKCHAN_COMPANION_BOOT
+    if(stock_services::CurrentFeature()==stock_services::Feature::Onboarding)
+        network_setup::EndOriginalOnboardingSession();
+#endif
     GetHAL().onAppConfigEvent.disconnect(_app_config_signal_id);
     GetStackChan().resetAvatar();
 }
@@ -143,6 +153,8 @@ void WifiSetupWorker::update_state()
             if (_is_first_in) {
                 _is_first_in = false;
 
+                // Retrying the original setup must keep exactly one event subscriber.
+                GetHAL().onAppConfigEvent.disconnect(_app_config_signal_id);
                 // Start app config server
                 _app_config_signal_id =
                     GetHAL().onAppConfigEvent.connect([this](AppConfigEvent event) { _last_app_config_event = event; });

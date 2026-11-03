@@ -1,126 +1,147 @@
 /*
  * SPDX-FileCopyrightText: 2026 M5Stack Technology CO LTD
- *
  * SPDX-License-Identifier: MIT
  */
 #include "hal.h"
 #include "utils/ota/ota.h"
 #include "utils/secret_logic/secret_logic.h"
+#include <apps/stock_services/firmware_install_policy.h>
 #include <mooncake_log.h>
-#include <memory>
-#include <board.h>
 #include <cJSON.h>
+#include <esp_http_client.h>
+#include <esp_crt_bundle.h>
+#include <esp_timer.h>
+#include <array>
+#include <atomic>
+#include <memory>
+#include <cstring>
 
-static const std::string_view _tag = "HAL-AppCenter";
+namespace {
+constexpr size_t kBodyLimit = 24 * 1024;
+constexpr size_t kEntryLimit = 32;
+const std::string_view kTag = "HAL-AppCenter";
 
-static std::string get_app_info_list_url()
+std::string field(cJSON* item, std::initializer_list<const char*> keys, size_t limit, bool url = false)
 {
-    return secret_logic::get_server_url() + "/stackChan/apps";
-}
-
-static const char *get_json_string(cJSON *item, std::initializer_list<const char *> keys)
-{
-    for (const auto *key : keys) {
-        cJSON *value = cJSON_GetObjectItemCaseSensitive(item, key);
-        if (cJSON_IsString(value) && value->valuestring != nullptr) {
-            return value->valuestring;
+    for (auto key : keys) {
+        auto value = cJSON_GetObjectItemCaseSensitive(item, key);
+        if (!cJSON_IsString(value) || !value->valuestring) continue;
+        const char* text = value->valuestring;
+        const size_t size = strnlen(text, limit + 1);
+        if (url) return size <= limit ? std::string(text, size) : std::string();
+        std::string result(text, size > limit ? limit : size);
+        for (char& c : result) if (static_cast<unsigned char>(c) < 32 || c == 127) c = ' ';
+        // Avoid cutting a UTF-8 codepoint at the response limit.
+        if (size > limit && !result.empty()) {
+            size_t pos = result.size();
+            while (pos && (static_cast<unsigned char>(result[pos - 1]) & 0xc0) == 0x80) --pos;
+            if (pos && static_cast<unsigned char>(result[pos - 1]) >= 0xc0) result.resize(pos - 1);
         }
+        return result;
     }
-
-    return nullptr;
+    return {};
+}
+bool boundedDepth(const std::string& body)
+{
+    int depth = 0;
+    bool quoted = false, escaped = false;
+    for (char c : body) {
+        if (quoted) {
+            if (escaped) escaped = false;
+            else if (c == '\\') escaped = true;
+            else if (c == '"') quoted = false;
+        } else if (c == '"') quoted = true;
+        else if (c == '{' || c == '[') { if (++depth > 32) return false; }
+        else if (c == '}' || c == ']') { if (--depth < 0) return false; }
+    }
+    return !quoted && depth == 0;
+}
+std::function<void(int)> on_progress;
+std::atomic<bool> installing{false};
+void ota_callback(int progress) { if (on_progress) on_progress(progress); }
 }
 
 app_center::AppInfoList_t Hal::fetchAppList()
 {
-    app_center::AppInfoList_t app_list;
-    auto &board  = Board::GetInstance();
-    auto network = board.GetNetwork();
-
-    auto http = network->CreateHttp(0);
-    if (!http->Open("GET", get_app_info_list_url())) {
-        mclog::tagError(_tag, "failed to open http connection");
-        return app_list;
+    app_center::AppInfoList_t result;
+    const std::string url = secret_logic::get_server_url() + "/stackChan/apps";
+    if (!stock_services::IsFirmwareImageUrl(url)) return result;
+    esp_http_client_config_t config{};
+    config.url = url.c_str();
+    config.timeout_ms = 4000;
+    config.disable_auto_redirect = true;
+    config.buffer_size = 1024;
+#if CONFIG_MBEDTLS_CERTIFICATE_BUNDLE
+    config.crt_bundle_attach = esp_crt_bundle_attach;
+#endif
+    auto client = esp_http_client_init(&config);
+    if (!client) return result;
+    bool valid = esp_http_client_open(client, 0) == ESP_OK;
+    if (valid) {
+        const int64_t length = esp_http_client_fetch_headers(client);
+        valid = length >= 0 && length <= static_cast<int64_t>(kBodyLimit) &&
+                esp_http_client_get_status_code(client) == 200;
     }
-
-    if (http->GetStatusCode() != 200) {
-        mclog::tagError(_tag, "failed to fetch app list, status code: {}", http->GetStatusCode());
-        http->Close();
-        return app_list;
+    std::string body;
+    std::array<char, 1024> buffer{};
+    const int64_t deadline = esp_timer_get_time() + 12000000;
+    while (valid && esp_timer_get_time() < deadline) {
+        const int count = esp_http_client_read(client, buffer.data(), buffer.size());
+        if (count < 0) { valid = false; break; }
+        if (!count) { valid = esp_http_client_is_complete_data_received(client); break; }
+        if (body.size() + count > kBodyLimit) { valid = false; break; }
+        body.append(buffer.data(), count);
     }
-
-    std::string data = http->ReadAll();
-    http->Close();
-
-    cJSON *root = cJSON_Parse(data.c_str());
-    if (root == NULL) {
-        mclog::tagError(_tag, "failed to parse json response");
-        return app_list;
+    valid = valid && esp_http_client_is_complete_data_received(client);
+    esp_http_client_close(client);
+    esp_http_client_cleanup(client);
+    if (!valid || !boundedDepth(body)) {
+        mclog::tagError(kTag, "catalog unavailable or response exceeds limits");
+        return result;
     }
-
-    cJSON *app_array = nullptr;
-    if (cJSON_IsArray(root)) {
-        app_array = root;
-    } else if (cJSON_IsObject(root)) {
-        cJSON *code = cJSON_GetObjectItemCaseSensitive(root, "code");
-        if (cJSON_IsNumber(code) && code->valueint != 0) {
-            cJSON *message = cJSON_GetObjectItemCaseSensitive(root, "message");
-            mclog::tagError(_tag, "failed to fetch app list, code: {}, message: {}", code->valueint,
-                            cJSON_IsString(message) ? message->valuestring : "unknown");
-            cJSON_Delete(root);
-            return app_list;
-        }
-
-        app_array = cJSON_GetObjectItemCaseSensitive(root, "data");
-        if (!cJSON_IsArray(app_array)) {
-            mclog::tagError(_tag, "invalid app list response: data is not an array");
-            cJSON_Delete(root);
-            return app_list;
-        }
+    std::unique_ptr<cJSON, decltype(&cJSON_Delete)> root(
+        cJSON_ParseWithLengthOpts(body.c_str(), body.size() + 1, nullptr, true), cJSON_Delete);
+    if (!root) return result;
+    cJSON* list = root.get();
+    if (cJSON_IsObject(list)) {
+        auto code = cJSON_GetObjectItemCaseSensitive(list, "code");
+        if (cJSON_IsNumber(code) && code->valueint != 0) return result;
+        list = cJSON_GetObjectItemCaseSensitive(list, "data");
     }
-
-    if (cJSON_IsArray(app_array)) {
-        cJSON *item = NULL;
-        cJSON_ArrayForEach(item, app_array)
-        {
-            app_center::AppInfo_t info;
-
-            if (const char *name = get_json_string(item, {"appName", "name"})) {
-                info.name = name;
-            }
-
-            if (const char *icon = get_json_string(item, {"iconUrl", "appIcon", "icon"})) {
-                info.iconUrl = icon;
-            }
-
-            if (const char *desc = get_json_string(item, {"description", "appDescription", "desc"})) {
-                info.description = desc;
-            }
-
-            if (const char *url = get_json_string(item, {"firmwareUrl", "downloadUrl", "otaUrl", "url"})) {
-                info.firmwareUrl = url;
-            }
-
-            app_list.push_back(info);
-        }
-    } else {
-        mclog::tagError(_tag, "invalid app list response: unexpected json shape");
+    if (!cJSON_IsArray(list)) return result;
+    const int count = cJSON_GetArraySize(list);
+    for (int index = 0; index < count && index < static_cast<int>(kEntryLimit); ++index) {
+        auto item = cJSON_GetArrayItem(list, index);
+        if (!cJSON_IsObject(item)) continue;
+        app_center::AppInfo_t info;
+        info.name = field(item, {"appName", "name"}, 80);
+        info.iconUrl = field(item, {"appIconUrl", "iconUrl", "appIcon", "icon"}, 512, true);
+        info.description = field(item, {"description", "appDescription", "desc"}, 768);
+        // Stock aliases describe an ESP firmware image, never an executable package/plugin.
+        info.firmwareUrl = field(item, {"firmwareUrl", "downloadUrl", "otaUrl", "url"}, 512, true);
+        if (!info.name.empty()) result.push_back(std::move(info));
     }
-
-    cJSON_Delete(root);
-    return app_list;
-}
-
-static std::function<void(int)> _on_progress = nullptr;
-static void ota_callback(int progress)
-{
-    if (_on_progress) {
-        _on_progress(progress);
-    }
+    return result;
 }
 
 void Hal::launchApp(std::string_view url, std::function<void(int)> onProgress)
 {
-    mclog::tagInfo(_tag, "launching app from url: {}", url);
-    _on_progress = onProgress;
-    start_ota_update(url.data(), ota_callback);
+    if (!stock_services::FirmwareInstallAllowed() || !stock_services::IsFirmwareImageUrl(url)) {
+        if (onProgress) onProgress(-1);
+        return;
+    }
+    bool expected = false;
+    if (!installing.compare_exchange_strong(expected, true)) {
+        if (onProgress) onProgress(-1);
+        return;
+    }
+    const std::string image_url(url);  // Original helper requires a NUL-terminated string.
+    on_progress = std::move(onProgress);
+    start_ota_update(image_url.c_str(), ota_callback);
+    // Successful OTA restarts. Any return is failure; relinquish all permission/callback state.
+    stock_services::SetFirmwareInstallAllowed(false);
+    auto failed = std::move(on_progress);
+    on_progress = nullptr;
+    installing.store(false);
+    if (failed) failed(-1);
 }

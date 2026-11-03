@@ -1,4 +1,7 @@
+#include <apps/stock_shell/sd_mount_diagnostics.h>
 #include "wifi_board.h"
+#include <apps/stock_services/policy.h>
+#include <companion/settings_policy.hpp>
 #include "cores3_audio_codec.h"
 #include "display/lcd_display.h"
 #include "stackchan_display.h"
@@ -16,11 +19,14 @@
 #include <esp_lcd_panel_ops.h>
 #include <esp_lcd_ili9341.h>
 #include <esp_timer.h>
+#include <apps/runtime_lifecycle/session.h>
 #include <algorithm>
 #include <mutex>
 #include "stackchan_camera.h"
+#include <companion/audio_owner.hpp>
 #include "hal_bridge.h"
 #include <hal/hal.h>
+#include "apps/stock_shell/stackchan_sd_ir.h"
 
 #define TAG "M5Stack-StackChan-Board"
 
@@ -117,6 +123,9 @@ public:
 
         SetBrightness(0);
     }
+
+    esp_err_t ReadSdControl(uint8_t& value){return TryReadRegs(0x90,&value,1,100);}
+    esp_err_t ReadSdVoltage(uint8_t& value){return TryReadRegs(0x95,&value,1,100);}
 
     void SetBrightness(uint8_t brightness)
     {
@@ -228,6 +237,8 @@ public:
         WriteReg(0x12, 0b11111111);  // LEDMODE_P0
         WriteReg(0x13, 0b11111111);  // LEDMODE_P1
     }
+
+    esp_err_t ReadSdSwitch(uint8_t& value){return TryReadRegs(0x00,&value,1,100);}
 
     void ResetAw88298()
     {
@@ -357,9 +368,17 @@ private:
     Aw9523* aw9523_;
     Ft6336* ft6336_;
     LvglDisplay* display_;
-    StackChanCamera* camera_;
+    std::atomic<StackChanCamera*> camera_{nullptr};
+    std::mutex camera_object_mutex_;
+    std::mutex camera_stop_receipt_mutex_;
+    companion::desk::BoardCameraStopReport retained_camera_stop_;
+    std::shared_ptr<companion::desk::QualifiedCaptureTimingAuthority> camera_timing_;
+    companion::desk::BoardCameraSession camera_session_;
+    esp_video_init_dvp_config_t camera_dvp_config_{};
+    esp_video_init_config_t camera_video_config_{};
+
     esp_timer_handle_t touchpad_timer_;
-    PowerSaveTimer* power_save_timer_;
+    PowerSaveTimer* power_save_timer_ = nullptr;
     hal_bridge::XiaozhiConfig_t xiaozhi_config_;
     std::mutex power_state_mutex_;
     PowerState power_state_;
@@ -375,6 +394,10 @@ private:
 
     void UpdatePowerSaveEnabled(bool has_external_power, bool is_discharging)
     {
+        if (!power_save_timer_) return;
+#ifdef STACKCHAN_COMPANION_BOOT
+        if (companion::CurrentAudioOwner() != companion::AudioOwner::Stock) return;
+#endif
         const bool should_enable_power_save = ShouldEnablePowerSave(has_external_power, is_discharging);
         if (should_enable_power_save == last_power_save_enabled_) {
             return;
@@ -460,14 +483,25 @@ private:
 
         power_save_timer_ = new PowerSaveTimer(-1, seconds_to_sleep, seconds_to_shutdown);
         power_save_timer_->OnEnterSleepMode([this]() {
+#ifdef STACKCHAN_COMPANION_BOOT
+            if(companion::CurrentAudioOwner()!=companion::AudioOwner::Stock||runtime_lifecycle::HomeRequested())return;
+#endif
             GetDisplay()->SetPowerSaveMode(true);
             // GetBacklight()->SetBrightness(10);
         });
         power_save_timer_->OnExitSleepMode([this]() {
+#ifdef STACKCHAN_COMPANION_BOOT
+            if(companion::CurrentAudioOwner()!=companion::AudioOwner::Stock||runtime_lifecycle::HomeRequested())return;
+#endif
             GetDisplay()->SetPowerSaveMode(false);
             GetBacklight()->RestoreBrightness();
         });
-        power_save_timer_->OnShutdownRequest([this]() { pmic_->PowerOff(); });
+        power_save_timer_->OnShutdownRequest([this]() {
+#ifdef STACKCHAN_COMPANION_BOOT
+            if(companion::CurrentAudioOwner()!=companion::AudioOwner::Stock||runtime_lifecycle::HomeRequested())return;
+#endif
+            pmic_->PowerOff();
+        });
         RefreshPowerState();
     }
 
@@ -550,6 +584,13 @@ private:
                 [](void* arg) {
                     M5StackCoreS3Board* board = (M5StackCoreS3Board*)arg;
                     board->PollTouchpad();
+#ifdef STACKCHAN_COMPANION_BOOT
+                    if(companion::CurrentAudioOwner()==companion::AudioOwner::Stock) {
+                        if(!board->power_save_timer_)board->InitializePowerSaveTimer();
+                    }else if(board->power_save_timer_){board->power_save_timer_->SetEnabled(false);board->last_power_save_enabled_=false;}
+#endif
+                    // Battery sampling remains live in Home/Native; enabling
+                    // Stock's sleep/shutdown timer is separately owner gated.
                     board->PollPowerSaveState();
                 },
             .arg                   = this,
@@ -566,7 +607,7 @@ private:
     {
         spi_bus_config_t buscfg = {};
         buscfg.mosi_io_num      = GPIO_NUM_37;
-        buscfg.miso_io_num      = GPIO_NUM_NC;
+        buscfg.miso_io_num      = GPIO_NUM_35; // Factory SD MISO / LCD DC shared pin.
         buscfg.sclk_io_num      = GPIO_NUM_36;
         buscfg.quadwp_io_num    = GPIO_NUM_NC;
         buscfg.quadhd_io_num    = GPIO_NUM_NC;
@@ -625,12 +666,15 @@ private:
 
         // display_ = new StackChanLcdDisplay(panel_io, panel, DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_OFFSET_X,
         //                                    DISPLAY_OFFSET_Y, DISPLAY_MIRROR_X, DISPLAY_MIRROR_Y, DISPLAY_SWAP_XY);
+        stock_tools::BindStackChanIrLcd(panel_io);
         display_ = new StackChanAvatarDisplay(panel_io, panel, DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_OFFSET_X,
                                               DISPLAY_OFFSET_Y, DISPLAY_MIRROR_X, DISPLAY_MIRROR_Y, DISPLAY_SWAP_XY);
     }
 
     void InitializeCamera()
     {
+        std::lock_guard<std::mutex> lock(camera_object_mutex_);
+        if(camera_.load())return;
         ESP_LOGI(TAG, "Init Camera");
 
         static esp_cam_ctlr_dvp_pin_config_t dvp_pin_config = {
@@ -658,7 +702,7 @@ private:
             .freq       = 100000,
         };
 
-        esp_video_init_dvp_config_t dvp_config = {
+        camera_dvp_config_ = {
             .sccb_config = sccb_config,
             .reset_pin   = CAMERA_PIN_RESET,
             .pwdn_pin    = CAMERA_PIN_PWDN,
@@ -666,36 +710,147 @@ private:
             .xclk_freq   = XCLK_FREQ_HZ,
         };
 
-        esp_video_init_config_t video_config = {
-            .dvp = &dvp_config,
-        };
+        camera_video_config_ = {};
+        camera_video_config_.dvp = &camera_dvp_config_;
 
-        camera_ = new StackChanCamera(video_config);
-        camera_->SetHMirror(false);
+        camera_.store(new StackChanCamera(camera_video_config_));
+        camera_.load()->ConfigureExternalTiming(camera_timing_);
     }
 
 public:
+    companion::desk::CameraReadiness CameraReadiness() const {return {};}
+    companion::desk::CameraSessionResult AcquireCamera(uint64_t epoch,bool opt_in,companion::desk::CameraBinding& lease) {
+        return camera_session_.Acquire(epoch,opt_in,CameraReadiness(),lease);
+    }
+    void ConfigureCameraTiming(std::shared_ptr<companion::desk::QualifiedCaptureTimingAuthority> qualified) {
+        std::lock_guard<std::mutex> lock(camera_object_mutex_);camera_timing_=std::move(qualified);
+        if(camera_.load())camera_.load()->ConfigureExternalTiming(camera_timing_);
+    }
+    uint64_t CameraAuthorityId(companion::desk::CameraBinding lease) {
+        const auto never=camera_session_.NeverStartedAuthority(lease);
+        if(never)return never;
+        return camera_.load()?camera_.load()->StopAuthorityFor(lease):0;
+    }
+    bool CurrentCamera(companion::desk::CameraBinding lease) {return camera_session_.Current(lease);}
+    void RevokeCamera(companion::desk::CameraBinding lease) {
+        if(camera_session_.Revoke(lease)&&camera_.load())camera_.load()->Revoke(lease);
+    }
+    companion::desk::CameraSessionResult StartCamera(companion::desk::CameraBinding lease) {
+        using Result=companion::desk::CameraSessionResult;
+        // This checked qualification gate runs before constructing/configuring
+        // a sensor. The current firmware's dependencies intentionally return false.
+        if(!CameraReadiness().available())return Result::Unavailable;
+        const auto permit=camera_session_.BeginStart(lease,CameraReadiness());
+        if(permit!=Result::Reserved)return permit;
+        InitializeCamera(); // rebuild fresh board-owned DVP/config values
+        const bool started=camera_session_.Current(lease)&&camera_.load()->StartBound(camera_video_config_,lease,true,
+            [](void* owner,companion::desk::CameraBinding b){return static_cast<M5StackCoreS3Board*>(owner)->CurrentCamera(b);},this);
+        const auto result=camera_session_.FinishStart(lease,started);
+        if(result!=Result::Started)camera_.load()->Revoke(lease);
+        return result;
+    }
+    bool CaptureCamera(companion::desk::CameraBinding lease) {
+        return camera_session_.Current(lease)&&camera_.load()&&camera_.load()->CaptureBound(lease);
+    }
+    bool CopyCameraBGRA(companion::desk::CameraBinding lease,uint8_t* out,size_t capacity,uint64_t& sequence,uint64_t& captured_ns) {
+        sequence=captured_ns=0;
+        if(camera_session_.Current(lease)&&camera_.load())return camera_.load()->CopyBGRA(lease,out,capacity,sequence,captured_ns);
+        if(out){volatile uint8_t* p=out;const size_t n=capacity>companion::CameraBGRABytes?companion::CameraBGRABytes:capacity;for(size_t i=0;i<n;++i)p[i]=0;}
+        return false;
+    }
+    bool CopyCameraLV01(companion::desk::CameraBinding lease,uint8_t* out,size_t capacity,size_t& written) {
+        written=0;
+        if(camera_session_.Current(lease)&&camera_.load())return camera_.load()->CopyLV01(lease,out,capacity,written);
+        if(out){volatile uint8_t* p=out;const size_t n=capacity>companion::desk::BorrowedCameraAdapter::MaxEnvelope?companion::desk::BorrowedCameraAdapter::MaxEnvelope:capacity;for(size_t i=0;i<n;++i)p[i]=0;}
+        return false;
+    }
+    bool HoldCameraRestart(companion::desk::CameraBinding lease) {return camera_session_.HoldRestart(lease);}
+    bool ReleaseCameraRestart(const companion::desk::BoardCameraStopReport& report) {
+        std::lock_guard<std::mutex> lock(camera_stop_receipt_mutex_);
+        return report.exact_session()&&report.custody_released()&&report.driver().report_serial()==retained_camera_stop_.driver().report_serial()&&
+            report.driver().authority_id()==retained_camera_stop_.driver().authority_id()&&camera_session_.ReleaseRestart(report.driver());
+    }
+    companion::desk::BoardCameraStopReport StopCameraChecked(companion::desk::CameraBinding lease) {
+        using Outcome=companion::desk::CameraDriverStopOutcome;
+        std::lock_guard<std::mutex> receipt_lock(camera_stop_receipt_mutex_);
+        companion::desk::BoardCameraStopReport report;report.requested_=lease;
+        if(!camera_session_.Revoke(lease)){
+            if(!camera_session_.RetainedNoNewer(lease)||!(retained_camera_stop_.requested()==lease)||!retained_camera_stop_.custody_released())return report;
+            report=retained_camera_stop_;
+            if(report.driver_.owned_never_started()){
+                uint64_t a=0,s=0;if(!camera_session_.RefreshNeverStarted(lease,a,s))return {};
+                report.driver_.authority_=a;report.driver_.serial_=s;
+            }else if(camera_.load())report.driver_=camera_.load()->StopCheckedReceipt(lease);
+            if(!camera_session_.RetainedNoNewer(lease)||(!report.driver_.owned_driver_closed()&&!report.driver_.owned_never_started()))return {};
+            retained_camera_stop_=report;return report;
+        }
+        report.exact_session_=true;
+        uint64_t authority=0,serial=0;
+        if(camera_session_.ReleaseNeverStarted(lease,authority,serial)){
+            report.driver_.binding_=lease;report.driver_.authority_=authority;report.driver_.serial_=serial;
+            report.driver_.outcome_=Outcome::NotStarted;report.driver_.revoked_=true;
+            report.driver_.producer_quiesced_=true;report.driver_.raw_wiped_=true;
+            report.custody_released_=true;retained_camera_stop_=report;return report;
+        }
+        if(!camera_.load())return report; // pending start may still publish a camera object
+        report.driver_=camera_.load()->StopCheckedReceipt(lease);
+        report.custody_released_=camera_session_.ReleaseReceipt(lease,report.driver_);
+        if(report.custody_released_)retained_camera_stop_=report;
+        return report;
+    }
+    companion::desk::CameraSessionResult StopCamera(companion::desk::CameraBinding lease) {
+        using Result=companion::desk::CameraSessionResult;using Outcome=companion::desk::CameraDriverStopOutcome;
+        const auto report=StopCameraChecked(lease);
+        if(!report.exact_session())return Result::Stale;
+        if(report.custody_released())return Result::Closed;
+        switch(report.driver().outcome()){
+            case Outcome::Busy:case Outcome::DriverClosed:case Outcome::NotStarted:return Result::Stopping;
+            case Outcome::Stale:return Result::Stale;
+            default:return Result::DriverFailure;
+        }
+    }
     M5StackCoreS3Board()
     {
         InitializeI2c();
         InitializeAxp2101();
+#ifndef STACKCHAN_COMPANION_BOOT
         InitializePowerSaveTimer();
+#endif
         InitializeAw9523();
+#ifndef STACKCHAN_COMPANION_BOOT
         I2cDetect();
+#endif
         InitializeFt6336();
         InitializeSpi();
+        uint8_t switch_p0=0,sd_control=0,sd_voltage=0;
+        const auto switch_error=aw9523_->ReadSdSwitch(switch_p0);
+        const auto control_error=pmic_->ReadSdControl(sd_control);
+        const auto voltage_error=pmic_->ReadSdVoltage(sd_voltage);
+        stock_tools::RecordSdElectrical(switch_error,switch_p0,control_error,sd_control,voltage_error,sd_voltage);
+        if(!stock_tools::MountStackChanIrSd())ESP_LOGW(TAG,"IR SD mount unavailable; card not formatted");
         InitializeIli9342Display();
+#ifndef STACKCHAN_COMPANION_BOOT
         InitializeCamera();
+#endif
         StartTouchpadTimer();
         GetBacklight()->RestoreBrightness();
     }
 
-    // All fallback paths (no saved SSID, timeout, explicit reconfiguration) use
-    // the same BLE App setup flow. Never start the upstream configuration AP.
     void StartWifiConfigMode() override
     {
         ESP_LOGW(TAG, "WiFi setup required; opening StackChan App setup");
         GetHAL().requestAppSetup();
+    }
+
+    virtual std::string GetUuid() override
+    {
+        if (uuid_.empty() && (companion::CurrentAudioOwner() == companion::AudioOwner::Stock ||
+            (companion::CurrentAudioOwner() == companion::AudioOwner::Native && stock_services::IsActive()))) {
+            Settings identity("board", true);
+            uuid_ = GenerateUuid();
+            identity.SetString("uuid", uuid_); // Stable original activation identity after explicit Start.
+        }
+        return uuid_;
     }
 
     virtual AudioCodec* GetAudioCodec() override
@@ -714,7 +869,10 @@ public:
 
     virtual Camera* GetCamera() override
     {
-        return camera_;
+        #ifdef STACKCHAN_COMPANION_BOOT
+        if (!camera_.load() && (stock_services::AllowsCamera() || companion::CurrentAudioOwner()==companion::AudioOwner::Stock)) InitializeCamera();
+#endif
+        return camera_.load();
     }
 
     virtual bool GetBatteryLevel(int& level, bool& charging, bool& discharging) override
@@ -733,7 +891,7 @@ public:
     virtual void SetPowerSaveLevel(PowerSaveLevel level) override
     {
         if (level != PowerSaveLevel::LOW_POWER) {
-            power_save_timer_->WakeUp();
+            if(power_save_timer_)power_save_timer_->WakeUp();
         }
         WifiBoard::SetPowerSaveLevel(level);
     }
@@ -817,29 +975,20 @@ uint8_t hal_bridge::board_get_backlight_brightness()
 
 void hal_bridge::board_set_speaker_volume(uint8_t volume, bool permanent)
 {
-    auto& board      = Board::GetInstance();
-    auto audio_codec = board.GetAudioCodec();
-    if (audio_codec) {
-        Settings settings("audio", false);
-        const int persisted_volume = settings.GetInt("output_volume", audio_codec->output_volume());
-        audio_codec->SetOutputVolume(volume);
-        if (!permanent) {
-            Settings writable_settings("audio", true);
-            writable_settings.SetInt("output_volume", persisted_volume);
-            return;
-        }
-    }
+    auto codec=Board::GetInstance().GetAudioCodec();
+    if(!codec)return;
+    auto scope=companion::CurrentSettingsScope();
+    companion::SetSettingsScope(companion::SettingsScope::None);
+    codec->SetOutputVolume(volume);
+    companion::SetSettingsScope(scope);
+    // Codec::SetOutputVolume persists through Settings only inside the explicit
+    // Volume scope; permanent Confirm is the sole allowed persistent operation.
+    if(permanent){Settings settings("audio",true);settings.SetInt("output_volume",volume);}
 }
-
 uint8_t hal_bridge::board_get_speaker_volume()
 {
-    int volume = 70;
-    Settings settings("audio", false);
-    volume = settings.GetInt("output_volume", volume);
-    if (volume <= 0) {
-        volume = 10;
-    }
-    return volume;
+    auto codec=Board::GetInstance().GetAudioCodec();
+    return codec ? codec->output_volume() : 70;
 }
 
 void hal_bridge::toggle_xiaozhi_chat_state()
@@ -851,3 +1000,48 @@ void hal_bridge::toggle_xiaozhi_chat_state()
     }
     app.ToggleChatState();
 }
+
+companion::desk::CameraReadiness hal_bridge::board_camera_readiness() {
+    return static_cast<M5StackCoreS3Board&>(Board::GetInstance()).CameraReadiness();
+}
+companion::desk::CameraSessionResult hal_bridge::board_camera_acquire(uint64_t epoch,bool opt_in,companion::desk::CameraBinding& lease) {
+    return static_cast<M5StackCoreS3Board&>(Board::GetInstance()).AcquireCamera(epoch,opt_in,lease);
+}
+companion::desk::CameraSessionResult hal_bridge::board_camera_start(companion::desk::CameraBinding lease) {
+    return static_cast<M5StackCoreS3Board&>(Board::GetInstance()).StartCamera(lease);
+}
+companion::desk::CameraSessionResult hal_bridge::board_camera_stop(companion::desk::CameraBinding lease) {
+    return static_cast<M5StackCoreS3Board&>(Board::GetInstance()).StopCamera(lease);
+}
+bool hal_bridge::board_camera_current(companion::desk::CameraBinding lease) {
+    return static_cast<M5StackCoreS3Board&>(Board::GetInstance()).CurrentCamera(lease);
+}
+void hal_bridge::board_camera_revoke(companion::desk::CameraBinding lease) {
+    static_cast<M5StackCoreS3Board&>(Board::GetInstance()).RevokeCamera(lease);
+}
+
+bool hal_bridge::board_camera_capture(companion::desk::CameraBinding lease) {
+    return static_cast<M5StackCoreS3Board&>(Board::GetInstance()).CaptureCamera(lease);
+}
+bool hal_bridge::board_camera_copy_bgra(companion::desk::CameraBinding lease,uint8_t* out,size_t capacity,uint64_t& sequence,uint64_t& captured_ns) {
+    return static_cast<M5StackCoreS3Board&>(Board::GetInstance()).CopyCameraBGRA(lease,out,capacity,sequence,captured_ns);
+}
+bool hal_bridge::board_camera_copy_lv01(companion::desk::CameraBinding lease,uint8_t* out,size_t capacity,size_t& written) {
+    return static_cast<M5StackCoreS3Board&>(Board::GetInstance()).CopyCameraLV01(lease,out,capacity,written);
+}
+
+companion::desk::BoardCameraStopReport hal_bridge::board_camera_stop_checked(companion::desk::CameraBinding lease) {
+    return static_cast<M5StackCoreS3Board&>(Board::GetInstance()).StopCameraChecked(lease);
+}
+
+uint64_t hal_bridge::board_camera_authority_id(companion::desk::CameraBinding lease) {
+    return static_cast<M5StackCoreS3Board&>(Board::GetInstance()).CameraAuthorityId(lease);
+}
+
+void hal_bridge::board_camera_configure_timing(std::shared_ptr<companion::desk::QualifiedCaptureTimingAuthority> qualified) {
+    static_cast<M5StackCoreS3Board&>(Board::GetInstance()).ConfigureCameraTiming(std::move(qualified));
+}
+uint32_t hal_bridge::board_camera_driver_revision() {return esp_video_capture_clock_contract_revision();}
+
+bool hal_bridge::board_camera_hold_restart(companion::desk::CameraBinding lease) {return static_cast<M5StackCoreS3Board&>(Board::GetInstance()).HoldCameraRestart(lease);}
+bool hal_bridge::board_camera_release_restart(const companion::desk::BoardCameraStopReport& report) {return static_cast<M5StackCoreS3Board&>(Board::GetInstance()).ReleaseCameraRestart(report);}

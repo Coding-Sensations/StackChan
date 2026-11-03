@@ -1,0 +1,239 @@
+/*
+ * SPDX-FileCopyrightText: 2026 M5Stack Technology CO LTD
+ *
+ * SPDX-License-Identifier: MIT
+ */
+/*
+  UnitTest for compatibility_feature (Arduino API compatibility)
+*/
+#include <gtest/gtest.h>
+#include <M5Utility.hpp>
+
+#include <limits>
+
+using m5::utility::delay;
+using m5::utility::delayMicroseconds;
+using m5::utility::elapsed_time_t;
+using m5::utility::elapsedSince;
+using m5::utility::hasElapsed;
+using m5::utility::micros;
+using m5::utility::millis;
+
+TEST(CompatibilityFeature, MillisIncreasing)
+{
+    // millis() should return increasing values
+    unsigned long t1 = millis();
+    delay(10);
+    unsigned long t2 = millis();
+
+    EXPECT_GT(t2, t1) << "millis() should increase over time";
+}
+
+TEST(CompatibilityFeature, MicrosIncreasing)
+{
+    // micros() should return increasing values
+    unsigned long t1 = micros();
+    delayMicroseconds(100);
+    unsigned long t2 = micros();
+
+    EXPECT_GT(t2, t1) << "micros() should increase over time";
+}
+
+TEST(CompatibilityFeature, MicrosGreaterThanMillis)
+{
+    // micros() should be approximately millis() * 1000
+    unsigned long ms = millis();
+    unsigned long us = micros();
+
+    // Allow some tolerance for execution time between calls
+    // micros should be at least millis * 1000 (minus small tolerance)
+    EXPECT_GE(us + 1000, ms * 1000) << "micros() should be >= millis() * 1000";
+}
+
+TEST(CompatibilityFeature, DelayApproximateTime)
+{
+    // delay() should pause for approximately the specified time
+    const unsigned long delay_ms     = 50;
+    const unsigned long tolerance_ms = 20;  // Allow 20ms tolerance
+
+    unsigned long start = millis();
+    delay(delay_ms);
+    unsigned long elapsed = millis() - start;
+
+    // Only the lower bound is checked: delay() promises to wait at least the given
+    // time, and how much longer is up to the OS scheduler. An upper bound cannot
+    // hold on a shared CI runner.
+    EXPECT_GE(elapsed, delay_ms - tolerance_ms)
+        << "delay() should pause for at least " << (delay_ms - tolerance_ms) << "ms";
+}
+
+TEST(CompatibilityFeature, DelayMicrosecondsApproximateTime)
+{
+    // delayMicroseconds() should pause for approximately the specified time
+    const unsigned int delay_us      = 5000;  // 5ms in microseconds
+    const unsigned long tolerance_us = 3000;  // Allow 3ms tolerance
+
+    unsigned long start = micros();
+    delayMicroseconds(delay_us);
+    unsigned long elapsed = micros() - start;
+
+    // Lower bound only; see DelayApproximateTime
+    EXPECT_GE(elapsed, delay_us - tolerance_us)
+        << "delayMicroseconds() should pause for at least " << (delay_us - tolerance_us) << "us";
+}
+
+TEST(CompatibilityFeature, DelayZero)
+{
+    // delay(0) should return quickly
+    unsigned long start = millis();
+    delay(0);
+    unsigned long elapsed = millis() - start;
+
+    // A hang check, not a precision check: the bound is generous on purpose so that
+    // a loaded CI runner does not fail it
+    EXPECT_LE(elapsed, 1000U) << "delay(0) should return without waiting";
+}
+
+TEST(CompatibilityFeature, DelayMicrosecondsZero)
+{
+    // delayMicroseconds(0) should return quickly
+    unsigned long start = micros();
+    delayMicroseconds(0);
+    unsigned long elapsed = micros() - start;
+
+    // A hang check, not a precision check; see DelayZero
+    EXPECT_LE(elapsed, 1000000U) << "delayMicroseconds(0) should return without waiting";
+}
+
+TEST(CompatibilityFeature, MultipleDelays)
+{
+    // Multiple delays should accumulate
+    const unsigned long delay_ms     = 20;
+    const int count                  = 3;
+    const unsigned long tolerance_ms = 30;
+
+    unsigned long start = millis();
+    for (int i = 0; i < count; ++i) {
+        delay(delay_ms);
+    }
+    unsigned long elapsed = millis() - start;
+
+    unsigned long expected = delay_ms * count;
+    // Lower bound only; see DelayApproximateTime
+    EXPECT_GE(elapsed, expected - tolerance_ms);
+}
+
+TEST(CompatibilityFeature, ConsistencyBetweenMillisAndMicros)
+{
+    // The difference between consecutive millis/micros calls should be consistent
+    unsigned long ms1 = millis();
+    unsigned long us1 = micros();
+
+    delay(100);
+
+    unsigned long ms2 = millis();
+    unsigned long us2 = micros();
+
+    unsigned long ms_diff = ms2 - ms1;
+    unsigned long us_diff = us2 - us1;
+
+    // us_diff should be approximately ms_diff * 1000 (with tolerance)
+    unsigned long expected_us = ms_diff * 1000;
+    unsigned long tolerance   = 10000;  // 10ms tolerance
+
+    EXPECT_GE(us_diff + tolerance, expected_us);
+    EXPECT_LE(us_diff, expected_us + tolerance);
+}
+
+TEST(CompatibilityFeature, ElapsedSince)
+{
+    const elapsed_time_t wait         = 50;
+    const elapsed_time_t tolerance_ms = 30;
+
+    const elapsed_time_t start_at = millis();
+    delay(wait);
+    const elapsed_time_t elapsed = elapsedSince(start_at);
+
+    // Lower bound only; see DelayApproximateTime
+    EXPECT_GE(elapsed, wait - tolerance_ms) << "elapsedSince() should cover the delay";
+}
+
+TEST(CompatibilityFeature, HasElapsed)
+{
+    const elapsed_time_t start_at = millis();
+    EXPECT_FALSE(hasElapsed(start_at, 1000)) << "nothing has elapsed yet";
+
+    delay(30);
+    EXPECT_TRUE(hasElapsed(start_at, 10)) << "10ms has passed by now";
+    EXPECT_FALSE(hasElapsed(start_at, 10000)) << "10s has not passed";
+}
+
+TEST(CompatibilityFeature, HasElapsedZeroDuration)
+{
+    // A zero duration has always elapsed
+    EXPECT_TRUE(hasElapsed(millis(), 0));
+}
+
+TEST(CompatibilityFeature, HasElapsedAcrossWrap)
+{
+    // start_at sits just below the wrap of elapsed_time_t, so the elapsed time
+    // crosses the wrap: elapsedSince() returns millis() + 6
+    const elapsed_time_t start_at = std::numeric_limits<elapsed_time_t>::max() - 5;
+
+    const elapsed_time_t elapsed = elapsedSince(start_at);
+    EXPECT_GE(elapsed, 6U) << "unsigned subtraction stays correct across the wrap";
+
+    EXPECT_TRUE(hasElapsed(start_at, 3)) << "3ms has elapsed across the wrap";
+    EXPECT_FALSE(hasElapsed(start_at, std::numeric_limits<elapsed_time_t>::max() / 2))
+        << "a huge duration has not elapsed";
+
+    // The deadline form is what this helper exists to replace: the deadline
+    // overflows here and lands before start_at, cutting any wait short
+    const elapsed_time_t deadline = start_at + 1000;
+    EXPECT_LT(deadline, start_at) << "a precomputed deadline overflows near the wrap";
+}
+
+TEST(CompatibilityFeature, ElapsedSinceInjectedClock)
+{
+    // The overload takes the current time from the caller, so a test can drive
+    // the clock instead of waiting for real time to pass
+    EXPECT_EQ(elapsedSince<uint32_t>(1000, 1250), 250U);
+    EXPECT_EQ(elapsedSince<uint32_t>(1000, 1000), 0U);
+}
+
+TEST(CompatibilityFeature, HasElapsedInjectedClock)
+{
+    EXPECT_FALSE(hasElapsed<uint32_t>(1000, 100, 1099));
+    EXPECT_TRUE(hasElapsed<uint32_t>(1000, 100, 1100));
+    EXPECT_TRUE(hasElapsed<uint32_t>(1000, 100, 5000));
+}
+
+TEST(CompatibilityFeature, InjectedClockKeepsItsOwnWidth)
+{
+    // A 32-bit clock must be subtracted at 32 bits: widening it to a 64-bit type
+    // before subtracting turns the wrap into a huge value. The overloads deduce
+    // the caller's type so the width is kept even on a 64-bit host.
+    const uint32_t start_at = 0xFFFFFF9CUL;  // 100ms before the wrap
+    const uint32_t now      = 99;            // 199ms later, across the wrap
+
+    EXPECT_EQ(elapsedSince(start_at, now), 199U);
+    EXPECT_TRUE(hasElapsed(start_at, 199, now));
+    EXPECT_FALSE(hasElapsed(start_at, 200, now));
+
+    // What the non-deduced form would have done on a 64-bit host
+    const unsigned long widened = static_cast<unsigned long>(now) - static_cast<unsigned long>(start_at);
+    EXPECT_EQ(widened == 199UL, sizeof(unsigned long) == sizeof(uint32_t))
+        << "widening only stays correct where unsigned long is 32-bit";
+}
+
+TEST(CompatibilityFeature, HasElapsedInjectedClockAcrossWrap)
+{
+    // now has wrapped past start_at, which is what a precomputed deadline
+    // cannot survive
+    const elapsed_time_t start_at = std::numeric_limits<elapsed_time_t>::max() - 100;
+    const elapsed_time_t now      = 99;  // 200ms later, across the wrap
+
+    EXPECT_EQ(elapsedSince(start_at, now), 200U);
+    EXPECT_TRUE(hasElapsed(start_at, 200, now));
+    EXPECT_FALSE(hasElapsed(start_at, 201, now));
+}

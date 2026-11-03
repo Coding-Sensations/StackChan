@@ -1,0 +1,21 @@
+{
+  "result": "passed",
+  "checks": [
+    "menu_hierarchy",
+    "pr1_review_regressions",
+    "shell_teardown",
+    "usb_owner",
+    "menu_navigation",
+    "advanced_config",
+    "firmware_policy",
+    "credentials",
+    "wifi_store",
+    "firmware_migration",
+    "scoped_settings",
+    "tools_ui",
+    "stock_models"
+  ],
+  "source_revision": "4a24491761ffab19f3df758c93ebbdada4c29ddc",
+  "live_network": false,
+  "device_access": false
+}

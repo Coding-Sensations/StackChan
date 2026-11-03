@@ -1,0 +1,31 @@
+Test project /tmp/stackchan-navigation-host
+      Start  1: motion_math_test
+ 1/13 Test  #1: motion_math_test .................   Passed    0.11 sec
+      Start  2: category_test
+ 2/13 Test  #2: category_test ....................   Passed    0.11 sec
+      Start  3: raster_test
+ 3/13 Test  #3: raster_test ......................   Passed    0.10 sec
+      Start  4: catalog_bounded_test
+ 4/13 Test  #4: catalog_bounded_test .............   Passed    0.54 sec
+      Start  5: runtime_stop_test
+ 5/13 Test  #5: runtime_stop_test ................   Passed    0.10 sec
+      Start  6: launcher_navigation_test
+ 6/13 Test  #6: launcher_navigation_test .........   Passed    0.47 sec
+      Start  7: generated_teardown_test
+ 7/13 Test  #7: generated_teardown_test ..........   Passed    0.55 sec
+      Start  8: protocol_lifetime_test
+ 8/13 Test  #8: protocol_lifetime_test ...........   Passed    0.46 sec
+      Start  9: ble_stop_test
+ 9/13 Test  #9: ble_stop_test ....................   Passed    0.24 sec
+      Start 10: station_handoff_test
+10/13 Test #10: station_handoff_test .............   Passed    0.08 sec
+      Start 11: station_sdk_test
+11/13 Test #11: station_sdk_test .................   Passed    0.44 sec
+      Start 12: phone_station_test
+12/13 Test #12: phone_station_test ...............   Passed    0.36 sec
+      Start 13: station_event_test
+13/13 Test #13: station_event_test ...............   Passed    0.49 sec
+
+100% tests passed, 0 tests failed out of 13
+
+Total Test time (real) =   4.07 sec

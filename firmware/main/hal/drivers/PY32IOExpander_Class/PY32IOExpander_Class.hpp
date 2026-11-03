@@ -72,6 +72,7 @@ public:
     void setLedColor(uint8_t index, uint32_t color);
     void setLedData(const uint8_t* data, size_t len);
     void refreshLeds();
+    esp_err_t submitLedFrameChecked(const uint8_t* bytes, size_t size);
 
 private:
     i2c_master_dev_handle_t _i2c_dev;

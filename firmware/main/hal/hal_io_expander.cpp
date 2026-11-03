@@ -1,9 +1,13 @@
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 /*
  * SPDX-FileCopyrightText: 2026 M5Stack Technology CO LTD
  *
  * SPDX-License-Identifier: MIT
  */
 #include "hal.h"
+#include <apps/led_expression/led_service_api.h>
+#include <esp_timer.h>
 #include "board/hal_bridge.h"
 #include "drivers/PY32IOExpander_Class/PY32IOExpander_Class.hpp"
 #include <mooncake_log.h>
@@ -15,6 +19,7 @@ static std::unique_ptr<m5::PY32IOExpander_Class> _io_expander;
 
 void Hal::io_expander_init()
 {
+    if (_io_expander) return;
     mclog::tagInfo(_tag, "init");
 
     auto i2c_bus        = hal_bridge::board_get_i2c_bus();
@@ -41,7 +46,11 @@ void Hal::io_expander_init()
         // VM EN
         _io_expander->setDirection(0, true);  // Output
         _io_expander->setPullMode(0, true);   // Pull-up
+        #ifdef STACKCHAN_COMPANION_BOOT
+        GetHAL().setServoPowerEnabled(false); // RGB setup never powers motors.
+#else
         GetHAL().setServoPowerEnabled(true);
+#endif
         vTaskDelay(pdMS_TO_TICKS(200));
 
         // RGB
@@ -66,20 +75,24 @@ void Hal::setServoPowerEnabled(bool enabled)
     _io_expander->digitalWrite(0, enabled ? true : false);
 }
 
+bool Hal::rgbHardwareAvailable() const
+{
+    return _io_expander != nullptr;
+}
+
+bool Hal::submitRgb565Frame(const uint8_t* bytes, size_t size)
+{
+    return _io_expander && _io_expander->submitLedFrameChecked(bytes, size) == ESP_OK;
+}
+
 void Hal::setRgbColor(uint8_t index, uint8_t r, uint8_t g, uint8_t b)
 {
-    if (!_io_expander) {
-        return;
-    }
-    _io_expander->setLedColor(index, r, g, b);
+    led_expression::StageStockPixel(index, {r, g, b});
 }
 
 void Hal::refreshRgb()
 {
-    if (!_io_expander) {
-        return;
-    }
-    _io_expander->refreshLeds();
+    led_expression::Tick(static_cast<uint64_t>(esp_timer_get_time() / 1000));
 }
 
 void Hal::showRgbColor(uint8_t r, uint8_t g, uint8_t b)

@@ -1,0 +1,16 @@
+# Shared by the IDF build and offline profile tests.
+if((STACKCHAN_COMPANION_LOCAL_CA_FILE AND NOT STACKCHAN_COMPANION_LOCAL_TLS_HOST) OR
+   (STACKCHAN_COMPANION_LOCAL_TLS_HOST AND NOT STACKCHAN_COMPANION_LOCAL_CA_FILE))
+  message(FATAL_ERROR "Local CA and approved host must be configured together")
+endif()
+if(STACKCHAN_COMPANION_LOCAL_CA_FILE AND NOT CONFIG_MBEDTLS_HAVE_TIME_DATE)
+  message(FATAL_ERROR "Local TLS requires certificate date verification")
+endif()
+if(STACKCHAN_COMPANION_TRUSTED_USB_PROVISIONING)
+  if(CONFIG_ESP_CONSOLE_USB_CDC OR CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG OR CONFIG_ESP_CONSOLE_SECONDARY_USB_SERIAL_JTAG)
+    message(FATAL_ERROR "USB console conflicts with the physical provisioning driver")
+  endif()
+  if(NOT CONFIG_ESP_CONSOLE_UART_DEFAULT OR NOT CONFIG_ESP_CONSOLE_SECONDARY_NONE)
+    message(FATAL_ERROR "Provisioning requires primary UART and no secondary USB console")
+  endif()
+endif()

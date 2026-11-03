@@ -1,0 +1,46 @@
+{
+  "read_only": true,
+  "devices": [
+    {
+      "name": "Pro Tools Audio Bridge 2-A",
+      "uid": "Pro Tools Audio Bridge 2-A_UID",
+      "nominal_rate": 48000.0,
+      "alive": 1,
+      "buffer_frames": 512,
+      "scopes": {
+        "inpt": {
+          "stream_count": 1,
+          "latency_frames": 0,
+          "safety_offset_frames": 0
+        },
+        "outp": {
+          "stream_count": 1,
+          "latency_frames": 0,
+          "safety_offset_frames": 0
+        }
+      }
+    },
+    {
+      "name": "Pro Tools Audio Bridge 2-B",
+      "uid": "Pro Tools Audio Bridge 2-B_UID",
+      "nominal_rate": 48000.0,
+      "alive": 1,
+      "buffer_frames": 512,
+      "scopes": {
+        "inpt": {
+          "stream_count": 1,
+          "latency_frames": 0,
+          "safety_offset_frames": 0
+        },
+        "outp": {
+          "stream_count": 1,
+          "latency_frames": 0,
+          "safety_offset_frames": 0
+        }
+      }
+    }
+  ],
+  "routing_verified": false,
+  "IO_started": false,
+  "properties_changed": false
+}

@@ -1,0 +1,50 @@
+{
+  "recorded_at_utc": "2026-10-09T06:31:18.084368+00:00",
+  "firmware_source_revision": "1cedafdad113b3fb501b4ee5cc6e84b0671a427d",
+  "checks": [
+    {
+      "name": "Tools geometry/navigation/keyset and exclusive audio ownership portable C++",
+      "exit": 0
+    },
+    {
+      "name": "2048/NEC/Type2 URL models portable C++",
+      "exit": 0
+    },
+    {
+      "name": "Readonly NVS and Stock-gated RAM protocol settings portable C++",
+      "exit": 0
+    },
+    {
+      "name": "Companion synthetic provisioning regressions",
+      "python_tests": 39,
+      "cross_language_cpp_programs": 2,
+      "exit": 0
+    },
+    {
+      "name": "Actual ESP-IDF configure with pinned backend generator",
+      "exit": 0
+    },
+    {
+      "name": "Actual full ESP-IDF build one worker nice20 network denied",
+      "exit": 0,
+      "seconds": 39.59207274999062
+    },
+    {
+      "name": "Esptool image checksum and validation hash",
+      "result": "valid"
+    }
+  ],
+  "hardware_validation": false,
+  "live_catalog_requests": false,
+  "vendor_audio_activation": false,
+  "source_sha256": {
+    "firmware/main/apps/stock_shell/tools_ui.hpp": "b6f798c33ba3cfc97f5a13bbf87eecf57c59e137be01c1eaa5671438d1a231a6",
+    "firmware/main/companion/audio_owner.hpp": "cdccb5e98e4268b1482543bf0157bebcfd426db789bbe4c79bac600289deda1e",
+    "firmware/main/companion/readonly_settings.cc": "20b21351355b42241077c93a7379b6497883995c498cfb7a74455ffa12fde00f",
+    "companion/host/boot-tests/test_tools_ui.cpp": "6d90e1665b41f4c0076254e9c34a1a3ac05a3788cfe9547ca1808f442ab3282f",
+    "companion/host/boot-tests/test_readonly.cpp": "7359ced7e15135cde7cbcc351e2c2f02743ebb61cb996b29889a8695c8274bc1",
+    "firmware/main/apps/stock_agent/generate_backend.py": "63b611b17fbba210ed915dcc1a6f92c2499466ed4d1dc7d2fb24c99aa000a321"
+  },
+  "independent_review": "Tools overlap, asynchronous catalog WiFi init, expression modifier lifecycle, hotspot NVS writes identified and corrected before build; reviews were static",
+  "preview_inspection": "HTML simulation delivered; native browser tool transport unavailable; no rendered screenshot claimed"
+}

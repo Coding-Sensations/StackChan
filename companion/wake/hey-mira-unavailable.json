@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "phrase": "Hey Mira",
+  "available": false,
+  "model_file": null,
+  "model_sha256": null,
+  "runtime_enabled": false,
+  "network_capture_authorized": false,
+  "reason": "An audited literal-text feasibility trial exists; no qualified CoreS3 wake backend, acoustic result or enabled runtime.",
+  "candidate_route": "microWakeWord quantized streaming TFLite Micro",
+  "required_pcm": {
+    "sample_rate_hz": 16000,
+    "channels": 1,
+    "signed_bits": 16
+  },
+  "required_checks": [
+    "exact_phrase_asset",
+    "asset_hash",
+    "code_weight_voice_corpus_license",
+    "frontend_parity",
+    "tensor_contract",
+    "stream_reset",
+    "resource_budget",
+    "acoustic_acceptance",
+    "physical_listen_boundary"
+  ],
+  "trial_evidence": {
+    "model_sha256": "801a98307fb6c2b1a568de83f078a61bd1885e1a2c0aa34d621a910fa1681f77",
+    "qualified": false,
+    "runtime_enabled": false
+  }
+}

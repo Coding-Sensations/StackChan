@@ -1,3 +1,4 @@
+#include <apps/runtime_lifecycle/session.h>
 /*
  * SPDX-FileCopyrightText: 2026 M5Stack Technology CO LTD
  *
@@ -54,14 +55,17 @@ void AppEspnowControl::onOpen()
 
     // Start setup page
     bool is_advanced = start_startup_page();
+    if(runtime_lifecycle::HomeRequested())return;
     if (is_advanced) {
         start_advanced_page();
     }
+    if(runtime_lifecycle::HomeRequested())return;
     mclog::tagInfo(getAppInfo().name, "get setup: role {}, id {}, channel {}", _is_receiver ? "Receiver" : "Sender",
                    _receiver_id, _wifi_channel);
 
     // Start espnow
     GetHAL().startEspNow(_wifi_channel);
+    if(runtime_lifecycle::HomeRequested())return;
     GetHAL().onEspNowData.connect([](const std::vector<uint8_t>& data) {
         std::lock_guard<std::mutex> lock(_mutex);
         _received_data = data;
@@ -97,7 +101,7 @@ bool AppEspnowControl::start_startup_page()
     while (1) {
         GetHAL().delay(50);
         LvglLockGuard lock;
-        if (page->isSelected()) {
+        if (runtime_lifecycle::HomeRequested() || page->isSelected()) {
             break;
         }
     }
@@ -122,6 +126,7 @@ void AppEspnowControl::start_advanced_page()
     // Get role
     std::vector<std::string> role_options = {"Receiver", "Sender"};
     int role_selection                    = view::create_page_selector_and_wait("Select Role", role_options);
+    if(role_selection<0)return;
     _is_receiver                          = (role_selection == 0);
     mclog::tagInfo(getAppInfo().name, "selected role: {}", _is_receiver ? "Receiver" : "Sender");
 
@@ -130,7 +135,9 @@ void AppEspnowControl::start_advanced_page()
     for (int i = 0; i < 13; i++) {
         channel_options.push_back(std::to_string(i + 1));
     }
-    _wifi_channel = view::create_page_selector_and_wait("Select WiFi Channel", channel_options) + 1;
+    int channel=view::create_page_selector_and_wait("Select WiFi Channel", channel_options);
+    if(channel<0)return;
+    _wifi_channel=channel+1;
     mclog::tagInfo(getAppInfo().name, "selected wifi channel: {}", _wifi_channel);
 
     // Get id
@@ -139,7 +146,9 @@ void AppEspnowControl::start_advanced_page()
         for (int i = 1; i < 255; i++) {
             id_options.push_back(std::to_string(i));
         }
-        _receiver_id = view::create_page_selector_and_wait("Select Receiver ID", id_options) + 1;
+        int id=view::create_page_selector_and_wait("Select Receiver ID", id_options);
+        if(id<0)return;
+        _receiver_id=id+1;
         mclog::tagInfo(getAppInfo().name, "selected receiver id: {}", _receiver_id);
     } else {
         std::vector<std::string> id_options;
@@ -249,6 +258,9 @@ void AppEspnowControl::onRunning()
 
 void AppEspnowControl::onClose()
 {
+#ifdef STACKCHAN_COMPANION_BOOT
+    if(runtime_lifecycle::DeferNativeClose())return;
+#endif
     mclog::tagInfo(getAppInfo().name, "on close");
 
     LvglLockGuard lock;

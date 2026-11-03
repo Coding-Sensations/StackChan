@@ -1,0 +1,227 @@
+{
+  "source_hashes": {
+    "native_adapter.py": "145a86accecab84f567382c33f34558206ad4de56acafaa391d152a0b06435ee",
+    "coreaudio_bridge.cpp": "2fdce88b41fe193a5c60a82098076c36c470e0efb8fae2c855e762d33bd41565",
+    "test_native_diagnostics.cpp": "0827b25147a4fb9e780ada09a5999541c8655dc081f1878a2eecbf4694094ae6",
+    "probe_worker.py": "f3e86457bce7434e096be964901f7684207467fe6b0fada3b721366e52de80df",
+    "pcm_ring.hpp": "b449fb35de2fa99598e23a32ad3aecbf2f658307ec8a60fbbe29562737dcba75",
+    "test_probe_worker.py": "c00e852641aad051756c08207ecc56307ff9b4953a6f4870213f1b374461a2ce",
+    "test_native.cpp": "efa7d696076f0625219d5ce363c878a5d88a65fcd59deb0eb8e375f5194ae7cb",
+    "audio_session.hpp": "3541aba9daf13ae210c4a665d46678b00660c3655bbe91a01c183cd73abe6d1d",
+    "test_ring.cpp": "b1aaaed1232088c8ad442605e07279a85d67b2c064e93f0c2b5236f2188fdc8d",
+    "verify.py": "d641a073fbc047413be474dcd5cd56ed076c87841912109ee1e6e5459824d121",
+    "test_session.cpp": "94506b6b251a19f5c5cb26801fa45b23c8ce1bfe2f391936d36a443075f4f179",
+    "test_native_adapter.py": "69b4f9e04805c6318692313187c70ab1995cf018e92c8405c8a843116efd2191"
+  },
+  "commands": [
+    {
+      "argv": [
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++",
+        "-isysroot",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk",
+        "-isystem",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/usr/include/c++/v1",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-dynamiclib",
+        "/Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/companion/host/native-audio/coreaudio_bridge.cpp",
+        "-framework",
+        "AudioUnit",
+        "-framework",
+        "CoreAudio",
+        "-framework",
+        "CoreFoundation",
+        "-o",
+        "/var/folders/1_/85m0gzgx34dgj2mjfjz4r8qc0000gn/T/stackchan-native-n5zs1vic/libstackchan_audio.dylib"
+      ],
+      "exit": 0,
+      "seconds": 0.9325742910004919,
+      "sampled_peak_tree_rss_bytes": 104726528,
+      "retained_identities": {
+        "86148": "Fri Oct 9 08:57:58 2026",
+        "86153": "Fri Oct 9 08:57:58 2026",
+        "86183": "Fri Oct 9 08:57:59 2026"
+      },
+      "cleanup_errors": [],
+      "remaining_group_pids": [],
+      "log": ""
+    },
+    {
+      "argv": [
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++",
+        "-isysroot",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk",
+        "-isystem",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/usr/include/c++/v1",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "/Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/companion/host/native-audio/test_ring.cpp",
+        "-o",
+        "/var/folders/1_/85m0gzgx34dgj2mjfjz4r8qc0000gn/T/stackchan-native-n5zs1vic/test_ring"
+      ],
+      "exit": 0,
+      "seconds": 0.48876537499018013,
+      "sampled_peak_tree_rss_bytes": 92782592,
+      "retained_identities": {
+        "86196": "Fri Oct 9 08:57:59 2026",
+        "86198": "Fri Oct 9 08:57:59 2026"
+      },
+      "cleanup_errors": [],
+      "remaining_group_pids": [],
+      "log": ""
+    },
+    {
+      "argv": [
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++",
+        "-isysroot",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk",
+        "-isystem",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/usr/include/c++/v1",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "/Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/companion/host/native-audio/test_session.cpp",
+        "-o",
+        "/var/folders/1_/85m0gzgx34dgj2mjfjz4r8qc0000gn/T/stackchan-native-n5zs1vic/test_session"
+      ],
+      "exit": 0,
+      "seconds": 0.18052270800399128,
+      "sampled_peak_tree_rss_bytes": 163840,
+      "retained_identities": {
+        "86226": "Fri Oct 9 08:58:00 2026"
+      },
+      "cleanup_errors": [],
+      "remaining_group_pids": [],
+      "log": ""
+    },
+    {
+      "argv": [
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++",
+        "-isysroot",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk",
+        "-isystem",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/usr/include/c++/v1",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "/Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/companion/host/native-audio/test_native.cpp",
+        "-framework",
+        "AudioUnit",
+        "-framework",
+        "CoreAudio",
+        "-framework",
+        "CoreFoundation",
+        "-o",
+        "/var/folders/1_/85m0gzgx34dgj2mjfjz4r8qc0000gn/T/stackchan-native-n5zs1vic/test_native"
+      ],
+      "exit": 0,
+      "seconds": 0.4720203750039218,
+      "sampled_peak_tree_rss_bytes": 96927744,
+      "retained_identities": {
+        "86237": "Fri Oct 9 08:58:00 2026",
+        "86240": "Fri Oct 9 08:58:00 2026"
+      },
+      "cleanup_errors": [],
+      "remaining_group_pids": [],
+      "log": ""
+    },
+    {
+      "argv": [
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++",
+        "-isysroot",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk",
+        "-isystem",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/usr/include/c++/v1",
+        "-std=c++17",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "/Users/mikedemott/Developer/AgentWork/StackChan/src/upstream/companion/host/native-audio/test_native_diagnostics.cpp",
+        "-framework",
+        "AudioUnit",
+        "-framework",
+        "CoreAudio",
+        "-framework",
+        "CoreFoundation",
+        "-o",
+        "/var/folders/1_/85m0gzgx34dgj2mjfjz4r8qc0000gn/T/stackchan-native-n5zs1vic/test_diagnostics"
+      ],
+      "exit": 0,
+      "seconds": 0.49998583299748134,
+      "sampled_peak_tree_rss_bytes": 96288768,
+      "retained_identities": {
+        "86261": "Fri Oct 9 08:58:00 2026",
+        "86264": "Fri Oct 9 08:58:00 2026"
+      },
+      "cleanup_errors": [],
+      "remaining_group_pids": [],
+      "log": ""
+    },
+    {
+      "argv": [
+        "/var/folders/1_/85m0gzgx34dgj2mjfjz4r8qc0000gn/T/stackchan-native-n5zs1vic/test_diagnostics"
+      ],
+      "exit": 0,
+      "seconds": 0.2302205839951057,
+      "sampled_peak_tree_rss_bytes": 32768,
+      "retained_identities": {
+        "86295": "Fri Oct 9 08:58:01 2026"
+      },
+      "cleanup_errors": [],
+      "remaining_group_pids": [],
+      "log": ""
+    },
+    {
+      "argv": [
+        "/var/folders/1_/85m0gzgx34dgj2mjfjz4r8qc0000gn/T/stackchan-native-n5zs1vic/test_ring"
+      ],
+      "exit": 0,
+      "seconds": 0.39330666699970607,
+      "sampled_peak_tree_rss_bytes": 1720320,
+      "retained_identities": {
+        "86311": "Fri Oct 9 08:58:01 2026"
+      },
+      "cleanup_errors": [],
+      "remaining_group_pids": [],
+      "log": ""
+    },
+    {
+      "argv": [
+        "/var/folders/1_/85m0gzgx34dgj2mjfjz4r8qc0000gn/T/stackchan-native-n5zs1vic/test_session"
+      ],
+      "exit": 0,
+      "seconds": 0.19393833400681615,
+      "sampled_peak_tree_rss_bytes": 32768,
+      "retained_identities": {
+        "86332": "Fri Oct 9 08:58:02 2026"
+      },
+      "cleanup_errors": [],
+      "remaining_group_pids": [],
+      "log": ""
+    },
+    {
+      "argv": [
+        "/var/folders/1_/85m0gzgx34dgj2mjfjz4r8qc0000gn/T/stackchan-native-n5zs1vic/test_native"
+      ],
+      "exit": 0,
+      "seconds": 0.2146242919989163,
+      "sampled_peak_tree_rss_bytes": 32768,
+      "retained_identities": {
+        "86348": "Fri Oct 9 08:58:02 2026"
+      },
+      "cleanup_errors": [],
+      "remaining_group_pids": [],
+      "log": ""
+    }
+  ],
+  "worker_load_only": "PASS, no device IO",
+  "library_sha256": "4d76cec1510026f54a197ad5e4ed582ee84e02cb414c44409e8dba335246a924",
+  "result": "PASS",
+  "wall_seconds": 3.7139608330035117
+}

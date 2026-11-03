@@ -1,0 +1,56 @@
+{
+  "selectable_effects": 341,
+  "raw_draw_routines": 342,
+  "helper": "drawGear",
+  "sanitizer_frames_per_effect": 128,
+  "sanitizer_diagnostics": 0,
+  "reset_deterministic": true,
+  "host_peak_microseconds": [
+    [
+      913,
+      318
+    ],
+    [
+      890,
+      225
+    ],
+    [
+      880,
+      60
+    ],
+    [
+      669,
+      307
+    ],
+    [
+      547,
+      156
+    ],
+    [
+      534,
+      219
+    ],
+    [
+      486,
+      115
+    ],
+    [
+      471,
+      296
+    ],
+    [
+      425,
+      163
+    ],
+    [
+      415,
+      298
+    ]
+  ],
+  "host_object_bss": 36340,
+  "host_object_data": 576,
+  "host_object_const": 9144,
+  "source_sha256": "9aa4dfc0a71ca21ddbaf1c2ef83341c5d8bd20cb0ec5ad8c42d88cfb7489486e",
+  "engine_sha256": "0435ea8f2bfab3f24f2cfe678b8b868e0a58b32c91786c2e02ff05170e55c9f4",
+  "target_warning_fixes": "Initialize DNA baseColor and switch-assigned color to BLACK; generator retained."
+}

@@ -1,0 +1,24 @@
+# Exact reviewed non-secret historical findings; see evidence/secret-scan-baseline.json.
+0fba4813891b28548ce3e505434a275afb4cc406:firmware/components/M5Utility/test/crypto_des_test.cpp:generic-api-key:421
+0fba4813891b28548ce3e505434a275afb4cc406:firmware/components/mira_wake/SOURCE-PINS.json:generic-api-key:376
+0fba4813891b28548ce3e505434a275afb4cc406:firmware/components/mira_wake/SOURCE-PINS.json:generic-api-key:384
+95238f7375dfd066ee717dc33bbcd68a011e485a:companion/STOCK-RESTORATION-FIRMWARE-BUILD.json:generic-api-key:85
+95238f7375dfd066ee717dc33bbcd68a011e485a:companion/STOCK-RESTORATION-FIRMWARE-BUILD.json:generic-api-key:227
+95238f7375dfd066ee717dc33bbcd68a011e485a:companion/STOCK-RESTORATION-FIRMWARE-BUILD.json:generic-api-key:228
+95238f7375dfd066ee717dc33bbcd68a011e485a:companion/STOCK-RESTORATION-FIRMWARE-BUILD.json:generic-api-key:243
+f4d3a836d9b6b41462147e67ca950d28eb227709:companion/TOOLS-AGENTS-FIRMWARE-BUILD.json:generic-api-key:218
+f4d3a836d9b6b41462147e67ca950d28eb227709:companion/TOOLS-AGENTS-FIRMWARE-BUILD.json:generic-api-key:219
+f4d3a836d9b6b41462147e67ca950d28eb227709:companion/TOOLS-AGENTS-FIRMWARE-BUILD.json:generic-api-key:234
+c1ccff7db70390f7fd18e0f48a3ff62c9e50b4a3:companion/MENU-RESTORATION-FIRMWARE-BUILD.json:generic-api-key:86
+c1ccff7db70390f7fd18e0f48a3ff62c9e50b4a3:companion/MENU-RESTORATION-FIRMWARE-BUILD.json:generic-api-key:235
+c1ccff7db70390f7fd18e0f48a3ff62c9e50b4a3:companion/MENU-RESTORATION-FIRMWARE-BUILD.json:generic-api-key:236
+c1ccff7db70390f7fd18e0f48a3ff62c9e50b4a3:companion/MENU-RESTORATION-FIRMWARE-BUILD.json:generic-api-key:251
+3081e2d0529683843b220db6d295976358364d14:companion/STOCK-SHELL-FIRMWARE-BUILD.json:generic-api-key:210
+3081e2d0529683843b220db6d295976358364d14:companion/STOCK-SHELL-FIRMWARE-BUILD.json:generic-api-key:211
+3081e2d0529683843b220db6d295976358364d14:companion/STOCK-SHELL-FIRMWARE-BUILD.json:generic-api-key:226
+
+# Same byte-identical reviewed public files under reconciliation commit; exact fingerprints only.
+# Evidence: docs/companions/secret-scan-provenance.json
+14468887abde1753bdf5f7890aac8ff686e9c8dc:firmware/components/M5Utility/test/crypto_des_test.cpp:generic-api-key:421
+14468887abde1753bdf5f7890aac8ff686e9c8dc:firmware/components/mira_wake/SOURCE-PINS.json:generic-api-key:376
+14468887abde1753bdf5f7890aac8ff686e9c8dc:firmware/components/mira_wake/SOURCE-PINS.json:generic-api-key:384

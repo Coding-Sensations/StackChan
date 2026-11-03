@@ -1,0 +1,9 @@
+# Remote connection driver status
+
+`companion/host/streaming/gateway_connection.py` implements a connection driver independent of Mac/CoreAudio. It owns one receive task, dispatches bounded controls/audio to the existing authenticated StreamingSession, services 20ms codec ticks, checks authorization even with a silent peer, bounds sends, and invalidates audio before teardown. Provider playback state is propagated to the robot; it does not generate a continuous encoded-silence return stream while listening. Termination cancels and joins the receive task and closes the accepted socket.
+
+This is not a listener, deployment, TLS termination, pairing service or Mira adapter. Caller must authenticate before constructing the session and configure the accepted WebSocket with max_size4112, max_queue2 and compression disabled, plus verified TLS. No real endpoint/session/key was created. Codec/provider callbacks must remain bounded; execution latency, provider cancellation, actual playback tail/drain, full network IO and physical audio are unqualified. A real provider adapter must retain Speaking state through its bounded output drain and measure silence/cancellation separately.
+
+11 offline tests exercise control/binary dispatch and teardown, duplicate JSON, oversize frames, blocked sends, silent-peer revocation, cancellation, provider failure, output bounds, silence gating, and the existing session's actual begin/ack/physical-consent protocol. Fixtures use in-memory synthetic device grants only, with no network listener or audio IO. Test result is recorded in GATEWAY-VERIFICATION.json. No firmware source or image changed in this phase.
+
+Same-Mira voice/conversation/memory attachment remains a separate unresolved supported-interface requirement. This implementation does not claim that continuity; see REMOTE-INTEGRATION-CONTRACT.md.

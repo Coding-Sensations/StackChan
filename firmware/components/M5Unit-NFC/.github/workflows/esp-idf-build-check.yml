@@ -1,0 +1,146 @@
+name: Build(esp-idf-native)
+
+on:
+  push:
+    tags-ignore:
+      - '*.*.*'
+      - 'v*.*.*'
+    branches:
+      - '*'
+    paths:
+      - 'src/**.cpp'
+      - 'src/**.hpp'
+      - 'src/**.h'
+      - 'src/**.c'
+      - 'CMakeLists.txt'
+      - 'idf_component.yml'
+      - 'examples/UnitUnified/**.cpp'
+      - 'examples/UnitUnified/**.hpp'
+      - 'examples/UnitUnified/**.h'
+      - 'examples/UnitUnified/**.c'
+      - 'examples/UnitUnified/**/CMakeLists.txt'
+      - 'examples/UnitUnified/**/Kconfig.projbuild'
+      - 'examples/UnitUnified/common/**'
+      - '.github/workflows/esp-idf-build-check.yml'
+  pull_request:
+    paths:
+      - 'src/**.cpp'
+      - 'src/**.hpp'
+      - 'src/**.h'
+      - 'src/**.c'
+      - 'CMakeLists.txt'
+      - 'idf_component.yml'
+      - 'examples/UnitUnified/**.cpp'
+      - 'examples/UnitUnified/**.hpp'
+      - 'examples/UnitUnified/**.h'
+      - 'examples/UnitUnified/**.c'
+      - 'examples/UnitUnified/**/CMakeLists.txt'
+      - 'examples/UnitUnified/**/Kconfig.projbuild'
+      - 'examples/UnitUnified/common/**'
+      - '.github/workflows/esp-idf-build-check.yml'
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Cross design: variant coverage on esp32s3, chip coverage on the other SoCs with the
+# default I2C variant (UnitNFC). CapCC1101 is the M5Stack CardputerADV built-in radio (esp32s3
+# only) so it is only built in the variant job. NFC has no chip-specific example, so esp32p4
+# (Tab5) is folded into chip coverage rather than a separate Tab5 job.
+jobs:
+  # Variant coverage: every NFC family / variant on esp32s3 (LCD-capable dual-core Xtensa with PSRAM).
+  build-variants:
+    name: ${{ matrix.idf }} esp32s3 ${{ matrix.example_config.label }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        # idf boundaries: 5.1.7 = oldest legacy-driver (5.0.x dropped: M5GFX needs esp_mm added
+        # in 5.1), 5.4.4 = new driver/*_master.h + touch_sens.h era, 5.5.4 = latest.
+        idf: [v5.1.7, v5.4.4, v5.5.4]
+        # Cross design: NFCA Detect gets both variants (UnitNFC / CapCC1101) — primary protocol.
+        # NFCB/F/V Detect get UnitNFC only — protocol-specific compile check, no need to repeat
+        # the CapCC1101 variant per family (CapCC1101 is exercised by NFCA + chip job suffices).
+        example_config:
+          - label: NFCA-Detect-UnitNFC (full)
+            example_path: examples/UnitUnified/NFCA/Detect
+            variant: USING_UNIT_NFC
+          - label: NFCA-Detect-CapCC1101 (full)
+            example_path: examples/UnitUnified/NFCA/Detect
+            variant: USING_CAP_CC1101
+          - label: NFCB-Detect-UnitNFC (no_dial)
+            example_path: examples/UnitUnified/NFCB/Detect
+            variant: USING_UNIT_NFC
+#          - label: NFCB-Detect-CapCC1101 (no_dial)    # cross design — covered by NFCA CapCC1101
+#            example_path: examples/UnitUnified/NFCB/Detect
+#            variant: USING_CAP_CC1101
+          - label: NFCF-Detect-UnitNFC (basic)
+            example_path: examples/UnitUnified/NFCF/Detect
+            variant: USING_UNIT_NFC
+#          - label: NFCF-Detect-CapCC1101 (basic)      # cross design — covered by NFCA CapCC1101
+#            example_path: examples/UnitUnified/NFCF/Detect
+#            variant: USING_CAP_CC1101
+          - label: NFCV-Detect-UnitNFC (basic)
+            example_path: examples/UnitUnified/NFCV/Detect
+            variant: USING_UNIT_NFC
+#          - label: NFCV-Detect-CapCC1101 (basic)      # cross design — covered by NFCA CapCC1101
+#            example_path: examples/UnitUnified/NFCV/Detect
+#            variant: USING_CAP_CC1101
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Kconfig variant
+        # The example's own sdkconfig.defaults is not read (top CMakeLists points SDKCONFIG_DEFAULTS
+        # at common/sdkconfig.defaults). Append the choice to common/ in the CI workspace only.
+        run: |
+          echo "" >> examples/UnitUnified/common/sdkconfig.defaults
+          echo "CONFIG_EXAMPLE_${{ matrix.example_config.variant }}=y" >> examples/UnitUnified/common/sdkconfig.defaults
+
+      - name: ESP-IDF build
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: ${{ matrix.idf }}
+          target: esp32s3
+          path: ${{ matrix.example_config.example_path }}
+
+  # Chip coverage: NFCA Detect (UnitNFC / I2C) on every other supported SoC. esp32 = classic
+  # Xtensa dual-core (M5Unified touch-deprecation path). esp32c6 / esp32h2 = RISC-V single-core,
+  # exercises the app_main CONFIG_FREERTOS_UNICORE feedIdle branch. esp32p4 (M5Stack Tab5) =
+  # RISC-V dual-core; sdkconfig.defaults.esp32p4 overlay (chip-rev minimum keys) is auto-applied.
+  build-chips:
+    name: ${{ matrix.idf }} ${{ matrix.target }} NFCA-Detect-UnitNFC
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        target: [esp32, esp32c6, esp32h2, esp32p4]
+        idf: [v5.1.7, v5.4.4, v5.5.4]
+        exclude:
+          # esp32p4 stable from IDF v5.3 (M5GFX P4 verified on 5.4/5.5). 5.1.7 not applicable.
+          - target: esp32p4
+            idf: v5.1.7
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Kconfig variant
+        run: |
+          echo "" >> examples/UnitUnified/common/sdkconfig.defaults
+          echo "CONFIG_EXAMPLE_USING_UNIT_NFC=y" >> examples/UnitUnified/common/sdkconfig.defaults
+
+      - name: ESP-IDF build
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: ${{ matrix.idf }}
+          target: ${{ matrix.target }}
+          path: examples/UnitUnified/NFCA/Detect

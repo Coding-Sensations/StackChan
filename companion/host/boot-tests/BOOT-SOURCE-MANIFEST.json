@@ -1,0 +1,7 @@
+{
+  "firmware/main/main.cpp": "248c80801bd7cff63c00401e34ce0a0d6a64744088a3514dc1801decec1b49dd",
+  "firmware/main/CMakeLists.txt": "b7b65df7b6351f119afa089d6622850746e951f88fc159889a665a98223de70c",
+  "firmware/main/hal/hal.cpp": "f732977f65ac7c35bd78e28c121dc9b96f0f0a956e1c1bccdcaacaed4d2d4d62",
+  "firmware/main/hal/hal.h": "856bbf96f47b736487243fe56483a22b1832279ebd26d4235886de0476410936",
+  "firmware/main/hal/board/stackchan.cc": "1e38b72352bbf5d94b9951917cf3d1f94c227032e5252943d5e79741210a5a1e"
+}

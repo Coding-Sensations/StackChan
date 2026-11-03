@@ -1,0 +1,45 @@
+{
+  "argv": [
+    "/usr/bin/nice",
+    "-n",
+    "20",
+    "/usr/bin/sandbox-exec",
+    "-f",
+    "/tmp/stackchan-receiver-build.sb",
+    "/bin/bash",
+    "/tmp/stackchan-receiver-build.sh"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 93.52787925000302,
+  "max_waited_child_rss_bytes_not_process_tree_peak": 702038016,
+  "network_denied": true,
+  "workers": 1,
+  "nice": 20,
+  "timeout_seconds": 180,
+  "source_revision": "69f885e3df7385eeb7dbfcb50bb593e1a94d292e",
+  "flash": false,
+  "stack-chan.bin": {
+    "bytes": 2580848,
+    "sha256": "f0cb47ba8764e5514b25331acf0cea83c0086d30d7e6e823618c1e759d8e96cd"
+  },
+  "stack-chan.elf": {
+    "bytes": 65567536,
+    "sha256": "7268458f6efadd554dc355ee7a86d02afce652c64084be2479cfcc4dd1c1e4e3"
+  },
+  "ota_data_initial.bin": {
+    "bytes": 8192,
+    "sha256": "7d2c7ac4888bfd75cd5f56e8d61f69595121183afc81556c876732fd3782c62f"
+  },
+  "sdk": "ESP-IDF5.5.4",
+  "compiler": "XtensaGCC14.2.0 esp14.2.0_20260121",
+  "archive": "/Users/mikedemott/Developer/AgentWork/StackChan/.tools/receiver-build-f0cb47ba8764",
+  "provisioning_compile_option": "OFF",
+  "dependency_lock_sha256": "403a9f58f18ba6e2d2cfbfdbf2c6a23ec5ab3ba8e10f3bbdc806f677e2518016",
+  "source_commit": "69f885e3df7385eeb7dbfcb50bb593e1a94d292e",
+  "capacity": "89GiB disk and9.1GiB literal free RAM atstart; memory_pressure74-78%free duringbuild,83GiB disk later",
+  "resumed_build_windows": "3 timed-out180s windows plus final93.53s success; first4.96s resolver-disabled attempt corrected",
+  "global_scheduler_hold": false,
+  "hardware_acceptance": false,
+  "device_IO": false,
+  "actions_or_push": false
+}

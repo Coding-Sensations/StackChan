@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleIdentifier</key><string>local.mrkillbob.StackChanPairing.camera</string>
+<key>CFBundleExecutable</key><string>CameraExtension</string>
+<key>CFBundleName</key><string>StackChan Companion Camera</string>
+<key>CFBundlePackageType</key><string>SYSX</string>
+<key>CFBundleVersion</key><string>1</string>
+<key>CFBundleShortVersionString</key><string>1.0</string>
+<key>LSMinimumSystemVersion</key><string>12.3</string>
+<key>CMIOExtension</key><dict><key>CMIOExtensionMachServiceName</key><string>REPLACE_TEAM_ID.local.mrkillbob.StackChanPairing.camera</string></dict>
+<key>CompanionTeamID</key><string>REPLACE_TEAM_ID</string>
+<key>CompanionBundleID</key><string>local.mrkillbob.StackChanPairing</string>
+</dict></plist>

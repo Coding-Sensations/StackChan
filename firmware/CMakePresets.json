@@ -1,0 +1,18 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "muse-ram-reference",
+      "displayName": "RAM-only Muse; no Games/Music; no local artwork",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/../build",
+      "cacheVariables": {
+        "STACKCHAN_BUILD_PROFILE": "custom",
+        "STACKCHAN_FEATURE_MANIFEST": "${sourceDir}/profiles/muse-ram.json",
+        "STACKCHAN_MUSE_RAM_ONLY": "ON",
+        "STACKCHAN_ENABLE_LOCAL_PORTRAITS": "OFF",
+        "STACKCHAN_LOCAL_PORTRAIT_MANIFEST": ""
+      }
+    }
+  ]
+}

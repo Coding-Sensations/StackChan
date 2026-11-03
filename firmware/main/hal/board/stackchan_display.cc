@@ -17,11 +17,25 @@
 #include <stackchan/stackchan.h>
 #include <assets/lang_config.h>
 #include <hal/hal.h>
+#ifdef STACKCHAN_COMPANION_BOOT
+#include <companion/audio_owner.hpp>
+#endif
 
 using namespace stackchan;
 using namespace stackchan::avatar;
 
 #define TAG "StackChanAvatarDisplay"
+
+namespace {
+bool StockReactionsEnabled()
+{
+#ifdef STACKCHAN_COMPANION_BOOT
+    return companion::CurrentAudioOwner() == companion::AudioOwner::Stock;
+#else
+    return true;
+#endif
+}
+}
 
 LV_FONT_DECLARE(BUILTIN_TEXT_FONT);
 LV_FONT_DECLARE(BUILTIN_ICON_FONT);
@@ -269,18 +283,20 @@ void StackChanAvatarDisplay::SetupUI()
     stackchan.attachAvatar(std::move(avatar));
     stackchan.addModifier(std::make_unique<BreathModifier>());
     blink_modifier_id_ = stackchan.addModifier(std::make_unique<BlinkModifier>());
-    stackchan.addModifier(std::make_unique<HeadPetModifier>());
-    stackchan.addModifier(std::make_unique<ImuEventModifier>());
+    if (StockReactionsEnabled()) {
+        stackchan.addModifier(std::make_unique<HeadPetModifier>());
+        stackchan.addModifier(std::make_unique<ImuEventModifier>());
+    }
 
-    preview_image_ = lv_image_create(lv_screen_active());
+    if(!preview_image_)preview_image_ = lv_image_create(lv_screen_active());
     lv_obj_set_size(preview_image_, 320, 240);
     lv_obj_align(preview_image_, LV_ALIGN_CENTER, 0, 0);
     lv_obj_add_flag(preview_image_, LV_OBJ_FLAG_HIDDEN);
 
     // GetHAL().startStackChanAutoUpdate(24);
 
-    auto config        = hal_bridge::get_xiaozhi_config();
-    idle_motion_level_ = config.idleRandomMovementLevel;
+    auto config = hal_bridge::get_xiaozhi_config();
+    idle_motion_level_ = StockReactionsEnabled() ? config.idleRandomMovementLevel : 0;
 
     ESP_LOGI(TAG, "Avatar created and started");
 }
@@ -299,6 +315,7 @@ void StackChanAvatarDisplay::LvglUnlock()
 
 void StackChanAvatarDisplay::CreateIdleMotionModifier()
 {
+    if (!StockReactionsEnabled()) return;
     auto& stackchan = GetStackChan();
 
     switch (idle_motion_level_) {
@@ -356,13 +373,17 @@ void StackChanAvatarDisplay::SetEmotion(const char* emotion)
         if (idle_motion_modifier_id_ >= 0) {
             stackchan.removeModifier(idle_motion_modifier_id_);
             idle_motion_modifier_id_ = -1;
+        }
+        if (idle_expression_modifier_id_ >= 0) {
             stackchan.removeModifier(idle_expression_modifier_id_);
             idle_expression_modifier_id_ = -1;
         }
 
         // Return to default pose
-        auto& motion = GetStackChan().motion();
-        motion.pitchServo().moveWithSpeed(0, 80);
+        if (StockReactionsEnabled()) {
+            auto& motion = GetStackChan().motion();
+            motion.pitchServo().moveWithSpeed(0, 80);
+        }
 
     } else if (strcmp(emotion, "doubtful") == 0) {
         avatar.setEmotion(Emotion::Doubt);
@@ -488,8 +509,6 @@ void StackChanAvatarDisplay::SetStatus(const char* status)
     }
 
     auto& avatar = stackchan.avatar();
-    auto& motion = stackchan.motion();
-
     DisplayLockGuard lock(this);
 
     bool is_idle      = false;
@@ -523,7 +542,7 @@ void StackChanAvatarDisplay::SetStatus(const char* status)
 
     } else if (strcmp(status, Lang::Strings::SPEAKING) == 0) {
         if (speaking_modifier_id_ < 0) {
-            speaking_modifier_id_ = stackchan.addModifier(std::make_unique<SpeakingModifier>(0, 180, false));
+            speaking_modifier_id_ = stackchan.addModifier(std::make_unique<SpeakingModifier>(0, 180, StockReactionsEnabled()));
         }
 
         GetHAL().setRgbColor(0, 0, 0, 50);
@@ -539,6 +558,8 @@ void StackChanAvatarDisplay::SetStatus(const char* status)
             if (idle_motion_level_ > 0) {
                 CreateIdleMotionModifier();
             }
+        }
+        if (idle_expression_modifier_id_ < 0) {
             idle_expression_modifier_id_ = stackchan.addModifier(std::make_unique<IdleExpressionModifier>());
         }
 
@@ -549,6 +570,8 @@ void StackChanAvatarDisplay::SetStatus(const char* status)
         if (idle_motion_modifier_id_ >= 0) {
             stackchan.removeModifier(idle_motion_modifier_id_);
             idle_motion_modifier_id_ = -1;
+        }
+        if (idle_expression_modifier_id_ >= 0) {
             stackchan.removeModifier(idle_expression_modifier_id_);
             idle_expression_modifier_id_ = -1;
         }
@@ -570,4 +593,10 @@ void StackChanAvatarDisplay::SetStatus(const char* status)
 
 void StackChanAvatarDisplay::ShowNotification(const char* notification, int duration_ms)
 {
+}
+
+void StackChanAvatarDisplay::ResetSessionUi(){
+    SetPreviewImage(nullptr); // persistent preview object stays alive for timer callbacks
+    setup_ui_called_=false;is_sleeping_=false;
+    speaking_modifier_id_=idle_motion_modifier_id_=idle_expression_modifier_id_=blink_modifier_id_=-1;
 }

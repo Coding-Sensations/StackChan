@@ -1,0 +1,47 @@
+{"result": "passed", "setup": "official 6 sections/12 rows + Screensaver", "launcher": "official prefix, then joint Companion and extensions", "tools": "one Tools tile -> selection -> dedicated graphical pages", "device_access": false}
+....
+----------------------------------------------------------------------
+Ran 4 tests in 4.343s
+
+OK
+PASS USB ownership, foreign driver refusal, core affinity, stale FIFO, expiry, bounds and close failure
+firmware install policy tests passed
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/test_readonly.cpp:14:61: error: too few arguments to function call, expected 4, have 1
+   14 |  assert(companion::AcquireAudio(companion::AudioOwner::Stock));
+      |         ~~~~~~~~~~~~~~~~~~~~~~~                             ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/assert.h:72:25: note: expanded from macro 'assert'
+   72 |     (__builtin_expect(!(e), 0) ? __assert_rtn(__func__, __ASSERT_FILE_NAME, __LINE__, #e) : (void)0)
+      |                         ^
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/firmware/main/companion/audio_owner.hpp:58:13: note: 'AcquireAudio' declared here
+   58 | inline bool AcquireAudio(AudioOwner owner,AudioPurpose purpose,uint64_t epoch,AudioLease& out){return CommonAudioAuthority().Acquire(owner,purpose,epoch,out);}
+      |             ^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/test_readonly.cpp:19:54: error: too few arguments to function call, expected 2, have 1
+   19 |  companion::ReleaseAudio(companion::AudioOwner::Stock);
+      |  ~~~~~~~~~~~~~~~~~~~~~~~                             ^
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/firmware/main/companion/audio_owner.hpp:60:13: note: 'ReleaseAudio' declared here
+   60 | inline bool ReleaseAudio(AudioLease& l,bool closed_and_joined){return CommonAudioAuthority().Release(l,closed_and_joined);}
+      |             ^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/test_readonly.cpp:41:60: error: too few arguments to function call, expected 4, have 1
+   41 | assert(companion::AcquireAudio(companion::AudioOwner::Stock));
+      |        ~~~~~~~~~~~~~~~~~~~~~~~                             ^
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/assert.h:72:25: note: expanded from macro 'assert'
+   72 |     (__builtin_expect(!(e), 0) ? __assert_rtn(__func__, __ASSERT_FILE_NAME, __LINE__, #e) : (void)0)
+      |                         ^
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/firmware/main/companion/audio_owner.hpp:58:13: note: 'AcquireAudio' declared here
+   58 | inline bool AcquireAudio(AudioOwner owner,AudioPurpose purpose,uint64_t epoch,AudioLease& out){return CommonAudioAuthority().Acquire(owner,purpose,epoch,out);}
+      |             ^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/test_readonly.cpp:48:53: error: too few arguments to function call, expected 2, have 1
+   48 | companion::ReleaseAudio(companion::AudioOwner::Stock);
+      | ~~~~~~~~~~~~~~~~~~~~~~~                             ^
+/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/firmware/main/companion/audio_owner.hpp:60:13: note: 'ReleaseAudio' declared here
+   60 | inline bool ReleaseAudio(AudioLease& l,bool closed_and_joined){return CommonAudioAuthority().Release(l,closed_and_joined);}
+      |             ^            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+4 errors generated.
+Traceback (most recent call last):
+  File "/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/run_stock_restoration_checks.py", line 43, in <module>
+    subprocess.run(command, check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mikedemott/.local/share/uv/python/cpython-3.13.15-macos-aarch64-none/lib/python3.13/subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['clang++', '-std=c++17', '-Wall', '-Wextra', '-Werror', '-I/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests', '-I/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/firmware/main', '-I/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/firmware/xiaozhi-esp32/main', '/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/test_readonly.cpp', '/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/firmware/main/companion/readonly_settings.cc', '-o', '/var/folders/1_/85m0gzgx34dgj2mjfjz4r8qc0000gn/T/stackchan-stock-tests-leoekxgk/scoped_settings']' returned non-zero exit status 1.

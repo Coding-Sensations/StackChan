@@ -1,0 +1,66 @@
+{
+  "base": "4a24491761ffab19f3df758c93ebbdada4c29ddc",
+  "branch": "codex/narrow-navigation",
+  "origin_repair": "66b81c1eba1633374423bbd7f2b4443ebc247ea7",
+  "excluded_host_commits": [
+    "51d0c05e54a5372de04452005614623536ccf721",
+    "5c8228d27fff8488403b98d07783ccef969c8943",
+    "832730492ab9ae68d693ce6c2e7b024aba3c8d82"
+  ],
+  "application_conflicts": 0,
+  "source_edits_after_origin_review": 0,
+  "reviewed_source_count": 74,
+  "reviewed_hashes_match": true,
+  "full_tracked_firmware_equals_origin": true,
+  "host_bridge_trees_equal_published_base": true,
+  "host_tests": "13/13 passed; independent rerun, no skips",
+  "independent_webcam_tests": "14/14 passed",
+  "independent_review": "narrow-independent-review.md",
+  "full_firmware_build_exit": 0,
+  "build_directory": "firmware/build-narrow",
+  "build_inputs": "fresh local build; same SDK, pinned copied dependencies and unchanged sdkconfig; no device access",
+  "sdk": "ESP-IDF v5.5.4",
+  "sdkconfig_sha256": "d77e3ba0aca9f2a088a5d5b2c4ebefe49c21cfe21530976cce2c7bf38366e911",
+  "inherited_assembly_inputs": {
+    "count": 21,
+    "all_match_committed_SOURCE_PINS": true,
+    "tracked_in_base_or_candidate": false,
+    "receipt": "narrow-inherited-assembly-inputs.json",
+    "limitation": "Local build requires these pinned cached inputs; bare-checkout build is not self-contained"
+  },
+  "artifacts": {
+    "stack-chan.bin": {
+      "bytes": 4725136,
+      "sha256": "81b74d1a460e1303526c693d3eb782c893de9f758ac25428197615907010ce8c"
+    },
+    "stack-chan.elf": {
+      "bytes": 104488352,
+      "sha256": "dbb16b4a36a06f284093a9457f716bea9f28fd0b75a228c55d3e38fe4d436cd2"
+    }
+  },
+  "full_build_log": {
+    "local_path": "/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/narrow-validation/full-build.log",
+    "sha256": "1655471a311c162db332772dc4c8b7fb610100ebbffc45445b49191b951adbb0"
+  },
+  "narrow_source_manifest_sha256": "2327cc2daae6f701a172b2ce72907eb362044f0fd580493c7194ecee4707557f",
+  "new_narrow_evidence_records": [
+    "narrow-review-manifest.json",
+    "narrow-publication-provenance.md",
+    "narrow-independent-review.md",
+    "narrow-inherited-assembly-inputs.json",
+    "narrow-build-receipt.json",
+    "narrow-build-final.txt"
+  ],
+  "historical_evidence_records_retained": 12,
+  "base_pr1_approved": false,
+  "base_pr1_unresolved_P2": [
+    "float abs overload in generated effect catalog",
+    "stock menu fixture missing Screensaver"
+  ],
+  "physical_behavior_verified": false,
+  "installed_image_verified": false,
+  "publication": false,
+  "flash": false,
+  "device_actions": false,
+  "screensaver_removals": false
+}

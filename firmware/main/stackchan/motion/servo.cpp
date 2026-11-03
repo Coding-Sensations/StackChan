@@ -5,6 +5,8 @@
  */
 #include "servo.h"
 #include <hal/hal.h>
+#include <cmath>
+#include <algorithm>
 
 using namespace uitk;
 
@@ -37,6 +39,9 @@ void Servo::init()
 
 void Servo::update()
 {
+#if STACKCHAN_BOUNDED_MOTION
+    if (_bounded_state) {update_bounded();return;}
+#endif
     // Keep update in at most 50Hz
     if (GetHAL().millis() - _last_tick < 20) {
         return;
@@ -68,12 +73,18 @@ void Servo::update()
 
 void Servo::move(int angle)
 {
+#if STACKCHAN_BOUNDED_MOTION
+    if (_bounded_state) {retire_bounded();return;}
+#endif
     apply_default_spring_options();
     update_angle_anim_target(angle);
 }
 
 void Servo::moveWithSpringParams(int angle, float stiffness, float damping)
 {
+#if STACKCHAN_BOUNDED_MOTION
+    if (_bounded_state) {retire_bounded();return;}
+#endif
     _angle_anim.springOptions().visualDuration = 0.0f;  // Disable timing override
     _angle_anim.springOptions().stiffness      = stiffness;
     _angle_anim.springOptions().damping        = damping;
@@ -83,6 +94,9 @@ void Servo::moveWithSpringParams(int angle, float stiffness, float damping)
 
 void Servo::moveWithSpeed(int angle, int speed)
 {
+#if STACKCHAN_BOUNDED_MOTION
+    if (_bounded_state) {retire_bounded();return;}
+#endif
     auto spring_options = map_speed_to_spring_options(speed);
     moveWithSpringParams(angle, spring_options.stiffness, spring_options.damping);
 }
@@ -94,6 +108,9 @@ int Servo::getCurrentAngle()
 
 bool Servo::isMoving()
 {
+#if STACKCHAN_BOUNDED_MOTION
+    if (_bounded_state) return _bounded_state==1 && (std::fabs(_bounded_velocity)>0.1f || std::fabs(_bounded_target-_bounded_position)>0.1f);
+#endif
     return _angle_anim.done() == false || is_moving_impl();
 }
 
@@ -118,6 +135,9 @@ void Servo::update_angle_anim_target(int angle)
 
 void Servo::stop_motion_at_angle(int angle)
 {
+#if STACKCHAN_BOUNDED_MOTION
+    if (_bounded_state==1) {_bounded_position=_bounded_target=uitk::clamp(angle,_angle_limit.x,_angle_limit.y);_bounded_velocity=0;}
+#endif
     angle = uitk::clamp(angle, _angle_limit.x, _angle_limit.y);
     _angle_anim.teleport(angle);
     _snap_to_target_on_rest = false;
@@ -161,3 +181,85 @@ uitk::SpringOptions_t Servo::map_speed_to_spring_options(int speed)
 }
 
 }  // namespace stackchan::motion
+
+namespace stackchan::motion {
+void Servo::bounded_output_fault()
+{
+#if STACKCHAN_BOUNDED_MOTION
+    if (_bounded_state) retire_bounded();
+#endif
+}
+bool Servo::bounded_output_current()
+{
+#if STACKCHAN_BOUNDED_MOTION
+    if (!_bounded_state) return true;
+    if (_bounded_state!=1) return false;
+    const uint32_t now=GetHAL().millis();
+    if (now<_bounded_clock || now-_bounded_clock>100 || now>=_bounded_expiry || !_bounded_authority ||
+        !_bounded_authority(_bounded_context,_bounded_generation,now)) {retire_bounded();return false;}
+    const uint32_t after=GetHAL().millis();
+    if (_bounded_state!=1 || after<now || after-now>100 || after>=_bounded_expiry) {retire_bounded();return false;}
+    _bounded_clock=after;
+#endif
+    return true;
+}
+#if STACKCHAN_BOUNDED_MOTION
+void Servo::retire_bounded()
+{
+    _bounded_state=2;_bounded_velocity=_bounded_target=_bounded_position=0;
+    _bounded_authority=nullptr;_bounded_context=nullptr;
+    _angle_anim.teleport(0);_snap_to_target_on_rest=false;
+}
+bool Servo::beginBoundedMotion(uint64_t generation,uint32_t expiry_ms,MotionAuthority authority,void* context,BoundedLimits limits)
+{
+    if (_bounded_state) return false;
+    // An attempted activation is one-shot: invalid input cannot fall into legacy.
+    _bounded_state=1;_bounded_generation=generation;_bounded_expiry=expiry_ms;
+    _bounded_clock=_bounded_tick=GetHAL().millis();_bounded_authority=authority;_bounded_context=context;
+    if (!generation || !authority || expiry_ms<=_bounded_clock || expiry_ms-_bounded_clock>120000 ||
+        !std::isfinite(limits.speed_tenths_per_s) || !std::isfinite(limits.acceleration_tenths_per_s2) ||
+        limits.speed_tenths_per_s<=0 || limits.speed_tenths_per_s>250 ||
+        limits.acceleration_tenths_per_s2<=0 || limits.acceleration_tenths_per_s2>800 ||
+        _angle_limit.x>_angle_limit.y || !bounded_output_current()) {retire_bounded();return false;}
+    if (!bounded_position_mode_ready() || !bounded_output_current()) {retire_bounded();return false;}
+    _bounded_limits=limits;
+    if (!bounded_output_current()) return false;
+    const int angle=getCurrentAngle();
+    if (!bounded_output_current()) return false;
+    _bounded_position=_bounded_target=uitk::clamp(angle,_angle_limit.x,_angle_limit.y);_bounded_velocity=0;
+    _angle_anim.teleport(_bounded_position);_snap_to_target_on_rest=false;
+    return true;
+}
+bool Servo::moveBounded(uint64_t generation,float angle_tenths)
+{
+    if (generation!=_bounded_generation || _bounded_state!=1) return false;
+    if (!std::isfinite(angle_tenths) || !bounded_output_current()) {retire_bounded();return false;}
+    _bounded_target=std::clamp(angle_tenths,float(_angle_limit.x),float(_angle_limit.y));
+    return true;
+}
+void Servo::stopBounded(uint64_t generation)
+{
+    if (_bounded_state && generation==_bounded_generation) retire_bounded();
+}
+void Servo::update_bounded()
+{
+    if (!bounded_output_current()) return;
+    const uint32_t now=GetHAL().millis();
+    if (now-_bounded_tick<20) return;
+    _bounded_tick=now;
+    if (!std::isfinite(_bounded_position) || !std::isfinite(_bounded_velocity) || _angle_limit.x>_angle_limit.y) {retire_bounded();return;}
+    // Damped follower technique from CustomFW HeadMotion::Step. All model units
+    // here are tenths of a degree, seconds. Retargeting can overshoot a target.
+    const float a=std::clamp(16.0f*(_bounded_target-_bounded_position)-8.0f*_bounded_velocity,
+                             -_bounded_limits.acceleration_tenths_per_s2,_bounded_limits.acceleration_tenths_per_s2);
+    _bounded_velocity=std::clamp(_bounded_velocity+a*0.02f,-_bounded_limits.speed_tenths_per_s,_bounded_limits.speed_tenths_per_s);
+    _bounded_position+=_bounded_velocity*0.02f;
+    const float clamped=std::clamp(_bounded_position,float(_angle_limit.x),float(_angle_limit.y));
+    if (clamped!=_bounded_position) _bounded_velocity=0;
+    _bounded_position=clamped;
+    if (!bounded_output_current()) return;
+    set_angle_impl(static_cast<int>(std::lround(_bounded_position)));
+    bounded_output_current(); // Physical completion/stop is deliberately unknown.
+}
+#endif
+}

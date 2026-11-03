@@ -1,0 +1,61 @@
+<!doctype html><meta charset="utf-8"><title>StackChan Tools preview</title><style>body{background:#07161f;color:white;font:16px system-ui;margin:24px}p{max-width:760px}.wrap{display:flex;flex-wrap:wrap;gap:24px}.device{position:relative;width:320px;height:240px;background:#10232d;border:8px solid #283c49;border-radius:14px;overflow:hidden}.device button{position:absolute;color:white;background:#23516b;border:0;border-radius:9px;font:20px system-ui;cursor:pointer}.label{position:absolute;left:8px;white-space:pre-line}.title{position:absolute;left:104px;top:10px;font-size:24px}.icon{position:absolute;right:14px;top:60px;pointer-events:none}.url{position:absolute;left:8px;top:52px;width:304px;height:44px;box-sizing:border-box;background:#132d39;color:white;font-size:20px;border:1px solid #53d4d4;border-radius:5px;padding:8px}h2{font-size:16px}</style><h1>StackChan Tools</h1><p>Interactive design preview at the display's 320×240 layout. This simulates navigation and visual states only; it does not operate IR, NFC, audio, or the device. Actual fonts and rendering may differ from LVGL.</p><div id="interactive"></div><h2>All task pages</h2><div class="wrap" id="all"></div><script>const screens={"Tools": [["Infrared", 8, 64, 304, 64, "Infrared"], ["NFC URL", 8, 140, 304, 64, "NFC URL"]], "Infrared": [["Learn a signal", 8, 64, 304, 64, "Learn IR"], ["Review & send", 8, 140, 304, 64, "Send IR"]], "Learn IR": [["Start 10s scan", 8, 172, 304, 60, "Listening"]], "Listening": [["Stop scan", 8, 172, 304, 60, "Learn IR"]], "Send IR": [["Send once", 8, 172, 304, 60, "Sent"]], "Sent": [["Send once", 8, 172, 304, 60, "Sent"]], "NFC URL": [["Edit URL", 8, 104, 304, 56, "Edit URL"], ["Emulate 60s", 8, 176, 304, 56, "Emulate"]], "Emulate": [["Stop emulation", 8, 172, 304, 60, "NFC URL"]], "Edit URL": [["Keys 1/8", 8, 192, 88, 44, "Edit URL"], ["<--", 100, 192, 64, 44, "Edit URL"], ["Save", 168, 192, 144, 44, "NFC URL"]]};const parents={"Tools": "Launcher", "Infrared": "Tools", "Learn IR": "Infrared", "Listening": "Infrared", "Send IR": "Infrared", "Sent": "Infrared", "NFC URL": "Tools", "Edit URL": "NFC URL", "Emulate": "NFC URL"};const text={"Tools": [[212, "Actions start only when tapped", 16]], "Infrared": [[212, "One signal stays in RAM only", 16]], "Learn IR": [[60, "Ready to learn", 20], [108, "Aim remote at the IR sensor.", 16], [128, "Press its button after starting.", 16], [148, "IR off", 20]], "Listening": [[60, "Press the remote button", 20], [108, "Aim remote at the IR sensor.", 16], [148, "Listening \u2014 10s left", 20]], "Send IR": [[60, "NEC \u2022 67 timings", 20], [120, "Aim at device. 38kHz, once.", 16], [148, "Nothing sent yet", 16]], "Sent": [[60, "NEC \u2022 67 timings", 20], [120, "Aim at device. 38kHz, once.", 16], [148, "Sent once", 16]], "NFC URL": [[56, "https://example.com", 20]], "Emulate": [[60, "Hold a reader near", 20], [84, "the NFC antenna.", 20], [120, "NFC active \u2014 60s", 24], [152, "Stops automatically after 60s", 16]]};let page=0;const keys=['abcdefghij','klmnopqrst','uvwxyz./:-','0123456789','ABCDEFGHIJ','KLMNOPQRST','UVWXYZ?=&_','%#~+!$()*;'];let url='https://example.com';
+function icon(tag){return `<svg width="48" height="68" viewBox="0 0 48 68"><rect x="3" y="3" width="40" height="60" rx="9" fill="none" stroke="#53d4d4" stroke-width="3"/>${tag?'<circle cx="34" cy="12" r="3" fill="#53d4d4"/><path d="M14 24q20 8 0 22m4-18q12 7 0 14" fill="none" stroke="#53d4d4" stroke-width="3"/>':'<rect x="10" y="10" width="26" height="12" fill="#53d4d4"/><g fill="#53d4d4"><circle cx="15" cy="32" r="4"/><circle cx="30" cy="32" r="4"/><circle cx="15" cy="43" r="4"/><circle cx="30" cy="43" r="4"/><circle cx="15" cy="54" r="4"/><circle cx="30" cy="54" r="4"/></g>'}</svg>`}
+function render(name,interactive){let d=document.createElement('div');d.className='device';let title=document.createElement('div');title.className='title';title.textContent=name==='Listening'?'Learn IR':name==='Sent'?'Send IR':name;d.append(title);function button(label,x,y,w,h,go,action){let b=document.createElement('button');b.textContent=label;Object.assign(b.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'});if(interactive)b.onclick=()=>{if(action)action();else show(go==='Launcher'?'Tools':go)};d.append(b);return b}
+button('‹ Back',8,4,84,44,parents[name]);for(let [label,x,y,w,h,go] of screens[name]){let a;if(name==='Edit URL'){if(label.startsWith('Keys')){label='Keys '+(page+1)+'/8';a=()=>{url=d.querySelector('input').value;page=(page+1)%8;show(name)}}else if(label==='<--')a=()=>{let i=d.querySelector('input');i.value=i.value.slice(0,-1)};else a=()=>{url=d.querySelector('input').value;show(go)}}button(label,x,y,w,h,go,a)}
+for(let [y,t,size] of text[name]||[]){let l=document.createElement('div');l.className='label';l.style.top=y+'px';l.style.fontSize=size+'px';l.textContent=t;d.append(l)}if(['Learn IR','Listening','Send IR','Sent','NFC URL','Emulate'].includes(name)){let i=document.createElement('div');i.className='icon';i.innerHTML=icon(['NFC URL','Emulate'].includes(name));d.append(i)}if(name==='Edit URL'){let i=document.createElement('input');i.className='url';i.value=url;i.maxLength=96;d.append(i);[...keys[page]].forEach((c,j)=>button(c,8+(j%5)*60,100+Math.floor(j/5)*46,56,44,name,()=>{if(i.value.length<96)i.value+=c}))}return d}
+function show(name){let t=document.getElementById('interactive');t.replaceChildren(render(name,true))}show('Tools');for(let name of Object.keys(screens)){let c=document.createElement('div');let h=document.createElement('h2');h.textContent=name;c.append(h,render(name,false));document.getElementById('all').append(c)}
+</script><script>
+// Additional states are simulations only; no storage, GPIO or network adapter.
+screens.Tools=[['Infrared',8,60,304,44,'Infrared'],['NFC URL',8,112,304,44,'NFC URL'],['UART terminal',8,164,304,44,'UART demo']];
+screens.Infrared=[['Learn a signal',8,60,304,44,'Learn IR'],['Review & send',8,112,304,44,'Send IR'],['Saved remotes',8,164,304,44,'Saved remotes']];
+screens['Send IR']=[['Save remote',8,172,144,60,'Save captured'],['Send once',160,172,152,60,'Sent']];
+screens.Sent=screens['Send IR'];
+screens['Saved remotes']=[];screens['UART demo']=[];screens['Demo line']=[];
+parents['Saved remotes']='Infrared';parents['UART demo']='Tools';parents['Demo line']='UART demo';
+text.Infrared=[[212,'Saved here until Tools closes',16]];
+const uartKeys=[...keys," []{},<>\\|","\"'`^@"];
+let savedCount=0,remotePage=0,uartLine='ping',demoRunning=false,echo='Local echo only. No pins opened.';
+const oldRender=render;
+render=function(name,interactive){
+ if(name==='Save captured'){savedCount=Math.min(8,savedCount+1);name='Send IR';text[name][2]=[148,'Saved until Tools closes',16];}
+ if(name==='Edit URL' && page>=8)page=0;
+ if(!['Saved remotes','UART demo','Demo line'].includes(name)){
+  const device=oldRender(name,interactive);
+  device.querySelectorAll('button').forEach(b=>{if(parseInt(b.style.width)<200)b.style.fontSize='16px';});
+  return device;
+ }
+ const d=document.createElement('div');d.className='device';
+ const title=document.createElement('div');title.className='title';title.textContent=name;d.append(title);
+ const label=(y,value,size=16)=>{const l=document.createElement('div');l.className='label';l.style.top=y+'px';l.style.fontSize=size+'px';l.textContent=value;d.append(l);};
+ const button=(value,x,y,w,h,action,disabled=false)=>{
+  const b=document.createElement('button');b.textContent=value;b.disabled=disabled;
+  Object.assign(b.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px',fontSize:w<200?'16px':'20px',opacity:disabled?.5:1});
+  if(interactive&&!disabled)b.onclick=action;d.append(b);
+ };
+ button('‹ Back',8,4,84,44,()=>{demoRunning=false;page=0;show(parents[name]);});
+ if(name==='Saved remotes'){
+  for(let slot=0;slot<2;slot++){
+   const index=remotePage*2+slot;
+   button(index<savedCount?'Remote '+(index+1):'Empty slot',8,56+slot*52,304,44,()=>{text['Send IR'][2]=[148,'Loaded; nothing sent',16];show('Send IR');},index>=savedCount);
+  }
+  label(152,'RAM only; SD unavailable');
+  button('Next page',8,172,304,60,()=>{remotePage=(remotePage+1)%Math.max(1,Math.ceil(savedCount/2));show(name);});
+ }else if(name==='UART demo'){
+  label(52,'Grove IO unavailable');label(80,echo);label(140,demoRunning?'Simulated demo running':'Demo stopped');
+  button('Edit line',8,172,144,60,()=>{demoRunning=false;page=0;show('Demo line');});
+  button(demoRunning?'Send demo':'Start demo',160,172,152,60,()=>{demoRunning=true;echo='UART demo: no GPIO IO\ndemo> '+uartLine;show(name);});
+ }else{
+  const input=document.createElement('input');input.className='url';input.value=uartLine;input.maxLength=64;d.append(input);
+  [...uartKeys[page]].forEach((c,j)=>button(c,8+(j%5)*60,100+Math.floor(j/5)*46,56,44,()=>{if(input.value.length<64)input.value+=c;}));
+  button('Keys '+(page+1)+'/10',8,192,88,44,()=>{uartLine=input.value;page=(page+1)%10;show(name);});
+  button('<--',100,192,64,44,()=>{input.value=input.value.slice(0,-1);});
+  button('Use line',168,192,144,44,()=>{uartLine=input.value;page=0;show('UART demo');});
+ }
+ return d;
+};
+show('Tools');document.getElementById('all').replaceChildren();
+for(const name of Object.keys(screens)){
+ const card=document.createElement('div'),heading=document.createElement('h2');heading.textContent=name;
+ card.append(heading,render(name,false));document.getElementById('all').append(card);
+}
+</script>

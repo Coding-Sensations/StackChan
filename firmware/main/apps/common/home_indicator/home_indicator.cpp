@@ -93,7 +93,8 @@ private:
  */
 class HomeButton {
 public:
-    HomeButton(lv_obj_t* parent, uint32_t colorButton, uint32_t colorBorder)
+    HomeButton(lv_obj_t* parent, uint32_t colorButton, uint32_t colorBorder,
+               std::function<const char*()> status) : _read_status(std::move(status))
     {
         _bg_mask = std::make_unique<Container>(parent);
         _bg_mask->align(LV_ALIGN_CENTER, 0, 0);
@@ -108,6 +109,16 @@ public:
         _bg_mask->setPadding(0, 0, 0, 0);
         _bg_mask->onClick().connect([&]() { hide(); });
 
+        if (_read_status) {
+            _status = lv_label_create(_bg_mask->get());
+            lv_obj_set_pos(_status, 8, 120);
+            lv_obj_set_size(_status, 304, 40);
+            lv_label_set_long_mode(_status, LV_LABEL_LONG_WRAP);
+            lv_obj_set_style_text_font(_status, &lv_font_montserrat_14, 0);
+            lv_obj_set_style_text_color(_status, lv_color_hex(colorBorder), 0);
+            lv_obj_set_style_bg_color(_status, lv_color_hex(colorButton), 0);
+            lv_obj_set_style_bg_opa(_status, LV_OPA_COVER, 0);
+        }
         _btn = std::make_unique<Button>(_bg_mask->get());
         _btn->setSize(152, 73);
         _btn->setAlign(LV_ALIGN_BOTTOM_MID);
@@ -135,6 +146,7 @@ public:
 
     void update()
     {
+        if (_status && !_is_hidden) lv_label_set_text(_status, _read_status());
         _pos_y_anim.update();
         if (!_pos_y_anim.done()) {
             _btn->setPos(0, _pos_y_anim.directValue());
@@ -148,10 +160,20 @@ public:
 
     void show()
     {
+        _hide_mask_flag = false;
         _bg_mask->moveForeground();
         _bg_mask->setHidden(false);
         _pos_y_anim = _pos_y_show;
         _is_hidden  = false;
+    }
+
+    void hideImmediately()
+    {
+        _pos_y_anim.teleport(_pos_y_hide);
+        _btn->setPos(0, _pos_y_hide);
+        _bg_mask->setHidden(true);
+        _is_hidden = true;
+        _hide_mask_flag = false;
     }
 
     void hide()
@@ -187,6 +209,8 @@ private:
     bool _is_clicked     = false;
     bool _hide_mask_flag = false;
     lv_image_dsc_t _icon_home;
+    lv_obj_t* _status = nullptr;
+    std::function<const char*()> _read_status;
 };
 
 /**
@@ -197,16 +221,18 @@ class HomeIndicator {
 public:
     std::function<void(void)> onGoHome;
 
-    void init(lv_obj_t* parent, uint32_t colorButton, uint32_t colorBorder)
+    void init(lv_obj_t* parent, uint32_t colorButton, uint32_t colorBorder,
+              bool show_on_open = true, std::function<const char*()> status = {})
     {
         _home_gesture            = std::make_unique<HomeGesture>();
         _home_gesture->onGesture = [&]() { handle_home_gesture(); };
         _home_gesture->init();
 
-        _home_button = std::make_unique<HomeButton>(parent, colorButton, colorBorder);
-        _home_button->show();
+        _home_button = std::make_unique<HomeButton>(parent, colorButton, colorBorder, std::move(status));
+        if (show_on_open) _home_button->show();
+        else _home_button->hideImmediately();
         _button_show_tick = GetHAL().millis();
-        _is_first_show    = true;
+        _is_first_show    = show_on_open;
     }
 
     void update()
@@ -258,11 +284,11 @@ namespace view {
 static std::unique_ptr<HomeIndicator> _home_indicator;
 
 void create_home_indicator(std::function<void(void)> onGoHome, uint32_t colorButton, uint32_t colorBorder,
-                           lv_obj_t* parent)
+                           lv_obj_t* parent, bool show_on_open, std::function<const char*()> status)
 {
     _home_indicator           = std::make_unique<HomeIndicator>();
     _home_indicator->onGoHome = onGoHome;
-    _home_indicator->init(parent, colorButton, colorBorder);
+    _home_indicator->init(parent, colorButton, colorBorder, show_on_open, std::move(status));
 }
 
 void update_home_indicator()

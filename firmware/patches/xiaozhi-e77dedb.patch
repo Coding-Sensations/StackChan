@@ -1,0 +1,758 @@
+diff --git a/main/application.cc b/main/application.cc
+index d69d43d..e67514b 100644
+--- a/main/application.cc
++++ b/main/application.cc
+@@ -1,14 +1,15 @@
+ #include "application.h"
++#include <hal/hal.h>
++#include "assets.h"
++#include "assets/lang_config.h"
++#include "audio_codec.h"
+ #include "board.h"
+ #include "display.h"
+-#include "system_info.h"
+-#include "audio_codec.h"
+-#include "mqtt_protocol.h"
+-#include "websocket_protocol.h"
+-#include "assets/lang_config.h"
+ #include "mcp_server.h"
+-#include "assets.h"
++#include "mqtt_protocol.h"
+ #include "settings.h"
++#include "system_info.h"
++#include "websocket_protocol.h"
+ 
+ #include <cstring>
+ #include <esp_log.h>
+@@ -399,6 +400,7 @@ void Application::CheckNewVersion() {
+     const int MAX_RETRY = 10;
+     int retry_count = 0;
+     int retry_delay = 10; // Initial retry delay in seconds
++    int challenge_rounds = 0;
+ 
+     auto& board = Board::GetInstance();
+     while (true) {
+@@ -441,15 +443,18 @@ void Application::CheckNewVersion() {
+ 
+         // No new version, mark the current version as valid
+         ota_->MarkCurrentVersionValid();
+-        if (!ota_->HasActivationCode() && !ota_->HasActivationChallenge()) {
++        if (ota_->RequiresAppBinding()) {
++            GetHAL().requestAppSetup();
++        }
++        if (!ota_->HasActivationChallenge()) {
+             // Exit the loop if done checking new version
+             break;
+         }
+ 
+         display->SetStatus(Lang::Strings::ACTIVATION);
+-        // Activation code is shown to the user and waiting for the user to input
+-        if (ota_->HasActivationCode()) {
+-            ShowActivationCode(ota_->GetActivationCode(), ota_->GetActivationMessage());
++        // Retain automatic device authentication, with a bounded retry budget.
++        if (++challenge_rounds > 3) {
++            GetHAL().requestAppSetup();
+         }
+ 
+         // This will block the loop until the activation is done or timeout
+@@ -609,36 +614,6 @@ void Application::InitializeProtocol() {
+     protocol_->Start();
+ }
+ 
+-void Application::ShowActivationCode(const std::string& code, const std::string& message) {
+-    struct digit_sound {
+-        char digit;
+-        const std::string_view& sound;
+-    };
+-    static const std::array<digit_sound, 10> digit_sounds{{
+-        digit_sound{'0', Lang::Sounds::OGG_0},
+-        digit_sound{'1', Lang::Sounds::OGG_1}, 
+-        digit_sound{'2', Lang::Sounds::OGG_2},
+-        digit_sound{'3', Lang::Sounds::OGG_3},
+-        digit_sound{'4', Lang::Sounds::OGG_4},
+-        digit_sound{'5', Lang::Sounds::OGG_5},
+-        digit_sound{'6', Lang::Sounds::OGG_6},
+-        digit_sound{'7', Lang::Sounds::OGG_7},
+-        digit_sound{'8', Lang::Sounds::OGG_8},
+-        digit_sound{'9', Lang::Sounds::OGG_9}
+-    }};
+-
+-    // This sentence uses 9KB of SRAM, so we need to wait for it to finish
+-    Alert(Lang::Strings::ACTIVATION, message.c_str(), "link", Lang::Sounds::OGG_ACTIVATION);
+-
+-    for (const auto& digit : code) {
+-        auto it = std::find_if(digit_sounds.begin(), digit_sounds.end(),
+-            [digit](const digit_sound& ds) { return ds.digit == digit; });
+-        if (it != digit_sounds.end()) {
+-            audio_service_.PlaySound(it->sound);
+-        }
+-    }
+-}
+-
+ void Application::Alert(const char* status, const char* message, const char* emotion, const std::string_view& sound) {
+     ESP_LOGW(TAG, "Alert [%s] %s: %s", emotion, status, message);
+     auto display = Board::GetInstance().GetDisplay();
+@@ -716,8 +691,13 @@ void Application::ContinueOpenAudioChannel(ListeningMode mode) {
+         return;
+     }
+ 
++    // Leave MAX_MODEM before reusing or establishing the control connection.
++    auto& board = Board::GetInstance();
++    board.SetPowerSaveLevel(PowerSaveLevel::PERFORMANCE);
++
+     if (!protocol_->IsAudioChannelOpened()) {
+         if (!protocol_->OpenAudioChannel()) {
++            board.SetPowerSaveLevel(PowerSaveLevel::LOW_POWER);
+             return;
+         }
+     }
+@@ -825,8 +805,13 @@ void Application::ContinueWakeWordInvoke(const std::string& wake_word) {
+         return;
+     }
+ 
++    // The session handshake must not be sent while WiFi is still in MAX_MODEM.
++    auto& board = Board::GetInstance();
++    board.SetPowerSaveLevel(PowerSaveLevel::PERFORMANCE);
++
+     if (!protocol_->IsAudioChannelOpened()) {
+         if (!protocol_->OpenAudioChannel()) {
++            board.SetPowerSaveLevel(PowerSaveLevel::LOW_POWER);
+             audio_service_.EnableWakeWordDetection(true);
+             return;
+         }
+@@ -1116,4 +1101,3 @@ void Application::ResetProtocol() {
+         protocol_.reset();
+     });
+ }
+-
+diff --git a/main/application.h b/main/application.h
+index 7ca7af4..1418901 100644
+--- a/main/application.h
++++ b/main/application.h
+@@ -163,7 +163,6 @@ private:
+     void CheckAssetsVersion();
+     void CheckNewVersion();
+     void InitializeProtocol();
+-    void ShowActivationCode(const std::string& code, const std::string& message);
+     void SetListeningMode(ListeningMode mode);
+     ListeningMode GetDefaultListeningMode() const;
+     
+diff --git a/main/assets.cc b/main/assets.cc
+index ad61944..6b84daf 100644
+--- a/main/assets.cc
++++ b/main/assets.cc
+@@ -3,8 +3,8 @@
+ #include "display.h"
+ #include "application.h"
+ #include "lvgl_theme.h"
+-#include "emote_display.h"
+-#include "expression_emote.h"
++// #include "emote_display.h"
++// #include "expression_emote.h"
+ #if HAVE_LVGL
+ #include "display/lcd_display.h"
+ #include <spi_flash_mmap.h>
+@@ -356,72 +356,72 @@ bool Assets::LvglStrategy::Apply(Assets* assets) {
+ }
+ #endif // HAVE_LVGL
+ 
+-bool Assets::EmoteStrategy::InitializePartition(Assets* assets) {
+-    assets->partition_valid_ = false;
+-
+-    if (!Assets::FindPartition(assets)) {
+-        return false;
+-    }
+-
+-    esp_err_t ret = ESP_ERR_INVALID_STATE;
+-    auto display = Board::GetInstance().GetDisplay();
+-    auto* emote_display = dynamic_cast<emote::EmoteDisplay*>(display);
+-    if (emote_display && emote_display->GetEmoteHandle() != nullptr) {
+-        const emote_data_t data = {
+-            .type = EMOTE_SOURCE_PARTITION,
+-            .source = {
+-                .partition_label = PARTITION_LABEL,
+-            },
+-            .flags = {
+-                .mmap_enable = true, //must be true here!!!
+-            },
+-        };
+-        ret = emote_mount_assets(emote_display->GetEmoteHandle(), &data);
+-    } else {
+-        ESP_LOGE(TAG, "Emote display is not initialized");
+-    }
+-    assets->partition_valid_ = ((ret == ESP_OK) ? true : false);
+-    return assets->partition_valid_;
+-}
+-
+-void Assets::EmoteStrategy::UnApplyPartition(Assets* assets) {
+-    auto display = Board::GetInstance().GetDisplay();
+-    auto* emote_display = dynamic_cast<emote::EmoteDisplay*>(display);
+-    if (emote_display && emote_display->GetEmoteHandle() != nullptr) {
+-        emote_unmount_assets(emote_display->GetEmoteHandle());
+-    }
+-    (void)assets; // Unused parameter
+-}
+-
+-bool Assets::EmoteStrategy::GetAssetData(Assets* assets, const std::string& name, void*& ptr, size_t& size) {
+-    auto display = Board::GetInstance().GetDisplay();
+-    auto* emote_display = dynamic_cast<emote::EmoteDisplay*>(display);
+-    if (emote_display && emote_display->GetEmoteHandle() != nullptr) {
+-        const uint8_t* data = nullptr;
+-        size_t data_size = 0;
+-        if (ESP_OK == emote_get_asset_data_by_name(emote_display->GetEmoteHandle(), name.c_str(), &data, &data_size)) {
+-            ptr = const_cast<void*>(static_cast<const void*>(data));
+-            size = data_size;
+-            return true;
+-        }
+-        ESP_LOGE(TAG, "Failed to get asset data by name: %s", name.c_str());
+-        return false;
+-    }
+-    (void)assets; // Unused parameter
+-    return false;
+-}
+-
+-bool Assets::EmoteStrategy::Apply(Assets* assets) {
+-    Assets::LoadSrmodelsFromIndex(assets);
+-
+-    auto display = Board::GetInstance().GetDisplay();
+-    auto* emote_display = dynamic_cast<emote::EmoteDisplay*>(display);
+-
+-    if (emote_display && emote_display->GetEmoteHandle() != nullptr) {
+-        emote_load_assets(emote_display->GetEmoteHandle());
+-    }
+-    return true;
+-}
++// bool Assets::EmoteStrategy::InitializePartition(Assets* assets) {
++//     assets->partition_valid_ = false;
++
++//     if (!Assets::FindPartition(assets)) {
++//         return false;
++//     }
++
++//     esp_err_t ret = ESP_ERR_INVALID_STATE;
++//     auto display = Board::GetInstance().GetDisplay();
++//     auto* emote_display = dynamic_cast<emote::EmoteDisplay*>(display);
++//     if (emote_display && emote_display->GetEmoteHandle() != nullptr) {
++//         const emote_data_t data = {
++//             .type = EMOTE_SOURCE_PARTITION,
++//             .source = {
++//                 .partition_label = PARTITION_LABEL,
++//             },
++//             .flags = {
++//                 .mmap_enable = true, //must be true here!!!
++//             },
++//         };
++//         ret = emote_mount_assets(emote_display->GetEmoteHandle(), &data);
++//     } else {
++//         ESP_LOGE(TAG, "Emote display is not initialized");
++//     }
++//     assets->partition_valid_ = ((ret == ESP_OK) ? true : false);
++//     return assets->partition_valid_;
++// }
++
++// void Assets::EmoteStrategy::UnApplyPartition(Assets* assets) {
++//     auto display = Board::GetInstance().GetDisplay();
++//     auto* emote_display = dynamic_cast<emote::EmoteDisplay*>(display);
++//     if (emote_display && emote_display->GetEmoteHandle() != nullptr) {
++//         emote_unmount_assets(emote_display->GetEmoteHandle());
++//     }
++//     (void)assets; // Unused parameter
++// }
++
++// bool Assets::EmoteStrategy::GetAssetData(Assets* assets, const std::string& name, void*& ptr, size_t& size) {
++//     auto display = Board::GetInstance().GetDisplay();
++//     auto* emote_display = dynamic_cast<emote::EmoteDisplay*>(display);
++//     if (emote_display && emote_display->GetEmoteHandle() != nullptr) {
++//         const uint8_t* data = nullptr;
++//         size_t data_size = 0;
++//         if (ESP_OK == emote_get_asset_data_by_name(emote_display->GetEmoteHandle(), name.c_str(), &data, &data_size)) {
++//             ptr = const_cast<void*>(static_cast<const void*>(data));
++//             size = data_size;
++//             return true;
++//         }
++//         ESP_LOGE(TAG, "Failed to get asset data by name: %s", name.c_str());
++//         return false;
++//     }
++//     (void)assets; // Unused parameter
++//     return false;
++// }
++
++// bool Assets::EmoteStrategy::Apply(Assets* assets) {
++//     Assets::LoadSrmodelsFromIndex(assets);
++
++//     auto display = Board::GetInstance().GetDisplay();
++//     auto* emote_display = dynamic_cast<emote::EmoteDisplay*>(display);
++
++//     if (emote_display && emote_display->GetEmoteHandle() != nullptr) {
++//         emote_load_assets(emote_display->GetEmoteHandle());
++//     }
++//     return true;
++// }
+ 
+ bool Assets::Download(std::string url, std::function<void(int progress, size_t speed)> progress_callback) {
+     ESP_LOGI(TAG, "Downloading new version of assets from %s", url.c_str());
+diff --git a/main/assets.h b/main/assets.h
+index 3692e0c..7bfbc5c 100644
+--- a/main/assets.h
++++ b/main/assets.h
+@@ -68,13 +68,13 @@ private:
+         bool checksum_valid_ = false;
+     };
+     
+-    class EmoteStrategy : public AssetStrategy {
+-    public:
+-        bool Apply(Assets* assets) override;
+-        bool InitializePartition(Assets* assets) override;
+-        void UnApplyPartition(Assets* assets) override;
+-        bool GetAssetData(Assets* assets, const std::string& name, void*& ptr, size_t& size) override;
+-    };
++    // class EmoteStrategy : public AssetStrategy {
++    // public:
++    //     bool Apply(Assets* assets) override;
++    //     bool InitializePartition(Assets* assets) override;
++    //     void UnApplyPartition(Assets* assets) override;
++    //     bool GetAssetData(Assets* assets, const std::string& name, void*& ptr, size_t& size) override;
++    // };
+     
+     // Strategy instance
+     std::unique_ptr<AssetStrategy> strategy_;
+diff --git a/main/audio/audio_codec.cc b/main/audio/audio_codec.cc
+index 03e2baa..3d90ed1 100644
+--- a/main/audio/audio_codec.cc
++++ b/main/audio/audio_codec.cc
+@@ -18,6 +18,14 @@ void AudioCodec::OutputData(std::vector<int16_t>& data) {
+     Write(data.data(), data.size());
+ }
+ 
++bool AudioCodec::OutputDataChecked(std::vector<int16_t>& data) {
++    return Write(data.data(), data.size()) == static_cast<int>(data.size());
++}
++
++bool AudioCodec::InputDataChecked(std::vector<int16_t>& data) {
++    return Read(data.data(), data.size()) == static_cast<int>(data.size());
++}
++
+ bool AudioCodec::InputData(std::vector<int16_t>& data) {
+     int samples = Read(data.data(), data.size());
+     if (samples > 0) {
+@@ -65,3 +73,18 @@ void AudioCodec::EnableOutput(bool enable) {
+     output_enabled_ = enable;
+     ESP_LOGI(TAG, "Set output enable to %s", enable ? "true" : "false");
+ }
++
++bool AudioCodec::EnableInputChecked(bool enable) { EnableInput(enable); return input_enabled_ == enable; }
++bool AudioCodec::EnableOutputChecked(bool enable) { EnableOutput(enable); return output_enabled_ == enable; }
++
++// Unsupported codecs cannot claim digital completion or direct USB ownership.
++bool AudioCodec::DirectUsbCodecAcquire(uint64_t) { return false; }
++bool AudioCodec::DirectUsbEnableInputChecked(uint64_t, bool) { return false; }
++bool AudioCodec::DirectUsbEnableOutputChecked(uint64_t, bool) { return false; }
++bool AudioCodec::DirectUsbInputDataChecked(uint64_t, std::vector<int16_t>&) { return false; }
++bool AudioCodec::DirectUsbOutputDataChecked(uint64_t, std::vector<int16_t>&) { return false; }
++bool AudioCodec::DirectUsbDrainBegin(uint64_t) { return false; }
++AudioCodec::DirectUsbDrain AudioCodec::DirectUsbDrainState(uint64_t) { return DirectUsbDrain::Unavailable; }
++bool AudioCodec::DirectUsbStopInputChecked(uint64_t) { return false; }
++bool AudioCodec::DirectUsbStopOutputChecked(uint64_t) { return false; }
++bool AudioCodec::DirectUsbCodecRelease(uint64_t) { return false; }
+diff --git a/main/audio/audio_codec.h b/main/audio/audio_codec.h
+index 819e646..8d8dd56 100644
+--- a/main/audio/audio_codec.h
++++ b/main/audio/audio_codec.h
+@@ -16,15 +16,31 @@
+ 
+ class AudioCodec {
+ public:
++    enum class DirectUsbDrain { Unavailable, Pending, Sent, Failed };
++    virtual bool DirectUsbCodecAcquire(uint64_t generation);
++    virtual bool DirectUsbEnableInputChecked(uint64_t generation, bool enable);
++    virtual bool DirectUsbEnableOutputChecked(uint64_t generation, bool enable);
++    virtual bool DirectUsbInputDataChecked(uint64_t generation, std::vector<int16_t>& data);
++    virtual bool DirectUsbOutputDataChecked(uint64_t generation, std::vector<int16_t>& data);
++    virtual bool DirectUsbDrainBegin(uint64_t generation);
++    virtual DirectUsbDrain DirectUsbDrainState(uint64_t generation);
++    virtual bool DirectUsbStopInputChecked(uint64_t generation);
++    virtual bool DirectUsbStopOutputChecked(uint64_t generation);
++    virtual bool DirectUsbCodecRelease(uint64_t generation);
++
+     AudioCodec();
+     virtual ~AudioCodec();
+     
+     virtual void SetOutputVolume(int volume);
+     virtual void SetInputGain(float gain);
+     virtual void EnableInput(bool enable);
++    virtual bool EnableInputChecked(bool enable);
+     virtual void EnableOutput(bool enable);
++    virtual bool EnableOutputChecked(bool enable);
+ 
+     virtual void OutputData(std::vector<int16_t>& data);
++    virtual bool OutputDataChecked(std::vector<int16_t>& data);
++    virtual bool InputDataChecked(std::vector<int16_t>& data);
+     virtual bool InputData(std::vector<int16_t>& data);
+     virtual void Start();
+ 
+diff --git a/main/audio/audio_service.h b/main/audio/audio_service.h
+index 99db546..1fde0c0 100644
+--- a/main/audio/audio_service.h
++++ b/main/audio/audio_service.h
+@@ -2,6 +2,8 @@
+ #define AUDIO_SERVICE_H
+ 
+ #include <memory>
++#include <atomic>
++#include "companion/audio_owner.hpp"
+ #include <deque>
+ #include <condition_variable>
+ #include <chrono>
+@@ -92,7 +94,8 @@ enum AudioTaskType {
+ struct AudioTask {
+     AudioTaskType type;
+     std::vector<int16_t> pcm;
+-    uint32_t timestamp;
++    uint32_t timestamp=0;
++    ~AudioTask(){volatile int16_t* p=pcm.data();for(auto n=pcm.size();n;--n)*p++=0;}
+ };
+ 
+ struct DebugStatistics {
+@@ -107,23 +110,28 @@ public:
+     AudioService();
+     ~AudioService();
+ 
+-    void Initialize(AudioCodec* codec);
+-    void Start();
+-    void Stop();
++    bool BindAudioLease(companion::AudioLease lease);
++    bool HasCapturedAudioCustody()const{return companion::CommonAudioAuthority().Holds(SnapshotLease());}
++    bool IsRunning()const{return initialized_ && !service_stopped_ && LeaseCurrent();}
++    bool Initialize(AudioCodec* codec);
++    bool Start();
++    // True is a checked direction-close and all owned worker completion receipt.
++    // Keep the service and owner lease alive after false; retry Stop later.
++    bool Stop(uint32_t timeout_ms=2000);
+     void EncodeWakeWord();
+     std::unique_ptr<AudioStreamPacket> PopWakeWordPacket();
+-    const std::string& GetLastWakeWord() const;
++    std::string GetLastWakeWord() const;
+     bool IsVoiceDetected() const { return voice_detected_; }
+     bool IsIdle();
+     void WaitForPlaybackQueueEmpty();
+-    bool IsWakeWordRunning() const { return xEventGroupGetBits(event_group_) & AS_EVENT_WAKE_WORD_RUNNING; }
+-    bool IsAudioProcessorRunning() const { return xEventGroupGetBits(event_group_) & AS_EVENT_AUDIO_PROCESSOR_RUNNING; }
++    bool IsWakeWordRunning() const { return !service_stopped_ && LeaseCurrent() && (xEventGroupGetBits(event_group_) & AS_EVENT_WAKE_WORD_RUNNING); }
++    bool IsAudioProcessorRunning() const { return !service_stopped_ && LeaseCurrent() && (xEventGroupGetBits(event_group_) & AS_EVENT_AUDIO_PROCESSOR_RUNNING); }
+     bool IsAfeWakeWord();
+ 
+-    void EnableWakeWordDetection(bool enable);
+-    void EnableVoiceProcessing(bool enable);
++    bool EnableWakeWordDetection(bool enable);
++    bool EnableVoiceProcessing(bool enable);
+     void EnableAudioTesting(bool enable);
+-    void EnableDeviceAec(bool enable);
++    bool EnableDeviceAec(bool enable);
+ 
+     void SetCallbacks(AudioServiceCallbacks& callbacks);
+ 
+@@ -135,6 +143,20 @@ public:
+     void SetModelsList(srmodel_list_t* models_list);
+ 
+ private:
++    companion::AudioLease lease_{};
++    mutable std::mutex lease_mutex_;
++    companion::AudioLease SnapshotLease()const;
++    std::mutex hardware_mutex_;
++    std::atomic<unsigned> active_workers_{0};
++    std::atomic<bool> initialized_{false};
++    std::atomic<bool> checked_stopped_{true};
++    mutable std::mutex child_mutex_;
++    bool audio_processor_bound_=false,wake_word_bound_=false;
++    bool PrepareProcessorLocked();bool PrepareWakeWordLocked();
++    std::atomic<unsigned> wake_readers_{0};
++    bool LeaseCurrent()const;
++    void RequestStop();
++    void CloseSoftwareCodecs();
+     AudioCodec* codec_ = nullptr;
+     AudioServiceCallbacks callbacks_;
+     std::unique_ptr<AudioProcessor> audio_processor_;
+@@ -177,10 +199,13 @@ private:
+     bool wake_word_initialized_ = false;
+     bool audio_processor_initialized_ = false;
+     bool voice_detected_ = false;
+-    bool service_stopped_ = true;
++    std::atomic<bool> service_stopped_{true};
+     bool audio_input_need_warmup_ = false;
+ 
+     esp_timer_handle_t audio_power_timer_ = nullptr;
++    esp_timer_handle_t audio_shutdown_timer_ = nullptr;
++    std::atomic<bool> timer_barrier_done_{false};
++    bool timer_started_=false,timer_barrier_requested_=false;
+     std::chrono::steady_clock::time_point last_input_time_;
+     std::chrono::steady_clock::time_point last_output_time_;
+ 
+diff --git a/main/audio/processors/afe_audio_processor.h b/main/audio/processors/afe_audio_processor.h
+index fe2f025..fea47c3 100644
+--- a/main/audio/processors/afe_audio_processor.h
++++ b/main/audio/processors/afe_audio_processor.h
+@@ -12,6 +12,7 @@
+ #include <mutex>
+ 
+ #include "audio_processor.h"
++#include "child_audio_lifecycle.hpp"
+ #include "audio_codec.h"
+ 
+ class AfeAudioProcessor : public AudioProcessor {
+@@ -19,6 +20,11 @@ public:
+     AfeAudioProcessor();
+     ~AfeAudioProcessor();
+ 
++    bool SupportsCheckedLifecycle() const override { return true; }
++    bool BindAudioLease(companion::AudioLease lease) override;
++    bool InitializeChecked(AudioCodec*,int,srmodel_list_t*) override;
++    bool StartChecked() override;
++    bool StopChecked(uint32_t timeout_ms=2000) override;
+     void Initialize(AudioCodec* codec, int frame_duration_ms, srmodel_list_t* models_list) override;
+     void Feed(std::vector<int16_t>&& data) override;
+     void Start() override;
+@@ -30,6 +36,12 @@ public:
+     void EnableDeviceAec(bool enable) override;
+ 
+ private:
++    checked_audio_child::Lifecycle life_;
++    checked_audio_child::ResetWorker reset_{life_};
++    std::atomic<bool> initializing_{false},initialized_{false};
++    std::mutex lifecycle_mutex_;
++    std::atomic<bool> running_{false},stopping_{false};
++    srmodel_list_t* owned_models_=nullptr;
+     EventGroupHandle_t event_group_ = nullptr;
+     const esp_afe_sr_iface_t* afe_iface_ = nullptr;
+     esp_afe_sr_data_t* afe_data_ = nullptr;
+diff --git a/main/audio/wake_words/afe_wake_word.h b/main/audio/wake_words/afe_wake_word.h
+index 6c2bf72..cb9f337 100644
+--- a/main/audio/wake_words/afe_wake_word.h
++++ b/main/audio/wake_words/afe_wake_word.h
+@@ -18,23 +18,38 @@
+ 
+ #include "audio_codec.h"
+ #include "wake_word.h"
++#include "child_audio_lifecycle.hpp"
++#include "checked_wake_encoder.hpp"
+ 
+ class AfeWakeWord : public WakeWord {
+ public:
+     AfeWakeWord();
+     ~AfeWakeWord();
+ 
+-    bool Initialize(AudioCodec* codec, srmodel_list_t* models_list);
+-    void Feed(const std::vector<int16_t>& data);
+-    void OnWakeWordDetected(std::function<void(const std::string& wake_word)> callback);
+-    void Start();
+-    void Stop();
+-    size_t GetFeedSize();
+-    void EncodeWakeWordData();
+-    bool GetWakeWordOpus(std::vector<uint8_t>& opus);
+-    const std::string& GetLastDetectedWakeWord() const { return last_detected_wake_word_; }
++    bool SupportsCheckedLifecycle() const override {return true;}
++    bool BindAudioLease(companion::AudioLease lease) override;
++    bool StartChecked() override;
++    bool StopChecked(uint32_t timeout_ms=2000) override;
++    bool PauseChecked(uint32_t timeout_ms=2000) override;
++    bool EncodeWakeWordDataChecked() override;
++    bool Initialize(AudioCodec* codec, srmodel_list_t* models_list) override;
++    void Feed(const std::vector<int16_t>& data) override;
++    void OnWakeWordDetected(std::function<void(const std::string& wake_word)> callback) override;
++    void Start() override;
++    void Stop() override;
++    size_t GetFeedSize() override;
++    void EncodeWakeWordData() override;
++    bool GetWakeWordOpus(std::vector<uint8_t>& opus) override;
++    const std::string& GetLastDetectedWakeWord() const override { return last_detected_wake_word_; }
+ 
+ private:
++    checked_audio_child::Lifecycle life_;
++    checked_audio_child::ResetWorker reset_{life_};
++    std::atomic<bool> initializing_{false},initialized_{false};
++    CheckedWakeEncoder encoder_{life_};
++    std::mutex lifecycle_mutex_;
++    std::atomic<bool> running_{false},stopping_{false},detector_active_{false};
++    bool owns_models_=false;
+     srmodel_list_t *models_ = nullptr;
+     const esp_afe_sr_iface_t* afe_iface_ = nullptr;
+     esp_afe_sr_data_t* afe_data_ = nullptr;
+@@ -47,13 +62,8 @@ private:
+     std::vector<int16_t> input_buffer_;
+     std::mutex input_buffer_mutex_;
+ 
+-    TaskHandle_t wake_word_encode_task_ = nullptr;
+-    StaticTask_t* wake_word_encode_task_buffer_ = nullptr;
+-    StackType_t* wake_word_encode_task_stack_ = nullptr;
+     std::deque<std::vector<int16_t>> wake_word_pcm_;
+-    std::deque<std::vector<uint8_t>> wake_word_opus_;
+     std::mutex wake_word_mutex_;
+-    std::condition_variable wake_word_cv_;
+ 
+     void StoreWakeWordData(const int16_t* data, size_t size);
+     void AudioDetectionTask();
+diff --git a/main/audio/wake_words/custom_wake_word.h b/main/audio/wake_words/custom_wake_word.h
+index 645ad1b..addd66c 100644
+--- a/main/audio/wake_words/custom_wake_word.h
++++ b/main/audio/wake_words/custom_wake_word.h
+@@ -16,23 +16,38 @@
+ 
+ #include "audio_codec.h"
+ #include "wake_word.h"
++#include "child_audio_lifecycle.hpp"
++#include "checked_wake_encoder.hpp"
+ 
+ class CustomWakeWord : public WakeWord {
+ public:
+     CustomWakeWord();
+     ~CustomWakeWord();
+ 
+-    bool Initialize(AudioCodec* codec, srmodel_list_t* models_list);
+-    void Feed(const std::vector<int16_t>& data);
+-    void OnWakeWordDetected(std::function<void(const std::string& wake_word)> callback);
+-    void Start();
+-    void Stop();
+-    size_t GetFeedSize();
+-    void EncodeWakeWordData();
+-    bool GetWakeWordOpus(std::vector<uint8_t>& opus);
+-    const std::string& GetLastDetectedWakeWord() const { return last_detected_wake_word_; }
++    bool SupportsCheckedLifecycle() const override {return true;}
++    bool BindAudioLease(companion::AudioLease lease) override;
++    bool StartChecked() override;
++    bool StopChecked(uint32_t timeout_ms=2000) override;
++    bool PauseChecked(uint32_t timeout_ms=2000) override;
++    bool EncodeWakeWordDataChecked() override;
++    bool Initialize(AudioCodec* codec, srmodel_list_t* models_list) override;
++    void Feed(const std::vector<int16_t>& data) override;
++    void OnWakeWordDetected(std::function<void(const std::string& wake_word)> callback) override;
++    void Start() override;
++    void Stop() override;
++    size_t GetFeedSize() override;
++    void EncodeWakeWordData() override;
++    bool GetWakeWordOpus(std::vector<uint8_t>& opus) override;
++    const std::string& GetLastDetectedWakeWord() const override { return last_detected_wake_word_; }
+ 
+ private:
++    checked_audio_child::Lifecycle life_;
++    checked_audio_child::ResetWorker reset_{life_};
++    std::atomic<bool> initializing_{false},initialized_{false};
++    CheckedWakeEncoder encoder_{life_};
++    std::mutex lifecycle_mutex_;
++    std::atomic<bool> stopping_{false};
++    bool owns_models_=false;
+     struct Command {
+         std::string command;
+         std::string text;
+@@ -56,13 +71,8 @@ private:
+     std::vector<int16_t> input_buffer_;
+     std::mutex input_buffer_mutex_;
+ 
+-    TaskHandle_t wake_word_encode_task_ = nullptr;
+-    StaticTask_t* wake_word_encode_task_buffer_ = nullptr;
+-    StackType_t* wake_word_encode_task_stack_ = nullptr;
+     std::deque<std::vector<int16_t>> wake_word_pcm_;
+-    std::deque<std::vector<uint8_t>> wake_word_opus_;
+     std::mutex wake_word_mutex_;
+-    std::condition_variable wake_word_cv_;
+ 
+     void StoreWakeWordData(const std::vector<int16_t>& data);
+     void ParseWakenetModelConfig();
+diff --git a/main/boards/common/i2c_device.cc b/main/boards/common/i2c_device.cc
+index 835997d..ea50d51 100644
+--- a/main/boards/common/i2c_device.cc
++++ b/main/boards/common/i2c_device.cc
+@@ -32,4 +32,8 @@ uint8_t I2cDevice::ReadReg(uint8_t reg) {
+ 
+ void I2cDevice::ReadRegs(uint8_t reg, uint8_t* buffer, size_t length) {
+     ESP_ERROR_CHECK(i2c_master_transmit_receive(i2c_device_, &reg, 1, buffer, length, 100));
++}
++
++esp_err_t I2cDevice::TryReadRegs(uint8_t reg, uint8_t* buffer, size_t length, int timeout_ms) {
++    return i2c_master_transmit_receive(i2c_device_, &reg, 1, buffer, length, timeout_ms);
+ }
+\ No newline at end of file
+diff --git a/main/boards/common/i2c_device.h b/main/boards/common/i2c_device.h
+index 7bc917b..874b137 100644
+--- a/main/boards/common/i2c_device.h
++++ b/main/boards/common/i2c_device.h
+@@ -13,6 +13,7 @@ protected:
+     void WriteReg(uint8_t reg, uint8_t value);
+     uint8_t ReadReg(uint8_t reg);
+     void ReadRegs(uint8_t reg, uint8_t* buffer, size_t length);
++    esp_err_t TryReadRegs(uint8_t reg, uint8_t* buffer, size_t length, int timeout_ms = 100);
+ };
+ 
+ #endif // I2C_DEVICE_H
+diff --git a/main/boards/common/wifi_board.h b/main/boards/common/wifi_board.h
+index 7ee973c..8de99db 100644
+--- a/main/boards/common/wifi_board.h
++++ b/main/boards/common/wifi_board.h
+@@ -29,7 +29,7 @@ protected:
+     /**
+      * Enter WiFi configuration mode
+      */
+-    void StartWifiConfigMode();
++    virtual void StartWifiConfigMode();
+ 
+     /**
+      * WiFi connection timeout callback
+diff --git a/main/ota.cc b/main/ota.cc
+index bcc0dc5..e6792e3 100644
+--- a/main/ota.cc
++++ b/main/ota.cc
+@@ -119,19 +119,13 @@ esp_err_t Ota::CheckVersion() {
+         return ESP_ERR_INVALID_RESPONSE;
+     }
+ 
+-    has_activation_code_ = false;
++    requires_app_binding_ = false;
+     has_activation_challenge_ = false;
+     cJSON *activation = cJSON_GetObjectItem(root, "activation");
+     if (cJSON_IsObject(activation)) {
+-        cJSON* message = cJSON_GetObjectItem(activation, "message");
+-        if (cJSON_IsString(message)) {
+-            activation_message_ = message->valuestring;
+-        }
+-        cJSON* code = cJSON_GetObjectItem(activation, "code");
+-        if (cJSON_IsString(code)) {
+-            activation_code_ = code->valuestring;
+-            has_activation_code_ = true;
+-        }
++        // A manual activation response must be completed in StackChan World.
++        // Discard community activation codes and server-provided URL messages.
++        requires_app_binding_ = cJSON_IsString(cJSON_GetObjectItem(activation, "code"));
+         cJSON* challenge = cJSON_GetObjectItem(activation, "challenge");
+         if (cJSON_IsString(challenge)) {
+             activation_challenge_ = challenge->valuestring;
+diff --git a/main/ota.h b/main/ota.h
+index 1e5d687..dbcc91d 100644
+--- a/main/ota.h
++++ b/main/ota.h
+@@ -18,7 +18,7 @@ public:
+     bool HasNewVersion() { return has_new_version_; }
+     bool HasMqttConfig() { return has_mqtt_config_; }
+     bool HasWebsocketConfig() { return has_websocket_config_; }
+-    bool HasActivationCode() { return has_activation_code_; }
++    bool RequiresAppBinding() { return requires_app_binding_; }
+     bool HasServerTime() { return has_server_time_; }
+     bool StartUpgrade(std::function<void(int progress, size_t speed)> callback);
+     static bool Upgrade(const std::string& firmware_url, std::function<void(int progress, size_t speed)> callback);
+@@ -27,18 +27,14 @@ public:
+     const std::string& GetFirmwareVersion() const { return firmware_version_; }
+     const std::string& GetCurrentVersion() const { return current_version_; }
+     const std::string& GetFirmwareUrl() const { return firmware_url_; }
+-    const std::string& GetActivationMessage() const { return activation_message_; }
+-    const std::string& GetActivationCode() const { return activation_code_; }
+     std::string GetCheckVersionUrl();
+ 
+ private:
+-    std::string activation_message_;
+-    std::string activation_code_;
+     bool has_new_version_ = false;
+     bool has_mqtt_config_ = false;
+     bool has_websocket_config_ = false;
+     bool has_server_time_ = false;
+-    bool has_activation_code_ = false;
++    bool requires_app_binding_ = false;
+     bool has_serial_number_ = false;
+     bool has_activation_challenge_ = false;
+     std::string current_version_;

@@ -37,8 +37,17 @@
 # Build files
 build/
 cmake-build-*/
-/components/
+/components/*
+!/components/mira_wake/
+!/components/muse_direct_protocol/
+!/components/espressif__esp_video/
+!/components/M5Unit-NFC/
+!/components/M5UnitUnified/
+!/components/M5Utility/
+!/components/M5HAL/
 managed_components/
+# Also exclude an offline cache symlink, which is not a directory to Git.
+managed_components
 
 # PlatformIO
 .pio/
@@ -66,3 +75,12 @@ sdkconfig.old
 sdkconfig.defaults.local
 
 xiaozhi-esp32/
+build-*/
+logs/
+cache/
+tmp/
+personal_binding.local.hpp
+
+# Component-manager lock embeds machine-specific absolute local-component paths.
+# Keep it as local generated metadata; registry dependency requirements live in idf_component.yml.
+/dependencies.lock

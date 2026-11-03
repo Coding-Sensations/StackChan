@@ -1,2 +1,10 @@
 .DS_Store
 .idea/
+.tools/
+**/__pycache__/
+*.pyc
+*.dylib
+*.tflite
+*.onnx
+*.wav
+personal_binding.local.hpp

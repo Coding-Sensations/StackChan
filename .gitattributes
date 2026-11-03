@@ -1,0 +1,2 @@
+# Preserve reviewed vendor bytes and hashes across Git autocrlf settings.
+firmware/components/** -text

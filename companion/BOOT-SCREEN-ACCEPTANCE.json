@@ -1,0 +1,13 @@
+{
+  "status": "USER_OBSERVED_CUSTOM_BOOT_SCREEN",
+  "source_message_id": "Sentinel_3fc76a3036e08191857785f0813b27c4",
+  "reported_at_utc": "2026-10-09T04:26:52Z",
+  "reported_text": "mira companion muted pair a trusted host camera and motion inactive allow this conversation connect and mute",
+  "screen_acceptance": true,
+  "touch_acceptance": false,
+  "pairing_verified": false,
+  "audio_verified": false,
+  "camera_motion_activated": false,
+  "agent_device_operations_after_report": "none; source-only work",
+  "next_user_step": "Leave muted; no supported end-user pairing flow is connected yet."
+}

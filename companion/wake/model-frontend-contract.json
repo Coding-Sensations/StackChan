@@ -1,0 +1,25 @@
+{
+  "model_sha256": "801a98307fb6c2b1a568de83f078a61bd1885e1a2c0aa34d621a910fa1681f77",
+  "input_shape": [
+    1,
+    3,
+    40
+  ],
+  "input_type": "int8",
+  "input_scale_float32": 0.10196078568696976,
+  "input_zero_point": -128,
+  "raw_to_float_factor": 0.0390625,
+  "raw_to_input_integer_numerator": 1275,
+  "raw_to_input_integer_denominator": 3328,
+  "raw_rounding_addend": 1664,
+  "canonical_window_sha256": "30870f54ac86078d3168b2f399e6cb2f16f69639ff33651c2c17b195f0ddf60b",
+  "frontend": "pymicro-features2.0.2 canonical native coefficient table",
+  "eof": "consume every supplied sample; emit only complete480sample windows every160samples; no padding",
+  "model_invoke": false,
+  "available": false,
+  "runtime_enabled": false,
+  "core_s3_engine_qualified": false,
+  "tensor_arena_size": null,
+  "probability_cutoff": null,
+  "sliding_window_size": null
+}

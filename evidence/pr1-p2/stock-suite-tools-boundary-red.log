@@ -1,0 +1,17 @@
+{"result": "passed", "setup": "official 6 sections/12 rows + Screensaver", "launcher": "official prefix, then joint Companion and extensions", "tools": "one Tools tile -> selection -> dedicated graphical pages", "device_access": false}
+....
+----------------------------------------------------------------------
+Ran 4 tests in 4.425s
+
+OK
+PASS USB ownership, foreign driver refusal, core affinity, stale FIFO, expiry, bounds and close failure
+firmware install policy tests passed
+Assertion failed: (Allowed(Screen::Library,ChooseRemote+7)&&!Allowed(Screen::Library,ChooseRemote+8)), function main, file test_tools_ui.cpp, line 32.
+Traceback (most recent call last):
+  File "/Users/mikedemott/Developer/AgentWork/Codex/2026-10-19/task-9/stackchan-pr1-p2-fixes/companion/host/boot-tests/run_stock_restoration_checks.py", line 44, in <module>
+    subprocess.run([str(binary)], check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mikedemott/.local/share/uv/python/cpython-3.13.15-macos-aarch64-none/lib/python3.13/subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['/var/folders/1_/85m0gzgx34dgj2mjfjz4r8qc0000gn/T/stackchan-stock-tests-ns6audss/tools_ui']' died with <Signals.SIGABRT: 6>.
