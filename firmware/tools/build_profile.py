@@ -6,7 +6,7 @@ import json
 
 # Whole source closures, not merely launcher labels. Shared stock/Mira facilities
 # are deliberately not optional. The music group owns all local-audio consumers.
-MUSE_SOURCES = ['companion/muse_direct_local_ui.cc', 'companion/muse_direct_local_port.cc',
+MUSE_SOURCES = ['companion/muse_cold_output.cc', 'companion/muse_direct_local_ui.cc', 'companion/muse_direct_local_port.cc',
                 'companion/muse_direct_api.cc', 'companion/muse_direct_ble.cc',
                 'companion/muse_direct_device.cc', 'companion/muse_direct_live.cc',
                 'companion/muse_direct_native_api.cc', 'companion/muse_direct_native_socket.cc',
@@ -14,7 +14,7 @@ MUSE_SOURCES = ['companion/muse_direct_local_ui.cc', 'companion/muse_direct_loca
                 'companion/muse_direct_credential_custody.cc', 'companion/muse_voice_task.cc', 'companion/muse_voice_core_access.cc',
                 'companion/muse_room_transport.cc']
 FEATURES = {
-    'hermes': [], 'muse': MUSE_SOURCES, 'muse_voice_protocol': ['companion/muse_voice_task.cc', 'companion/muse_voice_core_access.cc'], 'bounded_motion': [], 'claude': [], 'codex': [],
+    'hermes': [], 'muse': MUSE_SOURCES, 'muse_voice_protocol': ['companion/muse_cold_output.cc', 'companion/muse_voice_task.cc', 'companion/muse_voice_core_access.cc'], 'bounded_motion': [], 'claude': [], 'codex': [],
     'music': ['apps/instruments/instrument_apps.cc',
               'apps/instruments/midi_host/host_client.cc',
               'apps/local_tools/local_tools_app.cc',

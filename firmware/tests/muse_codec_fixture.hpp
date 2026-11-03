@@ -7,9 +7,13 @@
 #include <functional>
 #include <algorithm>
 #include <cstdio>
+#include <audio_codec_if.h>
+#include "muse_cold_sdk_fixture.hpp"
 #define private public
+#define protected public
 #include "hal/board/cores3_audio_codec.h"
 #undef private
+#undef protected
 #include <companion/muse_quiesce_diagnostic.hpp>
 namespace companion::diagnostic {
 enum class StageCode {DriverInputOpen,DriverInputGain,DriverInputClose,DriverRead,DriverOutputOpen,DriverOutputVolume,DriverOutputClose,DriverWrite};
