@@ -11,6 +11,7 @@
 #include <companion/muse_room_transport.h>
 #include <companion/muse_direct_device.h>
 #include <companion/muse_direct_live_view.h>
+#include <companion/muse_voice_task.h>
 #include <companion/muse_direct_local_ui.hpp>
 #include <companion/muse_direct_local_port.h>
 #endif
@@ -29,6 +30,10 @@ class ProviderSetupApp final : public mooncake::AppAbility {
   bool showing_settings_ = false;
 #if STACKCHAN_BUILD_MUSE
   lv_obj_t *direct_pair_ = nullptr, *direct_confirm_ = nullptr, *direct_connect_ = nullptr;
+#if STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+  lv_obj_t* direct_voice_=nullptr;
+  std::atomic<bool> voice_requested_{false};
+#endif
   std::unique_ptr<companion::muse::LocalSetupUi> local_setup_;
   std::atomic<bool> native_requested_{false};
   std::atomic<bool> pair_requested_{false};
@@ -48,7 +53,11 @@ public:
     back_ = toggle_ = connect_requested_ = false;
     showing_settings_ = false;
 #if STACKCHAN_BUILD_MUSE
-    native_requested_=false;pair_requested_ = false;displayed_ticket_=press_requested_=0;
+    native_requested_=false;
+#if STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+    voice_requested_=false;
+#endif
+    pair_requested_ = false;displayed_ticket_=press_requested_=0;
     if(provider_.provider==companion_modes::Provider::Muse)companion::muse::DeviceProviderVisible(true);
 #endif
     root_ = lv_obj_create(lv_screen_active());
@@ -114,6 +123,13 @@ public:
         auto* self=static_cast<ProviderSetupApp *>(lv_event_get_user_data(e));
         self->press_requested_=self->displayed_ticket_.load();
       }, LV_EVENT_CLICKED, this);
+#if STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+      direct_voice_ = stock_ui::Button(settings_, "Start prepared voice", 8, 80, 288, 36);
+      lv_obj_add_event_cb(direct_voice_, [](lv_event_t* e) {
+        static_cast<ProviderSetupApp*>(lv_event_get_user_data(e))->voice_requested_=true;
+      }, LV_EVENT_CLICKED, this);
+      lv_obj_add_flag(direct_voice_, LV_OBJ_FLAG_HIDDEN);
+#endif
       direct_connect_ = stock_ui::Button(settings_, "Connect direct Muse", 8, 80, 288, 36);
       lv_obj_add_event_cb(direct_connect_, [](lv_event_t *e) {
         static_cast<ProviderSetupApp *>(lv_event_get_user_data(e))->native_requested_ = true;
@@ -134,6 +150,14 @@ public:
     }
 #if STACKCHAN_BUILD_MUSE
     if (provider_.provider == companion_modes::Provider::Muse) {
+#if STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+      companion::muse::PollNativeVoiceTaskCleanup();
+      if(voice_requested_.exchange(false)){
+        if(companion::muse::NativeVoiceTaskPrepared())companion::muse::StartPreparedNativeVoiceTask();
+        else companion::muse::QueueNativeVoiceReview();
+        showing_settings_=false;
+      }
+#endif
       if(native_requested_.exchange(false)&&companion::muse::StartPreparedNativeSession())showing_settings_=false;
       if(pair_requested_.exchange(false))companion::muse::StartPreparedDevicePairing();
       if(auto captured=press_requested_.exchange(0))companion::muse::QueueDevicePhysicalPress(captured);
@@ -164,6 +188,15 @@ public:
       lv_obj_set_pos(back_button_, prepared ? 156 : 8, 120);
       lv_obj_set_size(back_button_, prepared ? 140 : 288, 36);
     }
+#if STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+    if(direct_voice_){
+      const auto voice=companion::muse::ViewNativeVoiceTask();
+      const bool prepared=voice.stage==companion::muse::VoiceTaskStage::Prepared;
+      const bool review=voice.stage==companion::muse::VoiceTaskStage::Reviewing||voice.stage==companion::muse::VoiceTaskStage::DirectionsPrepared;
+      if(prepared||review){lv_label_set_text(lv_obj_get_child(direct_voice_,0),prepared?"Start prepared voice":"Show voice review");lv_obj_remove_flag(direct_voice_,LV_OBJ_FLAG_HIDDEN);}
+      else lv_obj_add_flag(direct_voice_,LV_OBJ_FLAG_HIDDEN);
+    }
+#endif
     if(direct_connect_){if(native_prepared)lv_obj_remove_flag(direct_connect_,LV_OBJ_FLAG_HIDDEN);else lv_obj_add_flag(direct_connect_,LV_OBJ_FLAG_HIDDEN);}
     if(direct_pair_){
       if(companion::muse::DevicePairingPrepared()&&!displayed_ticket_)lv_obj_remove_flag(direct_pair_,LV_OBJ_FLAG_HIDDEN);
@@ -202,7 +235,14 @@ public:
     root_ = settings_ = connect_ = back_button_ = nullptr;
 #if STACKCHAN_BUILD_MUSE
     direct_pair_ = direct_confirm_ = direct_connect_ = nullptr;
-    native_requested_=false;pair_requested_=false;displayed_ticket_=press_requested_=0;
+#if STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+    direct_voice_=nullptr;
+#endif
+    native_requested_=false;
+#if STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+    voice_requested_=false;
+#endif
+    pair_requested_=false;displayed_ticket_=press_requested_=0;
 #endif
     back_ = toggle_ = connect_requested_ = false;
   }

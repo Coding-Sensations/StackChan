@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "muse_direct_device.h"
+#include "muse_voice_task.h"
 #include "muse_direct_live.h"
 #include "muse_direct_activity.hpp"
 #include "muse_direct_ble.h"
@@ -115,7 +116,7 @@ void Reap(void* context){
     vTaskDelete(nullptr);
 }
 }
-void DeviceProviderVisible(bool value){DeviceCredentialsProviderVisible(value);visible=value;SessionWorkerProviderVisible(value);if(!value)StopDevicePairing();}
+void DeviceProviderVisible(bool value){DeviceCredentialsProviderVisible(value);visible=value;SessionWorkerProviderVisible(value);VoiceTaskProviderVisible(value);if(!value)StopDevicePairing();}
 bool PrepareDevicePairing(const PairingGrant& grant,std::string_view token){
     if(!visible||!room::ProviderSelected(room::Provider::Muse)||!grant.enrollment_current||!grant.network_current||!grant.storage_current||!grant.enrollment_current()||!grant.network_current()||!grant.storage_current()||grant.expires_ms<=Now()||grant.expires_ms-Now()>600000||!Id(grant.node)||!Id(grant.device)||!Id(grant.version,32)||grant.mac.size()!=17||token.size()!=48||token.substr(0,5)!="mgst_")return false;
     for(size_t n=0;n<17;++n){const char c=grant.mac[n];if(n%3==2){if(c!=':')return false;}else if(!((c>='0'&&c<='9')||(c>='a'&&c<='f')||(c>='A'&&c<='F')))return false;}

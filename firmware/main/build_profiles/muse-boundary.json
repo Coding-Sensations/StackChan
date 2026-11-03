@@ -3,7 +3,7 @@
   "guard_hashes": {
     "components/muse_direct_protocol/CMakeLists.txt": "6aeec330cbcd94d94a555a49727200f43fd5efeee25f557a39cfe98029452103",
     "main/CMakeLists.txt": "577ae5af1725afdcebe2d297ce7c86fa42bfb4da76c9e7b1cec8c75ce1b8e4ea",
-    "main/apps/stock_shell/provider_companion_app.cc": "7988188e4e79726ca65e9940a4fbb833491eb118fa567a2071631de9f858526c",
+    "main/apps/stock_shell/provider_companion_app.cc": "b339df7452f4e699174cb2af5ee3c14dca1772f913ad6a453463f8cf83ed37aa",
     "main/companion/provider_room_view.hpp": "fc0cd15b5d375035d2fc703423330b8f29c1d9c128dbdbe8d9c3ea188a724cdc",
     "main/feature_profiles/muse_disabled_boundary.cc": "e2668d445a50201784e0ac99e3f2419c1739120d491ce2d13cd72af1853aa70e"
   },

@@ -45,3 +45,10 @@ include("{component.as_posix()}")
   for source in ['voice/service_exchange.cc','voice/exchange_api.cc','stackchan_muse_voice_exchange_api']:
    assert (source in output)==bool(muse and voice),(muse,voice,source,output)
 print('Actual component CMake includes exchange sources/link root only with Muse + voice selected')
+
+# Native provider task must be removed before compile, not just launcher-hidden.
+for selected in ([],['muse'],['muse',key]):
+ result=p.resolve('custom',{'schema':1,'features':selected},root/'main')
+ assert ('companion/muse_voice_task.cc' in result['excluded_sources']) == (key not in selected)
+assert 'companion/muse_voice_task.cc' in p.MUSE_SOURCES
+print('Actual native worker source closure and reviewed Muse-off boundary passed')
