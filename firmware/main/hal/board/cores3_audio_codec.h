@@ -12,9 +12,32 @@
 #undef CODEC_FENCE_IRAM
 #include <esp_codec_dev.h>
 #include <esp_codec_dev_defaults.h>
+#include "muse_aw88298_quiet.hpp"
+
+#if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+namespace companion::muse {class QuiesceDiagnostic;}
+#endif
 
 class CoreS3AudioCodec : public AudioCodec {
+public:
+#if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+    enum class MuseDrain { Unavailable, Pending, Sent, Failed };
+    enum class MuseDiscard { Unavailable, Failed, StoppedDmaCleared };
+    static constexpr size_t MuseDiscardByteLimit=16384;
+    static constexpr size_t MuseRawSampleLimit=2048;
+    enum class MuseQuiesce {Unavailable,Failed,RegistersAndStoppedDma};
+    enum class MuseQuiescePhase {None,Amplifier,InputStop,OutputStop,DigitalDiscard,FinalReadback,Complete};
+    enum class MuseDiscardPhase {None,BeforeInfo,Preload,AfterInfo};
+    struct MuseDiscardEvidence {MuseDiscardPhase phase=MuseDiscardPhase::None;int status=0;size_t requested=0,loaded=0,total_loaded=0,total_dma_bytes=0;int direction=0,mode=0;bool enabled_before=false,enabled_after=false;};
+    struct MuseQuiesceEvidence {
+        MuseQuiesce outcome=MuseQuiesce::Unavailable;MuseQuiescePhase phase=MuseQuiescePhase::None;
+        codec_quiet::Evidence amplifier;int stop_status=0;bool channel_disable_failure=false;
+        MuseDiscard discard=MuseDiscard::Unavailable;MuseDiscardEvidence discard_detail;
+        uint8_t input_stop_attempts=0,output_stop_attempts=0;bool binding_lost=false;
+    };
+#endif
 private:
+    struct DirectCallScope{bool& flag;bool previous;explicit DirectCallScope(bool&f):flag(f),previous(f){flag=true;}~DirectCallScope(){flag=previous;}};
     companion::AudioLease direct_common_lease_;
     std::recursive_mutex direct_io_mutex_;
     portMUX_TYPE direct_mux_ = portMUX_INITIALIZER_UNLOCKED;
@@ -24,7 +47,7 @@ private:
     bool direct_input_stopped_ = false, direct_output_stopped_ = false;
     bool direct_input_closed_ = false, direct_output_closed_ = false;
     static bool IRAM_ATTR DirectOnSent(i2s_chan_handle_t, i2s_event_data_t*, void*);
-    bool DirectStopChecked(uint64_t generation, bool output);
+    bool DirectStopChecked(uint64_t generation, bool output,int* error=nullptr,bool* channel_failure=nullptr,uint8_t* attempts=nullptr,const companion::AudioLease* expected=nullptr);
     // Shared checked IO, always fenced by the captured common lease. Public
     // USB and Muse entrypoints remain disjoint; no owner enum is substituted.
     bool ScopedEnableInputChecked(uint64_t,bool);
@@ -35,9 +58,12 @@ private:
     DirectUsbDrain ScopedDrainState(uint64_t);
 #if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
     bool muse_bound_=false,muse_retired_=false,muse_discarding_=false;
+    bool muse_stop_active_=false,muse_volume_active_=false;
+    bool muse_quiescent_=false,muse_quiescing_=false,muse_quiesce_retained_=false;uint64_t muse_last_quiesce_ticket_=0;
     uint64_t muse_last_discard_ticket_=0;
     uint64_t muse_drain_ticket_=0,muse_last_drain_ticket_=0;
     bool MuseMatch(const companion::AudioLease&)const;
+    MuseDiscard MuseDiscardStopped(const companion::AudioLease&,uint64_t,MuseDiscardEvidence* detail=nullptr);
 #endif
     bool IsMuseBinding()const {
 #if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
@@ -54,6 +80,7 @@ private:
         if(muse_bound_&&muse_retired_&&!companion::CommonAudioAuthority().Holds(direct_common_lease_)){
             direct_generation_=0;direct_common_lease_={};muse_bound_=muse_retired_=false;
             muse_drain_ticket_=muse_last_drain_ticket_=muse_last_discard_ticket_=0;
+            muse_quiescent_=muse_quiescing_=muse_quiesce_retained_=false;muse_last_quiesce_ticket_=0;
         }
 #endif
     }
@@ -92,13 +119,11 @@ public:
     bool DirectUsbCodecRelease(uint64_t generation) override;
 
 #if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
-    enum class MuseDrain { Unavailable, Pending, Sent, Failed };
-    enum class MuseDiscard { Unavailable, Failed, StoppedDmaCleared };
-    static constexpr size_t MuseDiscardByteLimit=16384;
-    static constexpr size_t MuseRawSampleLimit=2048;
     // Resource/hardware binding only: not microphone/output consent. The
     // caller retains the exact original Muse lease through checked cleanup.
     bool MuseCodecAcquire(const companion::AudioLease&);
+    // Terminal cleanup only: parks this binding. Register/DMA evidence is not physical flush.
+    MuseQuiesceEvidence MuseQuiesceForRetirementChecked(const companion::AudioLease&,uint64_t,companion::muse::QuiesceDiagnostic* diagnostic=nullptr);
     bool MuseEnableInputChecked(const companion::AudioLease&,bool);
     bool MuseEnableOutputChecked(const companion::AudioLease&,bool);
     bool MuseInputDataChecked(const companion::AudioLease&,std::vector<int16_t>&);
