@@ -190,3 +190,6 @@ add_test(NAME voice_native_hold_test COMMAND ${Python3_EXECUTABLE}
 
 add_test(NAME muse_amplifier_test COMMAND ${Python3_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/test_muse_amplifier.py)
+
+add_test(NAME muse_quiesce_diagnostic_test COMMAND ${Python3_EXECUTABLE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_muse_quiesce_diagnostic.py)

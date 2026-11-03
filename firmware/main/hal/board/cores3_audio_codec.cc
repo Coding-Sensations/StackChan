@@ -1,4 +1,5 @@
 #include "cores3_audio_codec.h"
+#include <companion/muse_quiesce_diagnostic.hpp>
 #include <esp_memory_utils.h>
 #include <companion/diagnostics.h>
 #include <companion/audio_owner.hpp>
@@ -656,9 +657,20 @@ CoreS3AudioCodec::MuseDiscard CoreS3AudioCodec::MuseDiscardStopped(const compani
        after.is_enabled||after.total_dma_buf_size!=info.total_dma_buf_size)return failed();
     return MuseDiscard::StoppedDmaCleared; // not DMA-sent, acoustic silence or native authorization
 }
-CoreS3AudioCodec::MuseQuiesceEvidence CoreS3AudioCodec::MuseQuiesceForRetirementChecked(const companion::AudioLease& lease,uint64_t ticket){
+CoreS3AudioCodec::MuseQuiesceEvidence CoreS3AudioCodec::MuseQuiesceForRetirementChecked(const companion::AudioLease& lease,uint64_t ticket,companion::muse::QuiesceDiagnostic* diagnostic){
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);MuseQuiesceEvidence result;const auto captured=lease;
-    if(!MuseMatch(captured)||muse_retired_||direct_call_||muse_stop_active_||muse_volume_active_||muse_quiescing_||muse_discarding_||muse_quiescent_||!ticket||muse_last_quiesce_ticket_||muse_last_discard_ticket_||!codec_quiet::Available(out_codec_if_))return result;
+    using Reason=companion::muse::QuiesceDiagnostic::Reason;Reason reason=Reason::NotObserved;
+    if(diagnostic&&!diagnostic->Begin(captured,ticket))return result;
+    const auto finish=[&]{if(diagnostic){const bool related=reason!=Reason::BindingUnavailable;diagnostic->Finish(ticket,result,reason,MuseMatch(diagnostic->lease_),related&&muse_quiesce_retained_,related&&muse_quiescent_);}};
+    struct Publish{const decltype(finish)&call;~Publish(){call();}} publish{finish};
+    if(!MuseMatch(captured)){reason=Reason::BindingUnavailable;return result;}
+    if(muse_retired_){reason=Reason::Retired;return result;}
+    if(direct_call_||muse_stop_active_||muse_volume_active_||muse_quiescing_||muse_discarding_){reason=Reason::ActiveOperation;return result;}
+    if(muse_quiescent_||muse_last_quiesce_ticket_){reason=Reason::AlreadyAttempted;return result;}
+    if(!ticket){reason=Reason::InvalidTicket;return result;}
+    if(muse_last_discard_ticket_){reason=Reason::PriorDiscard;return result;}
+    if(!codec_quiet::Available(out_codec_if_)){reason=Reason::MissingInterface;return result;}
+    reason=Reason::Attempted;
     muse_last_quiesce_ticket_=ticket;muse_quiescent_=muse_quiesce_retained_=true;companion::RevokeAudio(captured);
     struct Busy{bool&flag;explicit Busy(bool&f):flag(f){flag=true;}~Busy(){flag=false;}} busy(muse_quiescing_);
     const auto* original=out_codec_if_;const auto current=[&]{const bool match=MuseMatch(captured)&&!muse_retired_&&muse_quiescent_&&out_codec_if_==original;if(!match)result.binding_lost=true;return match;};

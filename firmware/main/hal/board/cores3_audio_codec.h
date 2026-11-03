@@ -14,6 +14,10 @@
 #include <esp_codec_dev_defaults.h>
 #include "muse_aw88298_quiet.hpp"
 
+#if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+namespace companion::muse {class QuiesceDiagnostic;}
+#endif
+
 class CoreS3AudioCodec : public AudioCodec {
 public:
 #if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
@@ -119,7 +123,7 @@ public:
     // caller retains the exact original Muse lease through checked cleanup.
     bool MuseCodecAcquire(const companion::AudioLease&);
     // Terminal cleanup only: parks this binding. Register/DMA evidence is not physical flush.
-    MuseQuiesceEvidence MuseQuiesceForRetirementChecked(const companion::AudioLease&,uint64_t);
+    MuseQuiesceEvidence MuseQuiesceForRetirementChecked(const companion::AudioLease&,uint64_t,companion::muse::QuiesceDiagnostic* diagnostic=nullptr);
     bool MuseEnableInputChecked(const companion::AudioLease&,bool);
     bool MuseEnableOutputChecked(const companion::AudioLease&,bool);
     bool MuseInputDataChecked(const companion::AudioLease&,std::vector<int16_t>&);
