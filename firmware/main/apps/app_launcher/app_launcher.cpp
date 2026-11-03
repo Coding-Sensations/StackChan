@@ -6,6 +6,7 @@
 #include "app_launcher.h"
 #include "view/screensaver_library.hpp"
 #include <hal/hal.h>
+#include <hal/hal_toggles.h>
 #include <mooncake.h>
 #include <mooncake_log.h>
 #include <stackchan/stackchan.h>
@@ -98,12 +99,12 @@ void AppLauncher::create_launcher_view(int preferredAppID)
     const auto installed=getAppProps();
     std::vector<mooncake::AppProps_t> shown;
     if(_category){
-        for(const auto& props:installed)if(launcher_categories::Assign(props.info.name)==*_category)shown.push_back(props);
+        for(const auto& props:installed)if(hal_toggles::is_app_enabled(props.info.name)&&launcher_categories::Assign(props.info.name)==*_category)shown.push_back(props);
         if(!installed.empty()){auto back=installed.front();back.appID=launcher_categories::Back;back.info.name="Back to categories";shown.push_back(back);}
     }else{
         for(size_t index=0;index<launcher_categories::Titles.size();++index){
             const auto group=static_cast<launcher_categories::Group>(index);
-            for(const auto& props:installed)if(launcher_categories::Assign(props.info.name)==group){
+            for(const auto& props:installed)if(hal_toggles::is_app_enabled(props.info.name)&&launcher_categories::Assign(props.info.name)==group){
                 auto category=props;category.appID=launcher_categories::Token(group);category.info.name=std::string(launcher_categories::Titles[index]);shown.push_back(category);break;
             }
         }
@@ -127,12 +128,12 @@ void AppLauncher::handle_category_navigation()
     }
     if(launcher_categories::IsGroup(action)){
         const auto group=launcher_categories::Decode(action);int only=-1;unsigned count=0;
-        for(const auto& props:getAppProps())if(launcher_categories::Assign(props.info.name)==group){only=props.appID;++count;}
+        for(const auto& props:getAppProps())if(hal_toggles::is_app_enabled(props.info.name)&&launcher_categories::Assign(props.info.name)==group){only=props.appID;++count;}
         if(count==1){openApp(only);return;}
         _category=group;create_launcher_view();return;
     }
     bool installed=false;
-    for(const auto& props:getAppProps())if(props.appID==action&&(!_category||launcher_categories::Assign(props.info.name)==*_category)){installed=true;break;}
+    for(const auto& props:getAppProps())if(hal_toggles::is_app_enabled(props.info.name)&&props.appID==action&&(!_category||launcher_categories::Assign(props.info.name)==*_category)){installed=true;break;}
     if(installed)openApp(action);
 }
 
