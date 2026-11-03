@@ -23,6 +23,16 @@ Hal& GetHAL()
     return *_hal_instance.get();
 }
 
+#if defined(STACKCHAN_MUSE_LOCAL_DIAGNOSTIC) && STACKCHAN_MUSE_LOCAL_DIAGNOSTIC
+bool Hal::initMuseDiagnostic(){
+    xiaozhi_board_init();
+    io_expander_init();
+    setServoPowerEnabled(false);setLaserEnabled(false);
+    lvgl_init();
+    return true;
+}
+#endif
+
 bool Hal::initCompanion()
 {
     // Errors preserve NVS rather than erasing pairing, Wi-Fi or calibration.

@@ -1,3 +1,7 @@
+#if defined(STACKCHAN_MUSE_LOCAL_DIAGNOSTIC) && STACKCHAN_MUSE_LOCAL_DIAGNOSTIC
+#include "companion/muse_local_diagnostic.h"
+extern "C" void app_main(void){companion::muse::local_diag::RunLocalDiagnostic();}
+#else
 /*
  * SPDX-FileCopyrightText: 2026 M5Stack Technology CO LTD
  *
@@ -76,3 +80,5 @@ extern "C" void app_main(void)
     // Start xiaozhi, never returns
     GetHAL().startXiaozhi();
 }
+
+#endif

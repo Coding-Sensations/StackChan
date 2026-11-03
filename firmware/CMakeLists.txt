@@ -8,6 +8,20 @@ add_definitions(-DFIRMWARE_VERSION=\"${PROJECT_VER}\")
 # Add this line to disable the specific warning
 add_compile_options(-Wno-missing-field-initializers)
 
+option(STACKCHAN_MUSE_LOCAL_DIAGNOSTIC "Explicit local cold retirement diagnostic startup (no microphone/PCM/network)" OFF)
+# Diagnostic overlay preflight: reject before any private configuration is loaded.
+if(STACKCHAN_MUSE_LOCAL_DIAGNOSTIC)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/sdkconfig.defaults.local")
+        message(FATAL_ERROR "Cold diagnostic refuses implicit local SDK overlays; use its separate explicit configuration")
+    endif()
+    if(STACKCHAN_COMPANION_REMEMBERED_RUNTIME OR STACKCHAN_COMPANION_WIRELESS_PAIRING OR
+       STACKCHAN_COMPANION_TRUSTED_USB_PROVISIONING OR STACKCHAN_ENABLE_LOCAL_PORTRAITS OR
+       STACKCHAN_LOCAL_PORTRAIT_MANIFEST OR STACKCHAN_COMPANION_BINDING_CONFIG OR
+       STACKCHAN_COMPANION_LOCAL_CA_FILE OR STACKCHAN_COMPANION_LOCAL_TLS_HOST)
+        message(FATAL_ERROR "Cold diagnostic forbids saved/live routes, provisioning, private configuration and local artwork before generation")
+    endif()
+endif()
+
 # Auto-load a local sdkconfig overlay (git-ignored) when present. Lets
 # self-hosted / custom deployments pin CONFIG_STACKCHAN_SERVER_URL,
 # CONFIG_OTA_URL, etc. without touching committed defaults.

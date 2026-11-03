@@ -195,3 +195,8 @@ add_test(NAME muse_quiesce_diagnostic_test COMMAND ${Python3_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/test_muse_quiesce_diagnostic.py)
 
 add_test(NAME muse_cold_output_test COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_muse_cold_output.py)
+
+add_test(NAME muse_local_diagnostic_test COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_muse_local_diagnostic.py)
+add_test(NAME muse_diagnostic_build_test COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_muse_diagnostic_build.py)
+
+add_test(NAME muse_diagnostic_startup_test COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_muse_diagnostic_startup.py)
