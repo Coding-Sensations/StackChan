@@ -184,3 +184,6 @@ add_test(NAME voice_setup_issuer_test COMMAND ${Python3_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/test_voice_setup_issuer.py)
 add_test(NAME voice_core_lookup_test COMMAND ${Python3_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/test_voice_core_lookup.py)
+
+add_test(NAME voice_native_hold_test COMMAND ${Python3_EXECUTABLE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_voice_native_hold.py)

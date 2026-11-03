@@ -1,0 +1,11 @@
+# Native Muse held input and PTT source
+
+Build on PR35 exact head 9de5b9ecf3d367a99a5eee2867e17b9fb50c8502, preserving human main and all five providers/Stock. User opted out of design pauses; source PR pipeline continues, no device or live activation.
+
+Use the actual registered LVGL pointer, visible original Hold button, pressed state and current point inside its bounds. Only native PRESSED on the same active object may mint a private increasing ticket; direct data/click/timer cannot. Recheck actual input under the existing checked UI mutex on every Hold permit. Release/loss/Close/Return/render/provider/consent loss invalidates immediately. Bind exact reviewed generation and microphone consent; Hold grants neither admission nor microphone/output by itself. Query failure revokes the ticket, never revives it. Original widget/ports remain alive through drain and cleanup.
+
+Alternatives considered: timer/event boolean alone cannot prove held input; sampling LVGL outside its owner lock races native state. Chosen: real pointer query inside checked UI lock with atomic cancellation, private issuance from actual native UI callback, and retained runtime source composition. This is a source choice, not user-attested physical behavior.
+
+Every protocol Hold requests playback flush. CoreVoiceCodec::FlushOutput remains false; stopped DMA clearing is not physical discard. Add a default-deny codec PTT capability prerequisite; production Core remains disabled. Actual owner/UI wiring may be tested with inert explicitly capable codecs and simulated pointer input, never presented as native hardware proof. No automatic playback; bounded capture only while original native input/current scope hold remains valid. Handle release before a normal audio tick; release during SDK/codec operation prevents subsequent reads and retains original uncertain cleanup. End/revoke never depends on an extant hold.
+
+No flashing/serial/reset/device, real credentials/account/enrollment, endpoint, capture/playback on hardware, runtime/listener/motion activation, security/permission changes, merge or paid services. Reuse existing source/LVGL/Core/session; no new downloads or artwork. Real physical flush/hold latency/capture observations/native heap/live provider/recovery acceptance remain open.

@@ -14,6 +14,9 @@ class Permit{public:virtual ~Permit()=default;// Native owner checks its origina
  // borrow target only during this call, never retain it or derive rights from it.
  // A local review receipt cannot implement native authority on its own.
  virtual bool MatchesReviewedContext(const muse_review::Target&,companion::muse::Directions,int64_t)const{return false;}
+ // Non-callout cancellation fence only: no IO, Clock, callbacks, locks or
+ // permission issuance. Missing native support stays unavailable.
+ virtual bool HoldSignalCurrent(uint64_t,uint64_t)const{return false;}
  virtual bool VoiceContext(uint64_t,int64_t)const=0;virtual bool Microphone(uint64_t,int64_t)const=0;virtual bool Output(uint64_t,int64_t)const=0;virtual bool Provider(uint64_t,int64_t)const=0;virtual bool Hold(uint64_t,uint64_t,int64_t)const=0;};
 class NativeUnavailablePermit final:public Permit{public:bool VoiceContext(uint64_t,int64_t)const override{return false;}bool Microphone(uint64_t,int64_t)const override{return false;}bool Output(uint64_t,int64_t)const override{return false;}bool Provider(uint64_t,int64_t)const override{return false;}bool Hold(uint64_t,uint64_t,int64_t)const override{return false;}};
 enum class Operation{Bind,Input,Output};
@@ -22,6 +25,8 @@ class Codec{
 public:
  using Gate=std::function<bool(uint64_t,int64_t,Operation)>;
  virtual ~Codec()=default;
+ // Availability prerequisite only; never a held-input or audio permission.
+ virtual bool SupportsNativePtt()const{return false;}
  virtual bool Reserve(uint64_t)=0;
  // No generation-only fallback can bind native hardware custody.
  virtual bool ReserveExact(uint64_t,const companion::AudioLease&,companion::muse::Directions,int64_t,muse_native_review::Clock*,Gate){return false;}
