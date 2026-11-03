@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "muse_direct_local_ui.hpp"
 #include "muse_direct_local_model.hpp"
+#include "muse_voice_setup_ui.hpp"
 #include <apps/common/tool_visual.hpp>
 #include <array>
 #include <cstdio>
@@ -11,10 +12,17 @@ namespace companion::muse {
 struct LocalSetupUi::Impl {
  enum class Page { Mode, Ids, Review, Scope, Keys, Prepared, MessageTarget, MessageReview, MessageResult };
  struct Binding { Impl* self=nullptr; unsigned action=0; uint64_t revision=0,input=0; bool armed=false; };
+#if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+ std::unique_ptr<VoiceAdmissionSetupUi<LocalPort>> voice;LocalPort& voice_port;
+#endif
  LocalSetupModel model; lv_obj_t* root=nullptr; lv_obj_t* title=nullptr; lv_obj_t* detail=nullptr;
  std::array<lv_obj_t*,20> buttons{},labels{}; std::array<Binding,20> bindings{};
  Page page=Page::Mode; LocalField editing=LocalField::None; unsigned key_page=0,scope=0,review_page=0; uint64_t revision=0;bool queued=false;const char* notice=nullptr;
- explicit Impl(LocalPort& p):model(p){}
+ explicit Impl(LocalPort& p):
+#if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+ voice_port(p),
+#endif
+ model(p){}
  static void Event(lv_event_t* e) {
   auto& b=*static_cast<Binding*>(lv_event_get_user_data(e)); auto& u=*b.self;
   if(lv_event_get_code(e)==LV_EVENT_PRESSED){b.revision=u.revision;b.input=u.model.InputEpoch();b.armed=true;return;}
@@ -39,7 +47,13 @@ struct LocalSetupUi::Impl {
  void Render(){
   ++revision; for(auto* button:buttons)lv_obj_add_flag(button,LV_OBJ_FLAG_HIDDEN);
   auto menu=[this](unsigned i,const char* name){Button(i,name,8,52+int(i)*35,304,32);};
-  if(page==Page::Mode){lv_label_set_text(title,"Muse private setup");lv_label_set_text(detail,notice?notice:"Choose an action");menu(0,"Pair device");menu(1,"Prepare text chat");menu(2,"Close");return;}
+  if(page==Page::Mode){lv_label_set_text(title,"Muse private setup");lv_label_set_text(detail,notice?notice:"Choose an action");menu(0,"Pair device");menu(1,"Prepare text chat");
+#if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+ menu(2,"Prepare voice admission");menu(3,"Close");
+#else
+ menu(2,"Close");
+#endif
+ return;}
   if(page==Page::Ids){lv_label_set_text(title,"Choose exact chat");std::string s="VM: "+std::string(model.Value(LocalField::Vm))+"   Chat: "+std::string(model.Value(LocalField::Chat));lv_label_set_text(detail,s.c_str());menu(0,"Enter VM ID");menu(1,"Enter chat ID");menu(2,"Review device and Wi-Fi");menu(3,"Back");return;}
   if(page==Page::Review){lv_label_set_text(title,"Review before approval");std::string s="Device: "+model.Identity().device+"   Node: "+model.Identity().node+"   Wi-Fi: "+NetworkLabel();if(model.Mode()==LocalMode::Chat)s+="   VM: "+std::string(model.Value(LocalField::Vm))+"   Chat: "+std::string(model.Value(LocalField::Chat));lv_label_set_text(detail,s.c_str());menu(0,"Review permissions");menu(1,"Back");return;}
   if(page==Page::Scope){
@@ -65,7 +79,18 @@ struct LocalSetupUi::Impl {
  void Edit(LocalField field){if(model.Edit(model.Epoch(),field)){editing=field;key_page=0;page=Page::Keys;}}
  void Act(unsigned a){
   notice=nullptr;
-  if(page==Page::Mode){if(a==2){Close();return;}if(a<2&&model.Select(model.Epoch(),a==0?LocalMode::Pair:LocalMode::Chat)){if(a==0)Review();else page=Page::Ids;}}
+  if(page==Page::Mode){
+#if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+   if(a==2){model.Close();model.Begin();if(voice&&voice->Closed())voice.reset();if(!voice)voice=std::make_unique<VoiceAdmissionSetupUi<LocalPort>>(voice_port);if(!voice->Open(root))notice="Voice setup needs RAM profile and native touch input";Render();return;}
+   if(a==3){Close();return;}
+#else
+   if(a==2){Close();return;}
+#endif
+   if(a<2){
+#if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+    if(voice){if(!voice->Close())return;voice.reset();}
+#endif
+    if(model.Select(model.Epoch(),a==0?LocalMode::Pair:LocalMode::Chat)){if(a==0)Review();else page=Page::Ids;}}}
   else if(page==Page::Ids){if(a==0)Edit(LocalField::Vm);else if(a==1)Edit(LocalField::Chat);else if(a==2)Review();else if(a==3)page=Page::Mode;}
   else if(page==Page::Review){if(a==0){scope=0;page=Page::Scope;}else if(a==1)page=model.Mode()==LocalMode::Pair?Page::Mode:Page::Ids;}
   else if(page==Page::Scope){if(a==0){if(!model.Allow(model.Epoch(),scope))notice="Permission or network expired";}else if(a==1){if(scope<2)++scope;else if(model.Allowed(0)&&model.Allowed(1)&&model.Allowed(2)){if(model.Mode()==LocalMode::Pair){Edit(LocalField::Token);if(page==Page::Scope)notice="Permissions or network expired";}else if(model.Stage(model.Epoch()))page=Page::Prepared;else notice="Check IDs, permissions and network";}else notice="Allow all three permissions";}else if(a==2){model.Close();model.Begin();page=Page::Mode;}}
@@ -82,12 +107,20 @@ struct LocalSetupUi::Impl {
   }
   Render();
  }
- void Close(){model.Close();if(root){lv_obj_delete(root);root=nullptr;}}
+ void Close(){
+#if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+ if(voice&&!voice->Close())return;
+#endif
+ model.Close();if(root){lv_obj_delete(root);root=nullptr;}}
 };
 LocalSetupUi::LocalSetupUi(LocalPort& p):impl_(new Impl(p)){}
 LocalSetupUi::~LocalSetupUi(){Close();}
 void LocalSetupUi::Open(lv_obj_t* parent){if(!impl_->root)impl_->Build(parent);else lv_obj_remove_flag(impl_->root,LV_OBJ_FLAG_HIDDEN);}
-void LocalSetupUi::Poll(){if(impl_->root){const auto count=impl_->model.TokenCount();const bool scoped=impl_->model.HasScope();impl_->model.Poll();if(scoped&&!impl_->model.HasScope()){impl_->page=Impl::Page::Mode;impl_->Render();}else if(count!=impl_->model.TokenCount())impl_->Render();}}
+void LocalSetupUi::Poll(){
+#if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+ if(impl_->voice){impl_->voice->Poll();if(impl_->voice->TakeReturnRequested()&&impl_->root)lv_obj_add_flag(impl_->root,LV_OBJ_FLAG_HIDDEN);}
+#endif
+ if(impl_->root){const auto count=impl_->model.TokenCount();const bool scoped=impl_->model.HasScope();impl_->model.Poll();if(scoped&&!impl_->model.HasScope()){impl_->page=Impl::Page::Mode;impl_->Render();}else if(count!=impl_->model.TokenCount())impl_->Render();}}
 void LocalSetupUi::Close(){impl_->Close();}
 bool LocalSetupUi::Visible()const{return impl_->root&&!lv_obj_has_flag(impl_->root,LV_OBJ_FLAG_HIDDEN);}
 }

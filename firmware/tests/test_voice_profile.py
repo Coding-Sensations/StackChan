@@ -52,3 +52,8 @@ for selected in ([],['muse'],['muse',key]):
  assert ('companion/muse_voice_task.cc' in result['excluded_sources']) == (key not in selected)
 assert 'companion/muse_voice_task.cc' in p.MUSE_SOURCES
 print('Actual native worker source closure and reviewed Muse-off boundary passed')
+
+for selected in ([],['muse'],['muse',key]):
+ result=p.resolve('custom',{'schema':1,'features':selected},root/'main')
+ assert ('companion/muse_voice_core_access.cc' in result['excluded_sources']) == (key not in selected)
+assert 'companion/muse_voice_core_access.cc' in p.MUSE_SOURCES

@@ -1,3 +1,4 @@
+#include <companion/muse_voice_core_access.h>
 #include <apps/stock_shell/sd_mount_diagnostics.h>
 #include "wifi_board.h"
 #include <apps/stock_services/policy.h>
@@ -859,6 +860,7 @@ public:
                                             AUDIO_I2S_GPIO_MCLK, AUDIO_I2S_GPIO_BCLK, AUDIO_I2S_GPIO_WS,
                                             AUDIO_I2S_GPIO_DOUT, AUDIO_I2S_GPIO_DIN, AUDIO_CODEC_AW88298_ADDR,
                                             AUDIO_CODEC_ES7210_ADDR, AUDIO_INPUT_REFERENCE);
+        companion::muse::PublishStaticVoiceCore(audio_codec);
         return &audio_codec;
     }
 

@@ -11,10 +11,10 @@ MUSE_SOURCES = ['companion/muse_direct_local_ui.cc', 'companion/muse_direct_loca
                 'companion/muse_direct_device.cc', 'companion/muse_direct_live.cc',
                 'companion/muse_direct_native_api.cc', 'companion/muse_direct_native_socket.cc',
                 'companion/muse_direct_runtime.cc', 'companion/muse_direct_store.cc',
-                'companion/muse_direct_credential_custody.cc', 'companion/muse_voice_task.cc',
+                'companion/muse_direct_credential_custody.cc', 'companion/muse_voice_task.cc', 'companion/muse_voice_core_access.cc',
                 'companion/muse_room_transport.cc']
 FEATURES = {
-    'hermes': [], 'muse': MUSE_SOURCES, 'muse_voice_protocol': ['companion/muse_voice_task.cc'], 'bounded_motion': [], 'claude': [], 'codex': [],
+    'hermes': [], 'muse': MUSE_SOURCES, 'muse_voice_protocol': ['companion/muse_voice_task.cc', 'companion/muse_voice_core_access.cc'], 'bounded_motion': [], 'claude': [], 'codex': [],
     'music': ['apps/instruments/instrument_apps.cc',
               'apps/instruments/midi_host/host_client.cc',
               'apps/local_tools/local_tools_app.cc',
