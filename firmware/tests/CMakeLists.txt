@@ -187,3 +187,6 @@ add_test(NAME voice_core_lookup_test COMMAND ${Python3_EXECUTABLE}
 
 add_test(NAME voice_native_hold_test COMMAND ${Python3_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/test_voice_native_hold.py)
+
+add_test(NAME muse_amplifier_test COMMAND ${Python3_EXECUTABLE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_muse_amplifier.py)
