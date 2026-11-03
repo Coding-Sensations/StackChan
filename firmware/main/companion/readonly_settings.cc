@@ -1,3 +1,17 @@
+#if defined(STACKCHAN_MUSE_LOCAL_DIAGNOSTIC) && STACKCHAN_MUSE_LOCAL_DIAGNOSTIC
+#include "settings.h"
+// Diagnostic image has no NVS initialization, reads, overlay or persistence.
+Settings::Settings(const std::string& ns,bool):ns_(ns),read_write_(false){}
+Settings::~Settings()=default;
+std::string Settings::GetString(const std::string&,const std::string& value){return value;}
+int32_t Settings::GetInt(const std::string&,int32_t value){return value;}
+bool Settings::GetBool(const std::string&,bool value){return value;}
+void Settings::SetString(const std::string&,const std::string&){}
+void Settings::SetInt(const std::string&,int32_t){}
+void Settings::SetBool(const std::string&,bool){}
+void Settings::EraseKey(const std::string&){}
+void Settings::EraseAll(){}
+#else
 // Companion variant of pinned Xiaozhi MIT settings implementation: explicit feature-scoped persistent settings.
 #include "settings.h"
 
@@ -151,3 +165,5 @@ void Settings::EraseAll() {
         ESP_LOGW(TAG, "Namespace %s is not open for writing", ns_.c_str());
     }
 }
+
+#endif
