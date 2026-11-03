@@ -19,6 +19,8 @@ protected:
  virtual int Read(int16_t*,int)=0;virtual int Write(const int16_t*,int)=0;
 public:
  int input_sample_rate()const{return input_sample_rate_;}int output_sample_rate()const{return output_sample_rate_;}int input_channels()const{return input_channels_;}int output_channels()const{return output_channels_;}
+ inline static int legacy_starts=0;
+ virtual void Start(){++legacy_starts;}
  virtual ~AudioCodec()=default;
  virtual void SetOutputVolume(int v){output_volume_=v;}
  virtual void EnableInput(bool b){input_enabled_=b;}virtual void EnableOutput(bool b){output_enabled_=b;}

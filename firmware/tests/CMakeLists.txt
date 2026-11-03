@@ -193,3 +193,5 @@ add_test(NAME muse_amplifier_test COMMAND ${Python3_EXECUTABLE}
 
 add_test(NAME muse_quiesce_diagnostic_test COMMAND ${Python3_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/test_muse_quiesce_diagnostic.py)
+
+add_test(NAME muse_cold_output_test COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_muse_cold_output.py)

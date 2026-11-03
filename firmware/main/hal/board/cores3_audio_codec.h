@@ -21,6 +21,16 @@ namespace companion::muse {class QuiesceDiagnostic;}
 class CoreS3AudioCodec : public AudioCodec {
 public:
 #if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+    struct MuseColdOutputConfig {void* bus=nullptr;};
+    enum class MuseColdStage {Unused,Binding,Channel,Format,Info,Control,Gpio,Amplifier,Quiet,Complete};
+    enum class MuseColdFault {None,Rejected,Driver,NoObject,BindingLost,InvalidState,Amplifier};
+    struct MuseColdEvidence {
+        MuseColdStage stage=MuseColdStage::Unused;MuseColdFault fault=MuseColdFault::Rejected;int status=0;size_t dma_bytes=0;codec_quiet::Evidence amplifier;
+        bool Complete()const{return stage==MuseColdStage::Complete&&fault==MuseColdFault::None;}
+    };
+    // No IO, program-lifetime retirement-only instance. No PCM/enable path.
+    static CoreS3AudioCodec& MuseColdOutputOnly();
+    MuseColdEvidence MuseColdInitialize(const companion::AudioLease&,const MuseColdOutputConfig&);
     enum class MuseDrain { Unavailable, Pending, Sent, Failed };
     enum class MuseDiscard { Unavailable, Failed, StoppedDmaCleared };
     static constexpr size_t MuseDiscardByteLimit=16384;
@@ -33,7 +43,7 @@ public:
         MuseQuiesce outcome=MuseQuiesce::Unavailable;MuseQuiescePhase phase=MuseQuiescePhase::None;
         codec_quiet::Evidence amplifier;int stop_status=0;bool channel_disable_failure=false;
         MuseDiscard discard=MuseDiscard::Unavailable;MuseDiscardEvidence discard_detail;
-        uint8_t input_stop_attempts=0,output_stop_attempts=0;bool binding_lost=false;
+        uint8_t input_stop_attempts=0,output_stop_attempts=0;bool binding_lost=false,input_never_created=false,output_never_started=false;
     };
 #endif
 private:
@@ -57,6 +67,14 @@ private:
     bool ScopedDrainBegin(uint64_t);
     DirectUsbDrain ScopedDrainState(uint64_t);
 #if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+    struct MuseColdTag{};
+    explicit CoreS3AudioCodec(MuseColdTag);
+    bool muse_cold_=false,muse_cold_attempted_=false,muse_cold_ready_=false,muse_cold_output_confirmed_=false;
+    MuseColdEvidence muse_cold_evidence_;
+    bool MuseColdInputAbsent()const;
+    bool MuseInputQuiescentProof()const;
+    bool MuseOutputQuiescentProof()const;
+    bool MuseColdStop(bool,int*,uint8_t*);
     bool muse_bound_=false,muse_retired_=false,muse_discarding_=false;
     bool muse_stop_active_=false,muse_volume_active_=false;
     bool muse_quiescent_=false,muse_quiescing_=false,muse_quiesce_retained_=false;uint64_t muse_last_quiesce_ticket_=0;
@@ -68,6 +86,13 @@ private:
     bool IsMuseBinding()const {
 #if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
         return muse_bound_;
+#else
+        return false;
+#endif
+    }
+    bool ColdOutputOnlyInstance()const {
+#if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+        return muse_cold_;
 #else
         return false;
 #endif
@@ -106,6 +131,7 @@ public:
         gpio_num_t mclk, gpio_num_t bclk, gpio_num_t ws, gpio_num_t dout, gpio_num_t din,
         uint8_t aw88298_addr, uint8_t es7210_addr, bool input_reference);
     virtual ~CoreS3AudioCodec();
+    void Start() override;
 
     bool DirectUsbCodecAcquire(uint64_t generation) override;
     bool DirectUsbEnableInputChecked(uint64_t generation, bool enable) override;

@@ -93,6 +93,9 @@ CoreS3AudioCodec::CoreS3AudioCodec(void* i2c_master_handle, int input_sample_rat
 }
 
 CoreS3AudioCodec::~CoreS3AudioCodec() {
+    // Cold instances are program-lifetime. Never synthesize recovery by freeing
+    // resources from a partially initialized/retained diagnostic binding.
+    if(ColdOutputOnlyInstance())return;
     // Never free ISR user_data while its channel can invoke our callback.
     if (direct_callback_ready_) {
         auto stopped = i2s_channel_disable(tx_handle_);
@@ -214,7 +217,10 @@ void CoreS3AudioCodec::CreateDuplexChannels(gpio_num_t mclk, gpio_num_t bclk, gp
     ESP_LOGI(TAG, "Duplex channels created");
 }
 
+void CoreS3AudioCodec::Start(){if(!ColdOutputOnlyInstance())AudioCodec::Start();}
+
 void CoreS3AudioCodec::SetOutputVolume(int volume) {
+    if(ColdOutputOnlyInstance())return;
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);RefreshHardwareBinding();
 #if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
     if(muse_bound_&&muse_quiescent_)return;
@@ -225,6 +231,7 @@ void CoreS3AudioCodec::SetOutputVolume(int volume) {
 }
 
 void CoreS3AudioCodec::EnableInput(bool enable) {
+    if(ColdOutputOnlyInstance())return;
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);
     RefreshHardwareBinding();
     if (direct_generation_ && !direct_call_) return;
@@ -269,6 +276,7 @@ void CoreS3AudioCodec::EnableInput(bool enable) {
 }
 
 void CoreS3AudioCodec::EnableOutput(bool enable) {
+    if(ColdOutputOnlyInstance())return;
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);
     RefreshHardwareBinding();
     if (direct_generation_ && !direct_call_) return;
@@ -309,6 +317,7 @@ void CoreS3AudioCodec::EnableOutput(bool enable) {
 }
 
 int CoreS3AudioCodec::Read(int16_t* dest, int samples) {
+    if(ColdOutputOnlyInstance())return 0;
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);
     RefreshHardwareBinding();
     if (direct_generation_ && !direct_call_) return 0;
@@ -325,6 +334,7 @@ int CoreS3AudioCodec::Read(int16_t* dest, int samples) {
 }
 
 int CoreS3AudioCodec::Write(const int16_t* data, int samples) {
+    if(ColdOutputOnlyInstance())return 0;
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);
     RefreshHardwareBinding();
     if (direct_generation_ && (!direct_call_ || direct_draining_)) return 0;
@@ -342,6 +352,7 @@ int CoreS3AudioCodec::Write(const int16_t* data, int samples) {
 }
 
 bool CoreS3AudioCodec::EnableInputChecked(bool enable) {
+    if(ColdOutputOnlyInstance())return false;
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);
     RefreshHardwareBinding();
     if (direct_generation_ && !direct_call_) return false;
@@ -390,6 +401,7 @@ bool CoreS3AudioCodec::EnableInputChecked(bool enable) {
     return true;
 }
 bool CoreS3AudioCodec::EnableOutputChecked(bool enable) {
+    if(ColdOutputOnlyInstance())return false;
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);
     RefreshHardwareBinding();
     if (direct_generation_ && !direct_call_) return false;
@@ -436,6 +448,7 @@ bool CoreS3AudioCodec::EnableOutputChecked(bool enable) {
 
 // No authority is issued here: caller already owns the approved HAL codec lease.
 bool CoreS3AudioCodec::DirectUsbCodecAcquire(uint64_t generation) {
+    if(ColdOutputOnlyInstance())return false;
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);
     RefreshHardwareBinding();
     if (!direct_callback_ready_ || !generation || generation <= direct_last_generation_ || direct_generation_ || input_enabled_ || output_enabled_) return false;
@@ -515,6 +528,9 @@ bool CoreS3AudioCodec::DirectStopChecked(uint64_t generation, bool output,int* e
 #endif
     if (!generation || generation != direct_generation_) return false;
     if(expected&&!companion::CommonAudioAuthority().Holds(*expected))return false;
+#if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+    if(muse_cold_)return MuseColdStop(output,error,attempts);
+#endif
     bool& stopped = output ? direct_output_stopped_ : direct_input_stopped_;
     bool& closed = output ? direct_output_closed_ : direct_input_closed_;
     if (!stopped) {
@@ -567,6 +583,7 @@ bool CoreS3AudioCodec::MuseMatch(const companion::AudioLease& lease)const{
         companion::CommonAudioAuthority().Holds(lease);
 }
 bool CoreS3AudioCodec::MuseCodecAcquire(const companion::AudioLease& lease){
+    if(ColdOutputOnlyInstance())return false;
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);RefreshHardwareBinding();
     if(!direct_callback_ready_||direct_generation_||input_enabled_||output_enabled_||
        input_sample_rate_!=24000||output_sample_rate_!=24000||
@@ -579,11 +596,13 @@ bool CoreS3AudioCodec::MuseCodecAcquire(const companion::AudioLease& lease){
     portENTER_CRITICAL(&direct_mux_);direct_draining_=false;portEXIT_CRITICAL(&direct_mux_);return true;
 }
 bool CoreS3AudioCodec::MuseEnableInputChecked(const companion::AudioLease& lease,bool enable){
+    if(ColdOutputOnlyInstance())return false;
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);
     if(!MuseMatch(lease)||muse_retired_||muse_discarding_||muse_quiescing_||(enable&&muse_quiescent_))return false;
     const bool okay=ScopedEnableInputChecked(direct_generation_,enable)&&(!enable||companion::CommonAudioAuthority().Current(lease));if(!okay)companion::RevokeAudio(lease);return okay;
 }
 bool CoreS3AudioCodec::MuseEnableOutputChecked(const companion::AudioLease& lease,bool enable){
+    if(ColdOutputOnlyInstance())return false;
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);
     if(!MuseMatch(lease)||muse_retired_||muse_discarding_||muse_quiescing_||(enable&&muse_quiescent_))return false;
     const bool okay=ScopedEnableOutputChecked(direct_generation_,enable)&&(!enable||companion::CommonAudioAuthority().Current(lease));if(!okay)companion::RevokeAudio(lease);return okay;
@@ -621,14 +640,13 @@ CoreS3AudioCodec::MuseDiscard CoreS3AudioCodec::MuseDiscardOutputChecked(const c
     return (muse_quiescing_||muse_quiescent_)?MuseDiscard::Unavailable:MuseDiscardStopped(lease,ticket);
 }
 CoreS3AudioCodec::MuseDiscard CoreS3AudioCodec::MuseDiscardStopped(const companion::AudioLease& lease,uint64_t ticket,MuseDiscardEvidence* detail){
-    std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);
+    std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);const auto original=lease;
     // Both directions: input format setup can restart paired TX for its clock.
-    const auto stopped=[&]{return MuseMatch(lease)&&!muse_retired_&&direct_input_stopped_&&direct_output_stopped_&&
-        direct_input_closed_&&direct_output_closed_&&!input_enabled_&&!output_enabled_;};
+    const auto stopped=[&]{return MuseMatch(original)&&!muse_retired_&&MuseInputQuiescentProof()&&MuseOutputQuiescentProof()&&!input_enabled_&&!output_enabled_;};
     if(muse_discarding_||!ticket||ticket<=muse_last_discard_ticket_||!stopped())return MuseDiscard::Unavailable;
     struct Busy{bool& flag;explicit Busy(bool& f):flag(f){flag=true;}~Busy(){flag=false;}} busy(muse_discarding_);
     muse_last_discard_ticket_=ticket; // every attempted request is single-use, including failures
-    const auto failed=[&]{companion::RevokeAudio(lease);return MuseDiscard::Failed;};
+    const auto failed=[&]{if(muse_cold_){muse_cold_output_confirmed_=false;muse_quiescent_=muse_quiesce_retained_=true;}companion::RevokeAudio(original);return MuseDiscard::Failed;};
     i2s_chan_info_t info{};
     if(detail)detail->phase=MuseDiscardPhase::BeforeInfo;
     const auto info_status=i2s_channel_get_info(tx_handle_,&info);
@@ -636,8 +654,8 @@ CoreS3AudioCodec::MuseDiscard CoreS3AudioCodec::MuseDiscardStopped(const compani
     if(info_status==ESP_OK&&info.is_enabled)direct_output_stopped_=false; // contradictory hardware evidence needs a fresh stop
     if(info_status!=ESP_OK||!stopped()||info.dir!=I2S_DIR_TX||info.mode!=I2S_COMM_MODE_STD||
        info.is_enabled||!info.total_dma_buf_size||info.total_dma_buf_size%4||info.total_dma_buf_size>MuseDiscardByteLimit)return failed();
-    // Pinned IDF disable resets preload to descriptor0. Checked stops must
-    // precede this operation; success means every reported DMA byte overwritten.
+    // Normal stop resets the pinned preload cursor; cold construction owns a
+    // fresh never-preloaded channel. Neither permits replay after partial write.
     const std::array<unsigned char,256> zeros{};
     for(size_t offset=0;offset<info.total_dma_buf_size;){
         const size_t count=std::min(zeros.size(),size_t(info.total_dma_buf_size)-offset);size_t loaded=0;
@@ -676,6 +694,8 @@ CoreS3AudioCodec::MuseQuiesceEvidence CoreS3AudioCodec::MuseQuiesceForRetirement
     const auto* original=out_codec_if_;const auto current=[&]{const bool match=MuseMatch(captured)&&!muse_retired_&&muse_quiescent_&&out_codec_if_==original;if(!match)result.binding_lost=true;return match;};
     result.outcome=MuseQuiesce::Failed;result.phase=MuseQuiescePhase::Amplifier;
     result.amplifier=codec_quiet::Quiesce(original,current);if(!result.amplifier.Complete())return result;
+    result.input_never_created=muse_cold_&&MuseColdInputAbsent();
+    result.output_never_started=muse_cold_;
     result.phase=MuseQuiescePhase::InputStop;
     if(!current()||!DirectStopChecked(direct_generation_,false,&result.stop_status,&result.channel_disable_failure,&result.input_stop_attempts,&captured)){(void)current();return result;}
     result.phase=MuseQuiescePhase::OutputStop;
@@ -687,16 +707,16 @@ CoreS3AudioCodec::MuseQuiesceEvidence CoreS3AudioCodec::MuseQuiesceForRetirement
     muse_quiesce_retained_=false;result.phase=MuseQuiescePhase::Complete;result.outcome=MuseQuiesce::RegistersAndStoppedDma;return result;
 }
 bool CoreS3AudioCodec::MuseStopInputChecked(const companion::AudioLease& lease){
-    std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);return MuseMatch(lease)&&!muse_retired_&&!muse_quiescing_&&DirectStopChecked(direct_generation_,false);
+    std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);return MuseMatch(lease)&&!muse_retired_&&!muse_quiescing_&&!(muse_cold_&&muse_stop_active_)&&DirectStopChecked(direct_generation_,false);
 }
 bool CoreS3AudioCodec::MuseStopOutputChecked(const companion::AudioLease& lease){
-    std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);return MuseMatch(lease)&&!muse_retired_&&!muse_quiescing_&&DirectStopChecked(direct_generation_,true);
+    std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);return MuseMatch(lease)&&!muse_retired_&&!muse_quiescing_&&!(muse_cold_&&muse_stop_active_)&&DirectStopChecked(direct_generation_,true);
 }
 bool CoreS3AudioCodec::MuseCodecRelease(const companion::AudioLease& lease){
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);
     if(!MuseMatch(lease)||muse_discarding_||muse_quiescing_||muse_quiesce_retained_)return false;
     companion::RevokeAudio(lease);
-    if(!direct_input_stopped_||!direct_output_stopped_||!direct_input_closed_||!direct_output_closed_||input_enabled_||output_enabled_)return false;
+    if(!MuseInputQuiescentProof()||!MuseOutputQuiescentProof()||input_enabled_||output_enabled_)return false;
     // Do not release the original logical lease. Its owner still owes worker
     // join. Keep the legacy IO guard until that owner releases common custody.
     muse_retired_=true;return true;

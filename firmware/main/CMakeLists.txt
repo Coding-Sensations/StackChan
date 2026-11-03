@@ -22,7 +22,7 @@ set(STACK_CHAN_INCLUDE_DIRS
 )
 # ESP-IDF scans this file in script mode, where CONFIGURE_DEPENDS is invalid.
 # Explicitly name the new source so a stale source list cannot omit it.
-list(APPEND STACK_CHAN_SOURCES companion/muse_direct_live.cc companion/muse_direct_native_api.cc companion/muse_direct_native_socket.cc companion/muse_direct_device.cc companion/muse_direct_ble.cc companion/muse_direct_api.cc companion/muse_direct_runtime.cc companion/muse_direct_store.cc companion/muse_direct_credential_custody.cc main.cpp companion/muse_room_transport.cc companion/provider_room_runtime.cc apps/stock_shell/provider_companion_app.cc companion/numeric_pairing.cc companion/diagnostics.cc companion/camera_permission_wire.cc)
+list(APPEND STACK_CHAN_SOURCES companion/muse_cold_output.cc companion/muse_direct_live.cc companion/muse_direct_native_api.cc companion/muse_direct_native_socket.cc companion/muse_direct_device.cc companion/muse_direct_ble.cc companion/muse_direct_api.cc companion/muse_direct_runtime.cc companion/muse_direct_store.cc companion/muse_direct_credential_custody.cc main.cpp companion/muse_room_transport.cc companion/provider_room_runtime.cc apps/stock_shell/provider_companion_app.cc companion/numeric_pairing.cc companion/diagnostics.cc companion/camera_permission_wire.cc)
 list(REMOVE_DUPLICATES STACK_CHAN_SOURCES)
 
 # Define source files
