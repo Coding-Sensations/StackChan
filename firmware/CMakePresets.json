@@ -11,8 +11,25 @@
         "STACKCHAN_FEATURE_MANIFEST": "${sourceDir}/profiles/muse-ram.json",
         "STACKCHAN_MUSE_RAM_ONLY": "ON",
         "STACKCHAN_ENABLE_LOCAL_PORTRAITS": "OFF",
-        "STACKCHAN_LOCAL_PORTRAIT_MANIFEST": ""
+        "STACKCHAN_LOCAL_PORTRAIT_MANIFEST": "",
+        "STACKCHAN_MUSE_LOCAL_DIAGNOSTIC": "OFF"
       }
+    },
+    {
+      "name": "muse-cold-diagnostic",
+      "displayName": "Opt-in cold retirement diagnostic; no microphone/playback/network/storage",
+      "inherits": "muse-ram-reference",
+      "cacheVariables": {
+        "STACKCHAN_MUSE_LOCAL_DIAGNOSTIC": "ON",
+        "STACKCHAN_COMPANION_REMEMBERED_RUNTIME": "OFF",
+        "STACKCHAN_COMPANION_TRUSTED_USB_PROVISIONING": "OFF",
+        "STACKCHAN_COMPANION_WIRELESS_PAIRING": "OFF",
+        "STACKCHAN_COMPANION_LOCAL_CA_FILE": "",
+        "STACKCHAN_COMPANION_LOCAL_TLS_HOST": "",
+        "STACKCHAN_COMPANION_BINDING_CONFIG": "",
+        "SDKCONFIG": "${sourceDir}/../build-muse-cold-diagnostic/sdkconfig"
+      },
+      "binaryDir": "${sourceDir}/../build-muse-cold-diagnostic"
     }
   ]
 }

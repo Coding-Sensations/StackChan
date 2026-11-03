@@ -22,7 +22,7 @@ set(STACK_CHAN_INCLUDE_DIRS
 )
 # ESP-IDF scans this file in script mode, where CONFIGURE_DEPENDS is invalid.
 # Explicitly name the new source so a stale source list cannot omit it.
-list(APPEND STACK_CHAN_SOURCES companion/muse_direct_live.cc companion/muse_direct_native_api.cc companion/muse_direct_native_socket.cc companion/muse_direct_device.cc companion/muse_direct_ble.cc companion/muse_direct_api.cc companion/muse_direct_runtime.cc companion/muse_direct_store.cc companion/muse_direct_credential_custody.cc main.cpp companion/muse_room_transport.cc companion/provider_room_runtime.cc apps/stock_shell/provider_companion_app.cc companion/numeric_pairing.cc companion/diagnostics.cc companion/camera_permission_wire.cc)
+list(APPEND STACK_CHAN_SOURCES companion/muse_local_diagnostic.cc companion/muse_cold_output.cc companion/muse_direct_live.cc companion/muse_direct_native_api.cc companion/muse_direct_native_socket.cc companion/muse_direct_device.cc companion/muse_direct_ble.cc companion/muse_direct_api.cc companion/muse_direct_runtime.cc companion/muse_direct_store.cc companion/muse_direct_credential_custody.cc main.cpp companion/muse_room_transport.cc companion/provider_room_runtime.cc apps/stock_shell/provider_companion_app.cc companion/numeric_pairing.cc companion/diagnostics.cc companion/camera_permission_wire.cc)
 list(REMOVE_DUPLICATES STACK_CHAN_SOURCES)
 
 # Define source files
@@ -359,6 +359,7 @@ endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/all_changes_sources.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/build_profiles/select.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/build_profiles/muse_diagnostic.cmake")
 
 idf_component_register(
 # STACKCHAN_OFFLINE_MANIFEST_BEGIN
@@ -402,6 +403,7 @@ SRCS ${SOURCES}
                     )
 
 if(NOT CMAKE_BUILD_EARLY_EXPANSION)
+    target_compile_definitions(${COMPONENT_LIB} PRIVATE STACKCHAN_MUSE_LOCAL_DIAGNOSTIC=${STACKCHAN_DIAGNOSTIC_ENABLED})
     option(STACKCHAN_MUSE_RAM_ONLY "Hold Muse access token only in foreground RAM" OFF)
     option(STACKCHAN_ENABLE_LOCAL_PORTRAITS "Explicit private external portrait adapter" OFF)
     set(STACKCHAN_LOCAL_PORTRAIT_MANIFEST "" CACHE FILEPATH "External local portrait provenance manifest")

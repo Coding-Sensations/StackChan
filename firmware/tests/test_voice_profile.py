@@ -57,3 +57,15 @@ for selected in ([],['muse'],['muse',key]):
  result=p.resolve('custom',{'schema':1,'features':selected},root/'main')
  assert ('companion/muse_voice_core_access.cc' in result['excluded_sources']) == (key not in selected)
 assert 'companion/muse_voice_core_access.cc' in p.MUSE_SOURCES
+
+# Cold diagnostic implementation is absent before compile unless both features are selected.
+for selected in ([], ['muse'], ['muse', key]):
+ result=p.resolve('custom',{'schema':1,'features':selected},root/'main')
+ assert ('companion/muse_cold_output.cc' in result['excluded_sources']) == (key not in selected)
+assert 'companion/muse_cold_output.cc' in p.MUSE_SOURCES
+print('Cold output-only implementation source closure passed; production startup unchanged')
+
+for selected in ([], ['muse'], ['muse', key]):
+ result=p.resolve('custom',{'schema':1,'features':selected},root/'main')
+ assert ('companion/muse_local_diagnostic.cc' in result['excluded_sources']) == (key not in selected)
+assert 'companion/muse_local_diagnostic.cc' in p.MUSE_SOURCES

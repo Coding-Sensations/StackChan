@@ -182,6 +182,9 @@ class Hal {
 public:
     void init();
     bool initCompanion();
+#if defined(STACKCHAN_MUSE_LOCAL_DIAGNOSTIC) && STACKCHAN_MUSE_LOCAL_DIAGNOSTIC
+    bool initMuseDiagnostic();
+#endif
 
     /* --------------------------------- System --------------------------------- */
     void delay(std::uint32_t ms);
