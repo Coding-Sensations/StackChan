@@ -12,8 +12,8 @@ struct Device {lv_indev_t* input=nullptr;bool foreground=true;std::string node="
 using Consent=DeviceVoiceConsent<Admission,Reader,Device>;
 using Session=VoiceSessionOwner<Admission>;
 using Ui=DeviceVoiceReviewUi<Session,Consent>;
-static void Down(lv_obj_t* button,lv_indev_t& input){active_input=event_input=&input;input.active=button;input.state=LV_INDEV_STATE_PRESSED;Press(button);active_input=event_input=nullptr;}
-static void Up(lv_obj_t* button,lv_indev_t& input){active_input=event_input=&input;input.active=button;input.state=LV_INDEV_STATE_RELEASED;ReleaseClick(button);active_input=event_input=nullptr;}
+static void Down(lv_obj_t* button,lv_indev_t& input){active_input=event_input=&input;input.active=button;input.state=LV_INDEV_STATE_PRESSED;lv_area_t area{};lv_obj_get_coords(button,&area);input.point={(area.x1+area.x2)/2,(area.y1+area.y2)/2};Press(button);active_input=event_input=nullptr;}
+static void Up(lv_obj_t* button,lv_indev_t& input){active_input=event_input=&input;input.active=button;input.state=LV_INDEV_STATE_RELEASED;lv_event_t released{button,button->callback_user,LV_EVENT_RELEASED};button->callback(&released);ReleaseClick(button);active_input=event_input=nullptr;}
 static void Tap(lv_obj_t*button,lv_indev_t&input){assert(button&&Visible(button));Down(button,input);Up(button,input);}
 struct Rig {
  AdmissionOwner original;CoreS3AudioCodec core=Make();CoreVoiceCodec<CoreS3AudioCodec> codec{core};Device device;lv_indev_t pointer;Admission* admitted=original.admission.get();

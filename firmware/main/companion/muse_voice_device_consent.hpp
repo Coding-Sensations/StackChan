@@ -6,13 +6,14 @@
 #include <atomic>
 #include "muse_voice_admission.hpp"
 #include "muse_voice_codec_owner.hpp"
+#include "muse_voice_hold_input.hpp"
 namespace companion::muse {
 template<class Session,class Consent>class DeviceVoiceReviewUi;
 // Local device consent only. Admission/reader/clock/input are borrowed through
 // session+UI cleanup. Generic injected inputs are test ports, not attestations.
 template<class Admission,class Reader,class Device>
 class DeviceVoiceConsent final:public voice_codec_prep::Permit {
- Admission& admission_;Reader& reader_;muse_native_review::Clock& clock_;Device& device_;
+ Admission& admission_;Reader& reader_;muse_native_review::Clock& clock_;Device& device_;NativePointerHold*hold_;
  mutable std::atomic<bool> revoke_signal_{false};
  mutable AdmittedVoiceContext context_;mutable muse_review::LocalReceipt approved_{};
  mutable muse_review::Model* approved_model_=nullptr;mutable uint64_t approved_revision_=0;
@@ -49,10 +50,10 @@ class DeviceVoiceConsent final:public voice_codec_prep::Permit {
  }
  template<class Session,class Consent>friend class DeviceVoiceReviewUi;
 public:
- DeviceVoiceConsent(Admission&a,Reader&r,muse_native_review::Clock&clock,Device&device):admission_(a),reader_(r),clock_(clock),device_(device){}
+ DeviceVoiceConsent(Admission&a,Reader&r,muse_native_review::Clock&clock,Device&device,NativePointerHold*hold=nullptr):admission_(a),reader_(r),clock_(clock),device_(device),hold_(hold){}
  DeviceVoiceConsent(const DeviceVoiceConsent&)=delete;DeviceVoiceConsent&operator=(const DeviceVoiceConsent&)=delete;
  ~DeviceVoiceConsent(){Revoke();}
- void SignalRevoke()const{revoke_signal_.store(true);} // GUI callback: no owner-state mutation/IO
+ void SignalRevoke()const{revoke_signal_.store(true);if(hold_)hold_->SignalRevoke();} // GUI callback: no owner-state mutation/IO
  bool RevocationRequested()const{return revoke_signal_.load();}
  void Revoke()const{SignalRevoke();revoked_=true;bound_=granted_=false;approved_model_=nullptr;approved_revision_=0;context_.Clear();muse_review::Wipe(&approved_,sizeof approved_);last_={};}
  bool Bind(){
@@ -67,7 +68,8 @@ public:
  bool Provider(uint64_t g,int64_t now)const override{return VoiceContext(g,now);}
  bool Microphone(uint64_t g,int64_t now)const override{return approved_.microphone&&VoiceContext(g,now);}
  bool Output(uint64_t g,int64_t now)const override{return approved_.speaker&&VoiceContext(g,now);}
- bool Hold(uint64_t,uint64_t,int64_t)const override{return false;} // no invented native hold proof
+ bool HoldSignalCurrent(uint64_t g,uint64_t ticket)const override{return granted_&&approved_.microphone&&g==context_.budget.generation&&ticket&&hold_&&!revoke_signal_.load()&&hold_->Ticket()==ticket&&!revoke_signal_.load();}
+ bool Hold(uint64_t g,uint64_t ticket,int64_t now)const override{return approved_.microphone&&hold_&&VoiceContext(g,now)&&hold_->Current(g,ticket)&&VoiceContext(g,now)&&!revoke_signal_.load()&&hold_->Ticket()==ticket;}
  bool MatchesReviewedContext(const muse_review::Target&t,Directions d,int64_t now)const override{return granted_&&d.microphone==approved_.microphone&&d.output==approved_.speaker&&VoiceContext(t.generation,now)&&ReviewEqual(t,context_);}
 };
 }

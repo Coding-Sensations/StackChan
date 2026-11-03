@@ -62,5 +62,12 @@ int main(){
  {
   Reset();auto core=Make();companion::muse::CoreVoiceCodec<CoreS3AudioCodec> codec(core);voice_prep::Protocol p;Live(p);TestClock clock;TestCustody custody;Bridge bridge(p,clock,custody);assert(bridge.Open());Complete(bridge,true,true);Matching native;native.expected=bridge.Review().Receipt();Reviewed owner(p,bridge,codec,native,clock);assert(owner.Prepare()&&owner.Start(4000));native.current=false;assert(!owner.Poll(4000)&&CurrentAudioOwner()==AudioOwner::None&&owner.Stop(4000));
  }
+
+ for(unsigned trigger=1;trigger<=2;++trigger)for(unsigned failure=0;failure<3;++failure){
+  struct ChangingHold:Matching{mutable unsigned holds=0;unsigned at=0;std::function<void()>change;bool Hold(uint64_t,uint64_t,int64_t)const override{if(++holds==at)change();return true;}}native;
+  voice_prep::Protocol p;Live(p);TestClock clock;TestCustody custody;Bridge bridge(p,clock,custody);assert(bridge.Open());Complete(bridge,true,true);native.expected=bridge.Review().Receipt();native.at=trigger;native.change=[&]{if(failure==0)native.expected.target.device[0]='X';if(failure==1)custody.current=false;if(failure==2)clock.time.mono_us=10000000;};Bound bound(p,bridge,clock,native);assert(bound.BindReview());const bool allowed=bound.Hold(7,5,4000);assert(native.holds==1);assert(allowed==(trigger==2));
+ }
+
+ {struct NoFence:Matching{bool HoldSignalCurrent(uint64_t,uint64_t)const override{return false;}}native;voice_prep::Protocol p;Live(p);TestClock clock;TestCustody custody;Bridge bridge(p,clock,custody);assert(bridge.Open());Complete(bridge,true,true);native.expected=bridge.Review().Receipt();Bound bound(p,bridge,clock,native);assert(bound.BindReview()&&!bound.Hold(7,5,4000)&&bound.VoiceContext(7,4000));}
  std::puts("PASS actual returned-review/native-match/retained Owner composition; synthetic native match is not genuine authority");
 }

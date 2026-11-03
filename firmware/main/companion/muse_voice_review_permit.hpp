@@ -49,8 +49,12 @@ class ReviewBoundPermit final:public voice_codec_prep::Permit {
    case Query::Provider:allowed=native_.Provider(generation,stamp.mono_us);break;
    case Query::Hold:allowed=native_.Hold(generation,ticket,stamp.mono_us);break;
   }
-  if(!allowed||!Current(generation,required,stamp)||!native_.MatchesReviewedContext(pinned_.target,selected,stamp.mono_us)||!Current(generation,required,stamp))return failed();
-  return true;
+  if(!allowed)return query==Query::Hold?false:failed();
+  if(!Current(generation,required,stamp)||!native_.MatchesReviewedContext(pinned_.target,selected,stamp.mono_us)||!Current(generation,required,stamp))return failed();
+  // A released/superseded start ticket is not loss of the reviewed context.
+  // Active-read/hold loss is stopped by Owner. After original post-callout
+  // context validation, only a non-callout native cancellation fence may run.
+  return query!=Query::Hold||(native_.HoldSignalCurrent(generation,ticket)&&Bound());
  }
  friend class ReviewedDirectionOwner;
 public:

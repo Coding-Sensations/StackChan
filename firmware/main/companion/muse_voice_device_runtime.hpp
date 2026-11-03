@@ -8,7 +8,7 @@
 namespace companion::muse {
 // Explicit UI lock boundary; caller retains this port through cleanup. Native
 // callbacks only queue private actions. This does not attest protocol ownership.
-class VoiceUiAccess {public:virtual ~VoiceUiAccess()=default;virtual bool Enter()=0;virtual void Leave()=0;};
+// VoiceUiAccess is shared with the held-input source in muse_voice_hold_input.hpp.
 // Stable, single-use owner. Caller retains borrowed ports/scope callbacks and
 // LVGL parent through Close completion. One protocol owner calls methods; an
 // explicit UI access port selects queued callbacks and scopes only widget work.
@@ -19,14 +19,14 @@ class DeviceVoiceRuntime final {
  using Consent=DeviceVoiceConsent<Admission,Reader,Device>;
  using Ui=DeviceVoiceReviewUi<Session,Consent>;
  voice_prep::Protocol& protocol_;Reader& reader_;Device& device_;VoiceUiAccess* ui_access_;
- Consent consent_;
+ voice_codec_prep::Codec&codec_;NativePointerHold hold_;Consent consent_;uint64_t generation_=0,talking_ticket_=0;
  std::unique_ptr<Session> session_;
  std::optional<Ui> ui_;
  lv_obj_t* parent_=nullptr;std::atomic<bool> stop_signal_{false};
  bool spent_=false,active_=false,busy_=false,closing_=false,closed_=false;
  bool ending_=false,ending_transport_=false,end_started_=false,ui_opened_=false,end_confirmed_=false;
  struct Busy {bool& flag;explicit Busy(bool& f):flag(f){flag=true;}~Busy(){flag=false;}};
- DeviceVoiceRuntime(voice_prep::Protocol&p,Admission&a,Reader&r,muse_native_review::Clock&k,Device&d,VoiceUiAccess*access):protocol_(p),reader_(r),device_(d),ui_access_(access),consent_(a,r,k,d){}
+ DeviceVoiceRuntime(voice_prep::Protocol&p,Admission&a,Reader&r,muse_native_review::Clock&k,Device&d,VoiceUiAccess*access,voice_codec_prep::Codec&codec):protocol_(p),reader_(r),device_(d),ui_access_(access),codec_(codec),hold_([&d]{return d.Input();},access),consent_(a,r,k,d,&hold_){}
  template<class Operation>bool WithUi(Operation operation){
   if(!ui_access_){operation();return true;} // legacy already-serialized inline owner
   if(!ui_access_->Enter())return false;
@@ -35,8 +35,8 @@ class DeviceVoiceRuntime final {
  bool CloseUi(){bool done=false;return WithUi([&]{done=!ui_||ui_->Close();})&&done;}
  bool AdmissionAllowed()const{return spent_&&!closing_&&!closed_&&!stop_signal_.load()&&(!ending_||ending_transport_);}
  bool NativeCurrent()const{return AdmissionAllowed()&&(!consent_.RevocationRequested()||ending_transport_)&&reader_.Current()&&device_.Foreground()&&AdmissionAllowed();}
- void RequestClose(){closing_=true;ending_transport_=false;consent_.Revoke();}
- void RequestEnd(){ending_=true;consent_.Revoke();}
+ void RequestClose(){talking_ticket_=0;closing_=true;ending_transport_=false;consent_.Revoke();}
+ void RequestEnd(){talking_ticket_=0;ending_=true;consent_.Revoke();}
  bool Cleanup(){
   // A UI callback may still be on the stack even when runtime is not busy.
   // Close then returns false; do not retire its backing session in that case.
@@ -67,7 +67,7 @@ class DeviceVoiceRuntime final {
 public:
  static std::unique_ptr<DeviceVoiceRuntime> Create(voice_prep::Protocol&protocol,std::unique_ptr<Admission>&candidate,Reader&reader,voice_codec_prep::Codec&codec,muse_native_review::Clock&clock,Device&device,VoiceUiAccess*access=nullptr){
   if(!candidate||!candidate->Unused()||!candidate->UsesProtocol(protocol)||!candidate->UsesClock(clock)||!candidate->UsesReader(reader))return {};
-  auto result=std::unique_ptr<DeviceVoiceRuntime>(new(std::nothrow)DeviceVoiceRuntime(protocol,*candidate,reader,clock,device,access));
+  auto result=std::unique_ptr<DeviceVoiceRuntime>(new(std::nothrow)DeviceVoiceRuntime(protocol,*candidate,reader,clock,device,access,codec));
   if(!result)return {};
   result->session_=Session::Create(protocol,candidate,codec,result->consent_,clock);
   if(!result->session_)return {};
@@ -77,7 +77,7 @@ public:
  ~DeviceVoiceRuntime(){assert(!spent_||closed_);} // no substitute cleanup IO
  bool Open(lv_obj_t*parent,const VoiceAdmissionScope&scope){
   if(!STACKCHAN_MUSE_RAM_ONLY||busy_||spent_||closing_||closed_||!parent)return false;
-  Busy busy(busy_);spent_=true;parent_=parent;
+  Busy busy(busy_);spent_=true;parent_=parent;generation_=scope.budget.generation;
   std::string node;bool geometry=false;
   const bool layout=WithUi([&]{lv_obj_update_layout(parent);geometry=lv_obj_get_width(parent)>=320&&lv_obj_get_height(parent)>=240;});
   const bool ready=layout&&geometry&&NativeCurrent()&&device_.Node(node)&&node==scope.node&&NativeCurrent();
@@ -107,12 +107,28 @@ public:
    if(!ui_current||closing_){RequestClose();return Cleanup();}
   }
   if(ending_){RequestEnd();return EndTick();}
+  // Release a normal gesture before audio Poll would treat a lost Hold as a
+  // revoked in-flight read. A release during IO instead retains safe cleanup.
+  if(talking_ticket_&&!hold_.Current(generation_,talking_ticket_)){
+   const auto original=talking_ticket_;talking_ticket_=0;
+   if(!session_->Talking(original,false)){RequestClose();return Cleanup();}
+  }
   if(!session_->Tick()||closing_||ending_){RequestClose();return Cleanup();}
   if(!ui_opened_&&protocol_.Status()==voice_prep::State::Live){
    bool opened=false;if(!WithUi([&]{opened=ui_->Open(parent_);})||!opened||closing_||ending_){RequestClose();return Cleanup();}
    ui_opened_=true;
   }
-  if(prepare&&!session_->PrepareDirections()){RequestClose();return Cleanup();}
+  if(prepare){
+   if(!session_->PrepareDirections()){RequestClose();return Cleanup();}
+   if(!WithUi([&]{ui_->PttReady(codec_.SupportsNativePtt());})){RequestClose();return Cleanup();}
+  }
+  if(codec_.SupportsNativePtt()&&session_->DirectionsBound()){
+   const auto ticket=hold_.Ticket();
+   if(ticket&&hold_.Current(generation_,ticket)){
+    if(!talking_ticket_){if(session_->Talking(ticket,true))talking_ticket_=ticket;else hold_.CancelTicket(ticket);}
+    if(talking_ticket_&&hold_.Current(generation_,talking_ticket_))(void)session_->Capture();
+   }
+  }
   if(closing_||ending_||session_->CloseRequested()){RequestClose();return Cleanup();}
   return true;
  }
@@ -125,7 +141,7 @@ public:
  // Explicit bounded playback request, never automatic microphone/hold/capture.
  // Empty PCM is not a failed session; native failures retain original cleanup.
  bool Play(){
-  if(busy_||!DirectionsBound())return false;
+  if(busy_||!DirectionsBound()||hold_.Ticket())return false;
   Busy busy(busy_);const bool played=session_->Play();
   if(closing_||ending_||session_->CloseRequested())RequestClose();
   return played&&!closing_&&!ending_;

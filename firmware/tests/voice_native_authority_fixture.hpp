@@ -10,6 +10,7 @@ struct BooleanOnly:voice_codec_prep::Permit {
 };
 struct Matching: BooleanOnly {
  muse_review::LocalReceipt expected{};mutable std::function<void()> during;mutable unsigned matches=0;mutable int64_t seen=0;unsigned trigger=1;mutable std::function<void()> operation;bool current=true;
+ bool HoldSignalCurrent(uint64_t generation,uint64_t ticket)const override{return current&&expected.valid&&generation==expected.target.generation&&ticket==5;}
  bool Probe()const{++calls;auto f=std::move(operation);operation={};if(f)f();return current;}
  bool VoiceContext(uint64_t,int64_t)const override{return Probe();}
  bool Microphone(uint64_t,int64_t)const override{return Probe();}
