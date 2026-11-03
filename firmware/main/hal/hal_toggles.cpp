@@ -104,6 +104,10 @@ void reset_toggles_to_defaults()
 
 bool is_app_enabled(std::string_view app_name)
 {
+    if (app_name == "StackChan") {
+        return get_toggle_state(KEY_AI_AGENT);
+    }
+
     for (int i = 0; i < TOGGLE_COUNT; i++) {
         if (app_name == TOGGLE_LIST[i].display_name) {
             return get_toggle_state(TOGGLE_LIST[i].key);

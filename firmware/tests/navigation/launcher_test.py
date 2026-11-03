@@ -24,7 +24,10 @@ struct LvglLockGuard {};
 namespace mclog {template<class... T>void tagInfo(T...) {}}
 namespace hal_toggles {
 std::unordered_set<std::string> disabled_apps;
-bool is_app_enabled(std::string_view app_name) { return !disabled_apps.count(std::string(app_name)); }
+bool is_app_enabled(std::string_view app_name) {
+ if (app_name == "StackChan") app_name = "AI.AGENT";
+ return !disabled_apps.count(std::string(app_name));
+}
 }
 struct lv_obj_t{};lv_obj_t screen;lv_obj_t* lv_screen_active(){return &screen;}
 namespace mooncake {struct AppProps_t {struct Info{std::string name;}info;int appID;};}
@@ -39,7 +42,7 @@ struct AppLauncher {
  std::optional<launcher_categories::Group> _category;lv_obj_t* _launcher_screen=nullptr;
  int _pending_navigation=-1;unsigned _screensaver_timecount=0;bool _startup_checked=false;
  int opened=-1;
- std::vector<mooncake::AppProps_t> installed={{{"Mira"},1},{{"Stackchan"},2},{{"USB CONTROLS"},3},{{"Settings"},4},{{"AVATAR"},5},{{"GAMES"},6},{{"Hermes"},7},{{"Muse"},8},{{"Claude"},9},{{"Codex"},10},{{"MUSIC & AUDIO"},11},{{"TOOLS"},12},{{"NETWORK TOOLS"},13}};
+ std::vector<mooncake::AppProps_t> installed={{{"Mira"},1},{{"StackChan"},2},{{"USB CONTROLS"},3},{{"Settings"},4},{{"AVATAR"},5},{{"GAMES"},6},{{"Hermes"},7},{{"Muse"},8},{{"Claude"},9},{{"Codex"},10},{{"MUSIC & AUDIO"},11},{{"TOOLS"},12},{{"NETWORK TOOLS"},13}};
  auto getAppProps(){return installed;}auto getAppInfo(){return installed.front().info;}
  void openApp(int id){opened=id;}void screensaver_update(){}
  void onLauncherOpen();void onLauncherRunning();void onLauncherClose();void create_launcher_view(int preferredAppID=launcher_categories::Token(launcher_categories::Group::Companions));void handle_category_navigation();
@@ -50,7 +53,7 @@ int main(){AppLauncher l;for(int round=0;round<10;++round){
  l.onLauncherOpen();assert(!l._category);assert(l._view->shown.front().info.name=="Companions");assert(l._view->focus==launcher_categories::Token(launcher_categories::Group::Companions));
  l._view->next=launcher_categories::Token(launcher_categories::Group::Companions);l.onLauncherRunning();
  assert(l._category==launcher_categories::Group::Companions);assert(l._view->shown.size()==7);assert(l._view->focus==1);
- assert(l._view->shown[0].info.name=="Mira"&&l._view->shown[1].info.name=="Stackchan");
+ assert(l._view->shown[0].info.name=="Mira"&&l._view->shown[1].info.name=="StackChan");
  l.onLauncherRunning();assert(l._category==launcher_categories::Group::Companions);
  const int routes[]={1,2,7,8,9,10};l._view->next=routes[round%6];l.onLauncherRunning();assert(l.opened==routes[round%6]);
  l.onLauncherClose();assert(!l._view);l.onLauncherOpen();assert(!l._category);
@@ -73,6 +76,12 @@ int main(){AppLauncher l;for(int round=0;round<10;++round){
   for(const auto& item:l._view->shown)assert(item.appID!=1);
   l.opened=-1;
   l._view->next=1;l.onLauncherRunning();assert(l.opened!=1);
+  hal_toggles::disabled_apps.clear();
+  hal_toggles::disabled_apps.insert("AI.AGENT");
+  l.onLauncherOpen();l._view->next=launcher_categories::Token(launcher_categories::Group::Companions);l.onLauncherRunning();
+  for(const auto& item:l._view->shown)assert(item.appID!=2);
+  l.opened=-1;
+  l._view->next=2;l.onLauncherRunning();assert(l.opened!=2);
   hal_toggles::disabled_apps.clear();
   std::puts("10 real launcher cycles and 7 category Home/Back routes passed");}
 '''
