@@ -171,3 +171,11 @@ add_test(NAME voice_device_consent_test COMMAND ${Python3_EXECUTABLE}
 
 add_test(NAME voice_device_runtime_test COMMAND ${Python3_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/test_voice_device_runtime.py)
+
+add_test(NAME voice_ui_owner_handoff_test COMMAND ${Python3_EXECUTABLE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_voice_ui_owner_handoff.py)
+
+add_test(NAME voice_task_owner_test COMMAND ${Python3_EXECUTABLE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_voice_task_owner.py)
+add_test(NAME voice_task_reaper_test COMMAND ${Python3_EXECUTABLE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_voice_task_reaper.py)

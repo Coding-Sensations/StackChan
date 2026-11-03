@@ -9,3 +9,5 @@ inline int lv_indev_get_type(lv_indev_t*p){return p->type;}inline int lv_indev_g
 inline lv_obj_t* lv_indev_get_active_obj(){return active_input?active_input->active:nullptr;}
 inline lv_obj_t* lv_event_get_target_obj(lv_event_t*e){return e->target;}
 inline bool lv_obj_is_visible(lv_obj_t*p){return Visible(p);}
+
+inline uint32_t native_tick=0;inline uint32_t lv_tick_get(){return native_tick;}
