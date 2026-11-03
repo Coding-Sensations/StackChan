@@ -1,0 +1,11 @@
+# Inert Muse quiesce diagnostic and recovery classification
+
+Build on PR37 exact811e47c preserving human main ancestry. User authorizes source/testing/review/PRs without design pauses, not hardware/live activation.
+
+Add a bounded caller-owned single-use diagnostic collector optionally attached to the existing explicit terminal Core quiesce operation. Constructor, snapshot and formatting perform no IO. No Run/recover/reset/release/retry method, automatic registration, startup task, listener or device caller is added. Only Core privately publishes actual operation evidence, associated with its immutable original AudioLease value/ticket. Collector cannot be filled with caller-supplied receipt data, issue permission, return the opaque key or attest current hardware. Default and recording states expose no partial data. Publish once with acquire/release synchronization; reject collector reuse/reentry without IO. Caller retains it through the synchronous operation.
+
+Format bounded constant labels and numeric hardware evidence only; no token/network/VM/chat/user/device strings, pointers or opaque lease identity. Too-small buffers yield no partial report. Every report says snapshot-only, no authority and physical flush unqualified. Recovery classification is descriptive, never an executable plan or retirement receipt.
+
+Pinned IDF5.5.4 resets dma.curr_ptr/rw_pos only after disable accepts a RUNNING channel. READY preload advances the existing cursor; same-format reconfiguration does not provide a cursor reset contract. Enabling TX to make disable succeed changes hardware state; channel destruction/recreation requires rebuilding codec data interfaces and ISR custody. No legitimate ready-state recovery is established here. Keep single-attempt retention, prohibit replay, do not implement recovery by assumption or private driver-structure access.
+
+Preserve original quiesce effects/statuses and SourceStock/Mira/USB behavior; physical FlushOutput/capability remain false. Use existing pinned dependencies only, no downloads/artwork. No serial/device/reset/flash, microphone or live audio/session, real credentials/account/enrollment, security/permission change, GitHub merge or paid service. Native scheduling/measurement/fresh-state recovery/live provider/recovery-slot acceptance stay open.

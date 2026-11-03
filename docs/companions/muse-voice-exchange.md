@@ -176,3 +176,6 @@ Source fixtures run the actual SDK, Core adapter, consent, retained runtime and 
 
 
 Held-input cancellation is also checked after the original native-operation and post-operation target/custody/clock validation. `Permit::HoldSignalCurrent` is a separate default-deny, non-callout cancellation fence: no IO, clocks, locks, callbacks or permission issuance. The real device implementation reads only its original reviewed fields and atomic revocation/ticket state. Repeating the general native Hold callback after context validation would create another unchecked callout window, so that callback is invoked only once. A false starting Hold refuses the obsolete gesture without revoking an otherwise valid review; context/target failures remain sticky, and loss during an active read still stops the original owner. Expected-ticket cancellation cannot clear a successor press.
+
+
+The optional [checked amplifier retirement boundary](muse-amplifier-quiesce.md) adds exact-lease register/stop/DMA evidence with single-attempt retention. It is terminal, has no runtime caller, and does not satisfy or enable physical FlushOutput/PTT.

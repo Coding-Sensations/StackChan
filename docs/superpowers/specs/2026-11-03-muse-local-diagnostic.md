@@ -1,0 +1,11 @@
+# Opt-in local cold retirement harness
+
+Default-OFF STACKCHAN_MUSE_LOCAL_DIAGNOSTIC selects a separate diagnostic app_main. Normal source excludes the harness implementation. Diagnostic requires CoreS3, Muse+voice, RAM-only, no local portraits, remembered runtime, wireless/USB provisioning or configured network trust. No credentials/network/normal provider startup; diagnostic Settings is a no-storage implementation and no nvs_flash_init occurs. Dedicated HAL init only prepares display/touch and de-energized motor/laser IO. Board GetAudioCodec returns null in this build, SD mount skipped, camera remains companion-disabled.
+
+Use the registered native pointer press/release, original input identity, visible exact target/revision and10-second bound to Arm then Run once. Programmatic click/foreign/stale/cancelled/closed-view events confer nothing. An opaque one-use grant binds that local action. No timer/programmatic event serves as a native principal. Commit runs outside the LVGL lock, retaining a program-lifetime original owner. No child worker/session is created.
+
+After opt-in: acquire exact common Muse custody; use only the cold Core and board-owned I2C bus; initialize once; checked quiesce once; release hardware/logical custody only after complete checked evidence and the synchronous call's return. Every uncertain failure retains/revokes original custody, without retries, reset, destructor cleanup or successor action. Report fixed identity/credential-free data and immutable quiesce snapshot. No RX/ES7210/PCM/channel start, acoustic/physical flush/PTT claim. No automatic diagnostic at boot.
+
+After full tests and independent review, prepare one offline image using existing SDK/cache, separate build directory and one job. Preserve frozen installed/recovery artifacts. Record exact config/source/image size/hash/slot fit, SDK/dependency provenance, dormant-code/runtime limits and preservation. Never install/execute it. Actual screen, driver, heap, acoustic, recovery and live acceptance remain unqualified.
+
+Choice: diagnostic-only startup plus original registered-input UI, not a Settings item in normal production that could inherit saved networking/audio. No audible output stimulus in this cold retirement harness.

@@ -823,12 +823,14 @@ public:
 #endif
         InitializeFt6336();
         InitializeSpi();
+#if !defined(STACKCHAN_MUSE_LOCAL_DIAGNOSTIC) || !STACKCHAN_MUSE_LOCAL_DIAGNOSTIC
         uint8_t switch_p0=0,sd_control=0,sd_voltage=0;
         const auto switch_error=aw9523_->ReadSdSwitch(switch_p0);
         const auto control_error=pmic_->ReadSdControl(sd_control);
         const auto voltage_error=pmic_->ReadSdVoltage(sd_voltage);
         stock_tools::RecordSdElectrical(switch_error,switch_p0,control_error,sd_control,voltage_error,sd_voltage);
         if(!stock_tools::MountStackChanIrSd())ESP_LOGW(TAG,"IR SD mount unavailable; card not formatted");
+#endif
         InitializeIli9342Display();
 #ifndef STACKCHAN_COMPANION_BOOT
         InitializeCamera();
@@ -856,12 +858,16 @@ public:
 
     virtual AudioCodec* GetAudioCodec() override
     {
+#if defined(STACKCHAN_MUSE_LOCAL_DIAGNOSTIC) && STACKCHAN_MUSE_LOCAL_DIAGNOSTIC
+        return nullptr; // never instantiate the normal RX/ES7210 constructor
+#else
         static CoreS3AudioCodec audio_codec(i2c_bus_, AUDIO_INPUT_SAMPLE_RATE, AUDIO_OUTPUT_SAMPLE_RATE,
                                             AUDIO_I2S_GPIO_MCLK, AUDIO_I2S_GPIO_BCLK, AUDIO_I2S_GPIO_WS,
                                             AUDIO_I2S_GPIO_DOUT, AUDIO_I2S_GPIO_DIN, AUDIO_CODEC_AW88298_ADDR,
                                             AUDIO_CODEC_ES7210_ADDR, AUDIO_INPUT_REFERENCE);
         companion::muse::PublishStaticVoiceCore(audio_codec);
         return &audio_codec;
+#endif
     }
 
     virtual Display* GetDisplay() override

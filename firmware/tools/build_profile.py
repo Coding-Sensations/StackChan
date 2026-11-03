@@ -6,7 +6,7 @@ import json
 
 # Whole source closures, not merely launcher labels. Shared stock/Mira facilities
 # are deliberately not optional. The music group owns all local-audio consumers.
-MUSE_SOURCES = ['companion/muse_direct_local_ui.cc', 'companion/muse_direct_local_port.cc',
+MUSE_SOURCES = ['companion/muse_local_diagnostic.cc', 'companion/muse_cold_output.cc', 'companion/muse_direct_local_ui.cc', 'companion/muse_direct_local_port.cc',
                 'companion/muse_direct_api.cc', 'companion/muse_direct_ble.cc',
                 'companion/muse_direct_device.cc', 'companion/muse_direct_live.cc',
                 'companion/muse_direct_native_api.cc', 'companion/muse_direct_native_socket.cc',
@@ -14,7 +14,7 @@ MUSE_SOURCES = ['companion/muse_direct_local_ui.cc', 'companion/muse_direct_loca
                 'companion/muse_direct_credential_custody.cc', 'companion/muse_voice_task.cc', 'companion/muse_voice_core_access.cc',
                 'companion/muse_room_transport.cc']
 FEATURES = {
-    'hermes': [], 'muse': MUSE_SOURCES, 'muse_voice_protocol': ['companion/muse_voice_task.cc', 'companion/muse_voice_core_access.cc'], 'bounded_motion': [], 'claude': [], 'codex': [],
+    'hermes': [], 'muse': MUSE_SOURCES, 'muse_voice_protocol': ['companion/muse_local_diagnostic.cc', 'companion/muse_cold_output.cc', 'companion/muse_voice_task.cc', 'companion/muse_voice_core_access.cc'], 'bounded_motion': [], 'claude': [], 'codex': [],
     'music': ['apps/instruments/instrument_apps.cc',
               'apps/instruments/midi_host/host_client.cc',
               'apps/local_tools/local_tools_app.cc',
@@ -66,7 +66,7 @@ def resolve(profile, selection=None, main_root=None):
         implementations=sorted(p.relative_to(main_root).as_posix() for p in main_root.glob('companion/muse_*.cc'))
         if implementations:
             receipt=main_root/'build_profiles/muse-boundary.json'
-            required={'main/CMakeLists.txt', 'main/apps/stock_shell/provider_companion_app.cc',
+            required={'main/CMakeLists.txt', 'main/build_profiles/muse_diagnostic.cmake', 'main/apps/stock_shell/provider_companion_app.cc',
                       'main/companion/provider_room_view.hpp', 'components/muse_direct_protocol/CMakeLists.txt',
                       'main/feature_profiles/muse_disabled_boundary.cc'}
             try:
