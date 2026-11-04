@@ -37,6 +37,21 @@ public:
     static constexpr size_t MuseRawSampleLimit=2048;
     enum class MuseQuiesce {Unavailable,Failed,RegistersAndStoppedDma};
     enum class MuseQuiescePhase {None,Amplifier,InputStop,OutputStop,DigitalDiscard,FinalReadback,Complete};
+    // Non-terminal amplifier hardware reset. Success means registers read back
+    // muted after reset; it is not physical FIFO discard or audible silence.
+    enum class MuseReset {Unavailable,Failed,AmplifierResetMutedVerified};
+    enum class MuseResetPhase {None,Mute,InputStop,OutputStop,DigitalDiscard,Assert,Release,Requiesce,Complete};
+    // Reset-line access is injected, never owned. Implementations must read-modify-write
+    // only the AW88298 reset bit under their own bus lock and return 0 only when readback
+    // shows the requested level with every other output bit unchanged.
+    class MuseAmpResetPort {
+    public:
+        virtual ~MuseAmpResetPort()=default;
+        virtual int SetResetLine(bool released)=0;
+        virtual void DelayMs(uint32_t ms)=0;
+    };
+    // Timings are the values in the unused Aw9523::ResetAw88298; datasheet minimums are unverified.
+    static constexpr uint32_t MuseResetHoldMs=10,MuseResetSettleMs=50;
     enum class MuseDiscardPhase {None,BeforeInfo,Preload,AfterInfo};
     struct MuseDiscardEvidence {MuseDiscardPhase phase=MuseDiscardPhase::None;int status=0;size_t requested=0,loaded=0,total_loaded=0,total_dma_bytes=0;int direction=0,mode=0;bool enabled_before=false,enabled_after=false;};
     struct MuseQuiesceEvidence {
@@ -44,6 +59,13 @@ public:
         codec_quiet::Evidence amplifier;int stop_status=0;bool channel_disable_failure=false;
         MuseDiscard discard=MuseDiscard::Unavailable;MuseDiscardEvidence discard_detail;
         uint8_t input_stop_attempts=0,output_stop_attempts=0;bool binding_lost=false,input_never_created=false,output_never_started=false;
+    };
+    struct MuseResetEvidence {
+        MuseReset outcome=MuseReset::Unavailable;MuseResetPhase phase=MuseResetPhase::None;
+        codec_quiet::Evidence amplifier;int stop_status=0,port_status=0;bool channel_disable_failure=false;
+        MuseDiscard discard=MuseDiscard::Unavailable;MuseDiscardEvidence discard_detail;
+        uint8_t input_stop_attempts=0,output_stop_attempts=0;
+        bool assert_attempted=false,release_attempted=false,binding_or_authority_lost=false;
     };
 #endif
 private:
@@ -78,7 +100,8 @@ private:
     bool muse_bound_=false,muse_retired_=false,muse_discarding_=false;
     bool muse_stop_active_=false,muse_volume_active_=false;
     bool muse_quiescent_=false,muse_quiescing_=false,muse_quiesce_retained_=false;uint64_t muse_last_quiesce_ticket_=0;
-    uint64_t muse_last_discard_ticket_=0;
+    uint64_t muse_last_discard_ticket_=0,muse_last_reset_ticket_=0;
+    MuseAmpResetPort* muse_reset_port_=nullptr;
     uint64_t muse_drain_ticket_=0,muse_last_drain_ticket_=0;
     bool MuseMatch(const companion::AudioLease&)const;
     MuseDiscard MuseDiscardStopped(const companion::AudioLease&,uint64_t,MuseDiscardEvidence* detail=nullptr);
@@ -104,7 +127,7 @@ private:
         // on an unavailable/unknown close receipt.
         if(muse_bound_&&muse_retired_&&!companion::CommonAudioAuthority().Holds(direct_common_lease_)){
             direct_generation_=0;direct_common_lease_={};muse_bound_=muse_retired_=false;
-            muse_drain_ticket_=muse_last_drain_ticket_=muse_last_discard_ticket_=0;
+            muse_drain_ticket_=muse_last_drain_ticket_=muse_last_discard_ticket_=muse_last_reset_ticket_=0;
             muse_quiescent_=muse_quiescing_=muse_quiesce_retained_=false;muse_last_quiesce_ticket_=0;
         }
 #endif
@@ -150,6 +173,10 @@ public:
     bool MuseCodecAcquire(const companion::AudioLease&);
     // Terminal cleanup only: parks this binding. Register/DMA evidence is not physical flush.
     MuseQuiesceEvidence MuseQuiesceForRetirementChecked(const companion::AudioLease&,uint64_t,companion::muse::QuiesceDiagnostic* diagnostic=nullptr);
+    // Non-owning; set before acquire. Without a port the reset is Unavailable.
+    void SetMuseAmpResetPort(MuseAmpResetPort* port){std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);muse_reset_port_=port;}
+    // Ticket must exceed every prior reset and discard ticket. Failure retains custody and revokes the lease.
+    MuseResetEvidence MuseResetAmplifierChecked(const companion::AudioLease&,uint64_t ticket);
     bool MuseEnableInputChecked(const companion::AudioLease&,bool);
     bool MuseEnableOutputChecked(const companion::AudioLease&,bool);
     bool MuseInputDataChecked(const companion::AudioLease&,std::vector<int16_t>&);
