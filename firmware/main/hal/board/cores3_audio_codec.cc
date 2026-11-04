@@ -594,7 +594,7 @@ bool CoreS3AudioCodec::MuseCodecAcquire(const companion::AudioLease& lease){
        !lease.epoch()||!companion::CommonAudioAuthority().Current(lease))return false;
     direct_common_lease_=lease;direct_generation_=lease.generation();muse_bound_=true;muse_retired_=false;
     muse_quiescent_=muse_quiescing_=muse_quiesce_retained_=false;muse_last_quiesce_ticket_=0;
-    muse_drain_ticket_=muse_last_drain_ticket_=muse_last_discard_ticket_=0;
+    muse_drain_ticket_=muse_last_drain_ticket_=muse_last_discard_ticket_=muse_last_reset_ticket_=0;
     portENTER_CRITICAL(&direct_mux_);direct_draining_=false;portEXIT_CRITICAL(&direct_mux_);return true;
 }
 bool CoreS3AudioCodec::MuseEnableInputChecked(const companion::AudioLease& lease,bool enable){
@@ -709,6 +709,44 @@ CoreS3AudioCodec::MuseQuiesceEvidence CoreS3AudioCodec::MuseQuiesceForRetirement
     result.phase=MuseQuiescePhase::FinalReadback;result.amplifier=codec_quiet::Verify(original,current,result.amplifier);
     if(!result.amplifier.Complete()||!current())return result;
     muse_quiesce_retained_=false;result.phase=MuseQuiescePhase::Complete;result.outcome=MuseQuiesce::RegistersAndStoppedDma;return result;
+}
+CoreS3AudioCodec::MuseResetEvidence CoreS3AudioCodec::MuseResetAmplifierChecked(const companion::AudioLease& lease,uint64_t ticket){
+    std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);MuseResetEvidence result;const auto captured=lease;
+    auto*const port=muse_reset_port_;
+    // Admission: every rejection happens before IO and leaves ticket and ownership untouched.
+    if(ColdOutputOnlyInstance()||!port||!MuseMatch(captured)||muse_retired_||!companion::CommonAudioAuthority().Current(captured))return result;
+    if(direct_call_||muse_stop_active_||muse_volume_active_||muse_quiescing_||muse_quiescent_||muse_quiesce_retained_||muse_discarding_)return result;
+    if(!ticket||ticket<=muse_last_reset_ticket_||ticket<=muse_last_discard_ticket_||!codec_quiet::Available(out_codec_if_))return result;
+    muse_last_reset_ticket_=ticket; // single use, including failures; the discard step below consumes the same value itself
+    // quiescent+quiescing fence every Muse entry point (and nested callbacks) until success.
+    muse_quiescent_=muse_quiesce_retained_=true;
+    struct Busy{bool&flag;explicit Busy(bool&f):flag(f){flag=true;}~Busy(){flag=false;}} busy(muse_quiescing_);
+    const auto* original=out_codec_if_;
+    const auto current=[&]{const bool match=MuseMatch(captured)&&!muse_retired_&&muse_quiescent_&&out_codec_if_==original&&muse_reset_port_==port&&companion::CommonAudioAuthority().Current(captured);if(!match)result.binding_or_authority_lost=true;return match;};
+    result.outcome=MuseReset::Failed;
+    // A failure past this point never unfences: the amplifier may be mid-reset, so custody is retained and the owner must stay muted.
+    const auto fail=[&]{companion::RevokeAudio(captured);return result;};
+    result.phase=MuseResetPhase::Mute;
+    result.amplifier=codec_quiet::Quiesce(original,current);if(!result.amplifier.Complete())return fail();
+    result.phase=MuseResetPhase::InputStop;
+    if(!current()||!DirectStopChecked(direct_generation_,false,&result.stop_status,&result.channel_disable_failure,&result.input_stop_attempts,&captured))return fail();
+    result.phase=MuseResetPhase::OutputStop;
+    if(!current()||!DirectStopChecked(direct_generation_,true,&result.stop_status,&result.channel_disable_failure,&result.output_stop_attempts,&captured))return fail();
+    result.phase=MuseResetPhase::DigitalDiscard;
+    result.discard=MuseDiscardStopped(captured,ticket,&result.discard_detail);
+    if(result.discard!=MuseDiscard::StoppedDmaCleared||!current())return fail();
+    result.phase=MuseResetPhase::Assert;result.assert_attempted=true;
+    result.port_status=port->SetResetLine(false);if(result.port_status!=0||!current())return fail();
+    port->DelayMs(MuseResetHoldMs);
+    if(!current())return fail(); // authority may be lost during the hold: leave the line asserted
+    result.phase=MuseResetPhase::Release;result.release_attempted=true;
+    result.port_status=port->SetResetLine(true);if(result.port_status!=0||!current())return fail();
+    port->DelayMs(MuseResetSettleMs);
+    // Reset returned amplifier registers to defaults; mute again and verify. The codec device is closed
+    // by the stops above, so the next checked output enable reopens and reprograms it.
+    result.phase=MuseResetPhase::Requiesce;
+    result.amplifier=codec_quiet::Quiesce(original,current);if(!result.amplifier.Complete()||!current())return fail();
+    muse_quiescent_=muse_quiesce_retained_=false;result.phase=MuseResetPhase::Complete;result.outcome=MuseReset::AmplifierResetMutedVerified;return result;
 }
 bool CoreS3AudioCodec::MuseStopInputChecked(const companion::AudioLease& lease){
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);return MuseMatch(lease)&&!muse_retired_&&!muse_quiescing_&&!(muse_cold_&&muse_stop_active_)&&DirectStopChecked(direct_generation_,false);
