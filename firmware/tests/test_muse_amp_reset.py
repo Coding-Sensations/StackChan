@@ -2,7 +2,7 @@ from pathlib import Path
 import subprocess,tempfile
 from muse_codec_fixture import production_fixture
 r=Path(__file__).resolve().parent
-CASES=[0,1,2,3,4,5,6,*range(10,24),30,31,32,33]
+CASES=[0,1,2,3,4,5,6,*range(10,24),30,31,32,33,34]
 with tempfile.TemporaryDirectory(prefix='muse-amp-reset-') as temporary:
  t=Path(temporary);cpp=t/'test.cpp';binary=t/'test'
  cpp.write_text(production_fixture('muse_amp_reset_test.cpp'))

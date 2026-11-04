@@ -14,7 +14,8 @@ struct Port:Codec::MuseAmpResetPort{
   if(!released){++assert_calls;in_off_at_assert=input_disables;out_off_at_assert=output_disables;preload_at_assert=preload_calls;mute_at_assert=mute_reg;writes_at_assert=amp_writes;if(assert_status)return assert_status;latch&=uint8_t(~0x04);return 0;}
   ++release_calls;amp_calls_at_release=amp_calls;if(release_status)return release_status;latch|=0x04;return 0;
  }
- void DelayMs(uint32_t ms)override{delays.push_back(ms);}
+ std::function<void(uint32_t)> delay_hook;
+ void DelayMs(uint32_t ms)override{delays.push_back(ms);if(delay_hook)delay_hook(ms);}
 };
 static void Dma(){dma_info={};std::fill(dma_bytes.begin(),dma_bytes.end(),0x6d);dma_cursor=largest_preload=0;dma_capacity=5760;info_calls=preload_calls=info_error=error_preload=partial_preload=0;info_hook={};preload_hook={};}
 static int Io(){return opens+reads+writes+closes+disables+info_calls+preload_calls+amp_calls;}
@@ -128,6 +129,13 @@ int main(int argc,char**argv){
   port.hook=[&](bool released){if(!released){assert(ReleaseAudio(lease,true));assert(AcquireAudio(AudioOwner::Stock,AudioPurpose::StockRuntime,99,next));}};
   auto r=core.MuseResetAmplifierChecked(lease,1);
   assert(r.outcome==Reset_::Failed&&r.binding_or_authority_lost&&!port.release_calls&&CommonAudioAuthority().Current(next));
+ }
+ else if(test==34){ // authority revoked during the hold delay: the line must stay asserted
+  core.SetMuseAmpResetPort(&port);assert(core.MuseCodecAcquire(lease));
+  port.delay_hook=[&](uint32_t){RevokeAudio(lease);};
+  auto r=core.MuseResetAmplifierChecked(lease,1);
+  assert(r.outcome==Reset_::Failed&&r.binding_or_authority_lost&&r.phase==RPhase::Assert&&!r.release_attempted&&!port.release_calls&&port.latch==0b10100011);
+  port.delay_hook={};Retained(core,port,lease,1);
  }
  else assert(false);
  std::puts("PASS amplifier reset: admission, ordering, fencing, failure custody, repeat cycles; no physical flush or audible-silence claim");

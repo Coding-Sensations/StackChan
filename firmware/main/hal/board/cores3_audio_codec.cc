@@ -738,6 +738,7 @@ CoreS3AudioCodec::MuseResetEvidence CoreS3AudioCodec::MuseResetAmplifierChecked(
     result.phase=MuseResetPhase::Assert;result.assert_attempted=true;
     result.port_status=port->SetResetLine(false);if(result.port_status!=0||!current())return fail();
     port->DelayMs(MuseResetHoldMs);
+    if(!current())return fail(); // authority may be lost during the hold: leave the line asserted
     result.phase=MuseResetPhase::Release;result.release_attempted=true;
     result.port_status=port->SetResetLine(true);if(result.port_status!=0||!current())return fail();
     port->DelayMs(MuseResetSettleMs);
