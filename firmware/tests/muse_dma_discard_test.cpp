@@ -25,6 +25,20 @@ int main(){
   // No fresh disable means preload cursor remains full; never invent success.
   assert(core.MuseDiscardOutputChecked(lease,2)==Discard::Failed&&preload_calls==24);Cleanup(core,lease);
  }
+ // Recursive IO locking does not exclude same-thread driver callbacks.
+ // Discard must not nest inside a volume transaction or permit one to nest.
+ {
+  ResetDma();auto core=Make();auto lease=Take();Stopped(core,lease);
+  volume_hook=[&]{assert(core.MuseDiscardOutputChecked(lease,1)==Discard::Unavailable);};
+  core.SetOutputVolume(20);
+  assert(volume_sets==1&&!info_calls&&!preload_calls);
+  // Rejected admission did not consume the ticket or revoke the owner.
+  assert(CommonAudioAuthority().Current(lease));
+  preload_hook=[&]{core.SetOutputVolume(30);assert(volume_sets==1);};
+  assert(core.MuseDiscardOutputChecked(lease,1)==Discard::StoppedDmaCleared);
+  core.SetOutputVolume(40);assert(volume_sets==2);
+  Cleanup(core,lease);
+ }
  for(unsigned fault=0;fault<10;++fault){
   ResetDma();auto core=Make();auto lease=Take();Stopped(core,lease);
   if(fault==0)dma_info.total_dma_buf_size=0;
