@@ -1,13 +1,18 @@
-# CoreS3 quiet amplifier reset: design (not implemented)
+# CoreS3 quiet amplifier reset: design (port implemented, unverified on hardware)
 
 Base: PR #43 head `73cf3b34dfb087023286dfba38b87c0fea596558`
 (`local/cores3-audio-research`). Status: codec operation and host tests
 implemented (`MuseResetAmplifierChecked`, `firmware/tests/muse_amp_reset_test.cpp`).
-Not wired: no `MuseAmpResetPort` implementation exists on the board, so the
-operation returns Unavailable in firmware. `FlushOutput` stays false and no
-hardware claim changes. Implementation notes: reuses `muse_quiescing_` as the
-busy fence; a reset immediately after a completed discard fails closed until a
-fresh stop resets the DMA preload cursor.
+Board port: `Aw88298ResetPort` (`firmware/main/hal/board/stackchan.cc`) is injected once
+in `GetAudioCodec()` behind the Muse build flags. It drives AW9523 P0_2 through a checked
+read-modify-write (`aw9523::SetP0Bit`, host-tested in `aw9523_p0_test`): verifies the pin is
+configured as an output, reads the latch, writes only that bit, reads back, and fails on any
+bus error or mismatch. It never uses `WriteReg` (which aborts on bus error), and the unsafe,
+uncalled `ResetAw88298` was removed. Firmware is NOT compiled in this tree's environment (no
+ESP-IDF), so the board code is source-reviewed and host-tested only; not hardware-accepted.
+`FlushOutput` stays false and no hardware claim changes. Implementation notes: reuses
+`muse_quiescing_` as the busy fence; a reset immediately after a completed discard fails
+closed until a fresh stop resets the DMA preload cursor.
 
 ## What the source already shows
 
@@ -124,6 +129,11 @@ during diagnosis.
 - AW9523B and AW88298 datasheet reset minimum widths and power-up times.
 - `I2cDevice::WriteReg`/`TryReadRegs` error semantics and whether the I2C bus
   is shared with touch/PMIC traffic that would need the same lock.
+- Resolved in source: `I2cDevice::WriteReg` is `ESP_ERROR_CHECK` (aborts); `TryReadRegs` returns `esp_err_t`.
+  The port uses `TryReadRegs` plus raw `i2c_master_transmit`. Still open: whether touch/PMIC/camera
+  traffic needs one shared lock around multi-transfer sequences (single transfers are serialized by the bus).
+- Datasheet search found no AW88298 reset timing; AW9523B notes are driver comments, not datasheet
+  minimums. 10 ms hold / 50 ms settle remain UNVERIFIED existing values.
 - Whether the AW88298 driver (`esp_codec_dev` 1.5.4) can be reopened cleanly
   after a hardware reset, or the codec interface must be rebuilt.
 - Whether the amplifier is audibly silent while reset is asserted

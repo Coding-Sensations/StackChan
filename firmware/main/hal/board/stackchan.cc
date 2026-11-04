@@ -4,6 +4,7 @@
 #include <apps/stock_services/policy.h>
 #include <companion/settings_policy.hpp>
 #include "cores3_audio_codec.h"
+#include "aw9523_p0.hpp"
 #include "display/lcd_display.h"
 #include "stackchan_display.h"
 #include "application.h"
@@ -241,13 +242,21 @@ public:
 
     esp_err_t ReadSdSwitch(uint8_t& value){return TryReadRegs(0x00,&value,1,100);}
 
-    void ResetAw88298()
+    // Checked RMW of one P0 output bit (logic and tests: aw9523_p0.hpp). Never uses WriteReg, which aborts
+    // on bus error. p0_mutex_ covers the two-step RMW; individual transfers are serialized by the I2C bus.
+    int SetP0Bit(uint8_t bit, bool level)
     {
-        ESP_LOGI(TAG, "Reset AW88298");
-        WriteReg(0x02, 0b00000011);
-        vTaskDelay(pdMS_TO_TICKS(10));
-        WriteReg(0x02, 0b00000111);
-        vTaskDelay(pdMS_TO_TICKS(50));
+        struct Io {
+            Aw9523& d;
+            int Read(uint8_t reg, uint8_t& v) { return d.TryReadRegs(reg, &v, 1, 100); }
+            int Write(uint8_t reg, uint8_t v)
+            {
+                const uint8_t tx[2] = {reg, v};
+                return i2c_master_transmit(d.i2c_device_, tx, sizeof(tx), 100);
+            }
+        } io{*this};
+        std::lock_guard<std::mutex> lock(p0_mutex_);
+        return aw9523::SetP0Bit(io, bit, level);
     }
 
     void ResetIli9342()
@@ -258,7 +267,24 @@ public:
         WriteReg(0x03, 0b10000011);
         vTaskDelay(pdMS_TO_TICKS(10));
     }
+
+private:
+    std::mutex p0_mutex_;
 };
+
+#if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+// Injected into CoreS3AudioCodec. AW88298 reset is AW9523 P0_2 (low = reset). Timing values are the
+// codec's constants; AW88298 datasheet minimums are still unverified. DelayMs must not re-enter the codec.
+class Aw88298ResetPort : public CoreS3AudioCodec::MuseAmpResetPort {
+public:
+    explicit Aw88298ResetPort(Aw9523* expander) : expander_(expander) {}
+    int SetResetLine(bool released) override { return expander_->SetP0Bit(2, released); }
+    void DelayMs(uint32_t ms) override { vTaskDelay(pdMS_TO_TICKS(ms)); }
+
+private:
+    Aw9523* expander_;
+};
+#endif
 
 class Ft6336 : public I2cDevice {
 public:
@@ -865,6 +891,12 @@ public:
                                             AUDIO_I2S_GPIO_MCLK, AUDIO_I2S_GPIO_BCLK, AUDIO_I2S_GPIO_WS,
                                             AUDIO_I2S_GPIO_DOUT, AUDIO_I2S_GPIO_DIN, AUDIO_CODEC_AW88298_ADDR,
                                             AUDIO_CODEC_ES7210_ADDR, AUDIO_INPUT_REFERENCE);
+        // Reset line is injected, never owned by the codec; the port outlives it (both static).
+#if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
+        static Aw88298ResetPort amp_reset_port(aw9523_);
+        static const bool amp_reset_port_injected = (audio_codec.SetMuseAmpResetPort(&amp_reset_port), true);
+        (void)amp_reset_port_injected;  // once only: later getter calls must not touch the codec lock
+#endif
         companion::muse::PublishStaticVoiceCore(audio_codec);
         return &audio_codec;
 #endif
