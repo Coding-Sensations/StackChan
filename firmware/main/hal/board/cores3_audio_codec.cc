@@ -223,7 +223,9 @@ void CoreS3AudioCodec::SetOutputVolume(int volume) {
     if(ColdOutputOnlyInstance())return;
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);RefreshHardwareBinding();
 #if STACKCHAN_BUILD_MUSE && STACKCHAN_BUILD_MUSE_VOICE_PROTOCOL
-    if(muse_bound_&&muse_quiescent_)return;
+    // The mutex is recursive: driver callbacks must not change amplifier
+    // state while a stopped-DMA transaction is still on the stack.
+    if(muse_bound_&&(muse_quiescent_||muse_discarding_))return;
     struct Active{bool&flag;bool previous;explicit Active(bool&f):flag(f),previous(f){flag=true;}~Active(){flag=previous;}} active(muse_volume_active_);
 #endif
     ESP_ERROR_CHECK(esp_codec_dev_set_out_vol(output_dev_, volume));
@@ -637,7 +639,9 @@ CoreS3AudioCodec::MuseDrain CoreS3AudioCodec::MuseDrainState(const companion::Au
 }
 CoreS3AudioCodec::MuseDiscard CoreS3AudioCodec::MuseDiscardOutputChecked(const companion::AudioLease& lease,uint64_t ticket){
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);
-    return (muse_quiescing_||muse_quiescent_)?MuseDiscard::Unavailable:MuseDiscardStopped(lease,ticket);
+    // Exclude callback reentry before consuming a discard ticket. Terminal
+    // quiesce uses the private helper after establishing its own exclusion.
+    return (muse_volume_active_||muse_quiescing_||muse_quiescent_)?MuseDiscard::Unavailable:MuseDiscardStopped(lease,ticket);
 }
 CoreS3AudioCodec::MuseDiscard CoreS3AudioCodec::MuseDiscardStopped(const companion::AudioLease& lease,uint64_t ticket,MuseDiscardEvidence* detail){
     std::lock_guard<std::recursive_mutex> lock(direct_io_mutex_);const auto original=lease;
