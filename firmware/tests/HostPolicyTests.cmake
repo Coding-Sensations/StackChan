@@ -15,6 +15,7 @@ endfunction()
 
 stackchan_host_test(advanced_config_test advanced_config_test.cpp)
 stackchan_host_test(firmware_install_policy_test firmware_install_policy_test.cpp)
+stackchan_host_test(aw9523_p0_test aw9523_p0_test.cpp)
 stackchan_host_test(dma_sent_fence_test codec-drain/dma_sent_fence_test.cpp)
 stackchan_host_test(camera_authority_test desk-adapters/camera_authority_test.cpp)
 stackchan_host_test(camera_wire_lifecycle_test desk-adapters/camera_wire_lifecycle_test.cpp)

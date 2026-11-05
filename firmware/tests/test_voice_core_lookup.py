@@ -6,13 +6,13 @@ while depth:depth+=(source[end]=='{')-(source[end]=='}');end+=1
 body=source[start:end].replace('virtual ','').replace(' override','')
 cpp=r'''#include <cassert>
 #include <companion/muse_voice_core_access.h>
-static unsigned constructors=0;
-struct AudioCodec{};class CoreS3AudioCodec:public AudioCodec{public:template<class...Args>CoreS3AudioCodec(Args...){++constructors;}};
+static unsigned constructors=0,port_injections=0;struct Aw9523;struct Aw88298ResetPort{explicit Aw88298ResetPort(Aw9523*){}};
+struct AudioCodec{};class CoreS3AudioCodec:public AudioCodec{public:template<class...Args>CoreS3AudioCodec(Args...){++constructors;}template<class P>void SetMuseAmpResetPort(P*){++port_injections;}};
 constexpr int AUDIO_INPUT_SAMPLE_RATE=24000,AUDIO_OUTPUT_SAMPLE_RATE=24000,AUDIO_I2S_GPIO_MCLK=0,AUDIO_I2S_GPIO_BCLK=0,AUDIO_I2S_GPIO_WS=0,AUDIO_I2S_GPIO_DOUT=0,AUDIO_I2S_GPIO_DIN=0,AUDIO_CODEC_AW88298_ADDR=0,AUDIO_CODEC_ES7210_ADDR=0,AUDIO_INPUT_REFERENCE=0;
-struct Board{void* i2c_bus_=nullptr;
+struct Board{void* i2c_bus_=nullptr;Aw9523* aw9523_=nullptr;
 '''+body+r'''
 };
-int main(){assert(!companion::muse::ExistingVoiceCore()&&!constructors);Board b;auto* original=b.GetAudioCodec();assert(constructors==1&&companion::muse::ExistingVoiceCore()==original);assert(b.GetAudioCodec()==original&&constructors==1);CoreS3AudioCodec other;assert(!companion::muse::PublishStaticVoiceCore(other)&&companion::muse::ExistingVoiceCore()==original);}
+int main(){assert(!companion::muse::ExistingVoiceCore()&&!constructors);Board b;auto* original=b.GetAudioCodec();assert(constructors==1&&port_injections==1&&companion::muse::ExistingVoiceCore()==original);assert(b.GetAudioCodec()==original&&constructors==1&&port_injections==1);CoreS3AudioCodec other;assert(!companion::muse::PublishStaticVoiceCore(other)&&companion::muse::ExistingVoiceCore()==original);}
 '''
 with tempfile.TemporaryDirectory(prefix='voice-core-lookup-') as temp:
  t=Path(temp);(t/'test.cpp').write_text(cpp)
