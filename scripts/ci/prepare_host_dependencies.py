@@ -23,7 +23,7 @@ backend = module(FIRMWARE / 'main/apps/stock_agent/generate_backend.py')
 teardown = json.loads((FIRMWARE / 'main/apps/runtime_lifecycle/teardown_pins.json').read_text())
 # Exact revisions from firmware/repos.json and IDF component registry provenance.
 SOURCES = [
-    ('78/xiaozhi-esp32', 'e77dedb1309153bb63fed285772962c920c97dd4', 'xiaozhi-esp32',
+    ('78/xiaozhi-esp32', '49b4380b3faa0ceadd28a3e78aaf0f311c46c57e', 'xiaozhi-esp32',
      {'main/' + name: backend.PINNED[name] for name in (
          'device_state_machine.cc', 'protocols/websocket_protocol.cc',
          'protocols/mqtt_protocol.cc', 'application.cc', 'ota.cc', 'boards/common/wifi_board.cc')}),
@@ -54,7 +54,7 @@ def main():
                 # Only these patched units are consumed by these fixtures. Other
                 # firmware patch units are deliberately not fetched or built.
                 subprocess.run(['git', 'apply', '--include=main/application.cc', '--include=main/ota.cc',
-                                str(FIRMWARE / 'patches/xiaozhi-e77dedb.patch')],
+                                str(FIRMWARE / 'patches/xiaozhi-esp32.patch')],
                                cwd=stage / destination, check=True)
             for relative, expected in files.items():
                 source = stage / destination / relative

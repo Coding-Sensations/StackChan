@@ -25,8 +25,10 @@ struct Mqtt{Group* timer;Group* group;bool stopped=false;
  void Disconnect(){assert(timer->alive&&group->alive);stopped=mqtt_stopped=true;}
  ~Mqtt(){assert(stopped);}
 };
+constexpr int PSA_KEY_ID_NULL=0;
+void psa_destroy_key(int){}
 struct WebsocketProtocol{Group* event_group_handle_;std::unique_ptr<Socket> websocket_;~WebsocketProtocol();};
-struct MqttProtocol{Group* event_group_handle_;Group* reconnect_timer_;std::shared_ptr<bool> alive_=std::make_shared<bool>(true);std::unique_ptr<Mqtt> mqtt_;std::unique_ptr<Socket> udp_;~MqttProtocol();};
+struct MqttProtocol{Group* event_group_handle_;Group* reconnect_timer_;std::shared_ptr<bool> alive_=std::make_shared<bool>(true);std::unique_ptr<Mqtt> mqtt_;std::unique_ptr<Socket> udp_;std::mutex crypto_mutex_;int aes_key_id_=PSA_KEY_ID_NULL;~MqttProtocol();};
 '''
  for name,cls in [('websocket','WebsocketProtocol'),('mqtt','MqttProtocol')]:source+=body((tmp/f'stock_{name}_protocol.cc').read_text(),f'{cls}::~{cls}()')+'\n'
  dns=(tmp/'stock_dns_server.cc').read_text()

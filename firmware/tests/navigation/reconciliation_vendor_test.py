@@ -43,8 +43,10 @@ struct Display {void SetStatus(const char*){}};
 struct Board {Display display;PowerSaveLevel power=PowerSaveLevel::LOW_POWER;
  static Board& GetInstance(){static Board b;return b;}Display* GetDisplay(){return &display;}
  void SetPowerSaveLevel(PowerSaveLevel value){power=value;}};
+struct CheckError{std::string ToString()const{return "error";}const char* Message()const{return "error";}};
+struct CheckResult{bool ok=true;CheckError err{};explicit operator bool()const{return ok;}operator int()const{return ok?ESP_OK:-1;}const CheckError& error()const{return err;}};
 struct Ota {bool update=false,binding=false,challenge=false,cancel=false;int activations=0,valid=0;
- int CheckVersion(){if(cancel)runtime_lifecycle::home=true;return ESP_OK;}std::string GetCheckVersionUrl(){return "test";}
+ CheckResult CheckVersion(){if(cancel)runtime_lifecycle::home=true;return {true,{}};}std::string GetCheckVersionUrl(){return "test";}
  bool HasNewVersion(){return update;}std::string GetFirmwareUrl(){return "test";}
  std::string GetFirmwareVersion(){return "test";}void MarkCurrentVersionValid(){++valid;}
  bool RequiresAppBinding(){return binding;}bool HasActivationChallenge(){return challenge;}
@@ -54,7 +56,7 @@ struct Protocol {bool opened=false,succeeds=true;int attempts=0;
 struct AudioService {bool wake=false;void EnableWakeWordDetection(bool value){wake=value;}};
 struct Application {Ota* ota_;Protocol* protocol_;int state=kDeviceStateConnecting,listening=0;
  AudioService audio_service_;bool play_popup_on_listening_=false;int GetDefaultListeningMode(){return 0;}
- int GetDeviceState(){return state;}void Alert(const char*,const char*,const char*,const char*){}
+ int GetDeviceState(){return state;}bool SetDeviceState(int next){state=next;return true;}void Alert(const char*,const char*,const char*,const char*){}
  void SetListeningMode(int){++listening;}void CheckNewVersion();void ContinueOpenAudioChannel(ListeningMode);void ContinueWakeWordInvoke(const std::string&);};
 '''
 cases = r'''
@@ -73,13 +75,13 @@ int main(){
 #endif
  app.state=kDeviceStateIdle;app.ContinueOpenAudioChannel(0);assert(!protocol.attempts&&!app.listening);
  app.state=kDeviceStateConnecting;app.ContinueOpenAudioChannel(0);assert(protocol.attempts==1&&app.listening==1);
- protocol.succeeds=false;app.ContinueOpenAudioChannel(0);
- assert(protocol.attempts==2&&app.listening==1&&Board::GetInstance().power==PowerSaveLevel::LOW_POWER);
- protocol.opened=true;app.ContinueOpenAudioChannel(0);
+ protocol.succeeds=false;app.state=kDeviceStateConnecting;app.ContinueOpenAudioChannel(0);
+ assert(protocol.attempts==2&&app.listening==1&&Board::GetInstance().power==PowerSaveLevel::LOW_POWER&&app.state==kDeviceStateIdle);
+ protocol.opened=true;app.state=kDeviceStateConnecting;app.ContinueOpenAudioChannel(0);
  assert(protocol.attempts==2&&app.listening==2&&Board::GetInstance().power==PowerSaveLevel::PERFORMANCE);
- protocol.opened=false;app.ContinueWakeWordInvoke("test");
- assert(protocol.attempts==3&&app.listening==2&&app.audio_service_.wake&&Board::GetInstance().power==PowerSaveLevel::LOW_POWER);
- protocol.succeeds=true;app.ContinueWakeWordInvoke("test");
+ protocol.opened=false;protocol.succeeds=false;app.state=kDeviceStateConnecting;app.ContinueWakeWordInvoke("test");
+ assert(protocol.attempts==3&&app.listening==2&&Board::GetInstance().power==PowerSaveLevel::LOW_POWER&&app.state==kDeviceStateIdle);
+ protocol.succeeds=true;app.state=kDeviceStateConnecting;app.ContinueWakeWordInvoke("test");
  assert(protocol.attempts==4&&app.listening==3&&app.play_popup_on_listening_&&Board::GetInstance().power==PowerSaveLevel::PERFORMANCE);
  app.state=kDeviceStateIdle;app.ContinueWakeWordInvoke("test");assert(protocol.attempts==4);
 }

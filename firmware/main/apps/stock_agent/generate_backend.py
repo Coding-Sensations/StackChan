@@ -6,12 +6,12 @@ from pathlib import Path
 
 PINNED = {
     'dns_server.cc': '8e6f03dc39f7386a149e227c756a53e3f715454b1d024c7ce38b75cdf00045d1',
-    'protocols/mqtt_protocol.cc': 'f555738d12d6ef8e7b43dbe2cb45d6135de3d393b4f6374c99388457d34d6555',
-    'protocols/websocket_protocol.cc': 'f8454cdd600ce024d24207405125f6e5730084a2805be413ccf69fbdcfd55a97',
-    'device_state_machine.cc': 'c1167dc89493d275de3a9b267eb67bff171404613192e5daca6dc3eb65443ba5',
-    'application.cc': '7c9e9bb1b720c405ea52e4991edc555c0fb90887e68524d30aa69dd34bd92f0f',
-    'ota.cc': 'd5340cb20b3b4651656c619a138b6f8b0907b86b3a6541f3376f22bb5dd459d8',
-    'boards/common/wifi_board.cc': 'df4afcfdd13bae8ebdf0eb6b8d31f7a334aefb01b660f95bf7d4ababecbf789c',
+    'protocols/mqtt_protocol.cc': 'c35e6cae95b1eeea06a388d281619f50202980223540b5d0d5a8adaf67079229',
+    'protocols/websocket_protocol.cc': '513437a48a531d53afb02ea3beaefdab3a70f390c3f37894ca124a3e49dd668b',
+    'device_state_machine.cc': 'a1369ab276bad09d04e330c23b61b7210b01e3279fa2b65ca24d73922919e5e5',
+    'application.cc': '449d5d387531c88fbf224f652a60d6a277fe72881501d47944582325cf276b82',
+    'ota.cc': 'f9f0f19fefdf1aa0b0a9d49dbc09034882d6959fb06771b0480d251bd2433701',
+    'boards/common/wifi_board.cc': '72e271e4065b92d069394556c4cb8a95879ac81329f11a6ba2670388f820341c',
     'wifi_manager.cc': '3346377f3595774d8a8d07b259f4860a9aabaf323e39fba6c1cac598e44d5d20',
     'wifi_configuration_ap.cc': '05e2d1fe46ce57de433078f287accfc06df771c326a23b9eac894d6657a465c3',
     'ssid_manager.cc': 'e3441e0fc84012b539bd08b680cdfbfdaca5eb55af55423400268d0a18d5daca',
@@ -41,18 +41,27 @@ def generate(xiaozhi, wifi, output):
         '    if(new_state==kDeviceStateStarting && runtime_lifecycle::ConsumeStateReset())current_state_=kDeviceStateUnknown;\n    DeviceState old_state = current_state_.load();')
     (output / 'stock_device_state_machine.cc').write_text(state)
     source=pinned(xiaozhi/'protocols/websocket_protocol.cc','protocols/websocket_protocol.cc')
-    source=replace_once(source,'WebsocketProtocol::~WebsocketProtocol() {','WebsocketProtocol::~WebsocketProtocol() {\n    websocket_.reset(); // Join while callback state and event group are alive.')
+    source=replace_once(source,'WebsocketProtocol::~WebsocketProtocol() { vEventGroupDelete(event_group_handle_); }','''WebsocketProtocol::~WebsocketProtocol() {
+    websocket_.reset(); // Join while callback state and event group are alive.
+    vEventGroupDelete(event_group_handle_);
+}''')
     (output/'stock_websocket_protocol.cc').write_text(source)
     source=pinned(xiaozhi/'protocols/mqtt_protocol.cc','protocols/mqtt_protocol.cc')
     source=replace_once(source,'    if (reconnect_timer_ != nullptr) {',
         '    if(mqtt_)mqtt_->Disconnect();\n    mqtt_.reset();\n    udp_.reset();\n    if (reconnect_timer_ != nullptr) {')
-    source=replace_once(source,'    udp_.reset();\n    mqtt_.reset();','    // Transport callbacks have joined before timer and event-group destruction.')
+    source=replace_once(source,'''    std::shared_ptr<Udp> udp;
+    {
+        std::lock_guard<std::mutex> lock(channel_mutex_);
+        udp = std::move(udp_);
+    }
+    udp.reset();
+    mqtt_.reset();''','    // Transport callbacks have joined before timer and event-group destruction.')
     (output/'stock_mqtt_protocol.cc').write_text(source)
     source = pinned(xiaozhi / 'application.cc', 'application.cc')
     source = '#include <apps/stock_services/firmware_install_policy.h>\n#include <apps/stock_services/firmware_install_ui.h>\n#include <hal/hal.h>\n' + source
     source = replace_once(source, '''        if (ota_->HasNewVersion()) {
             if (UpgradeFirmware(ota_->GetFirmwareUrl(), ota_->GetFirmwareVersion())) {
-                return; // This line will never be reached after reboot
+                return;  // This line will never be reached after reboot
             }
             // If upgrade failed, continue to normal operation
         }''', '''        if (ota_->HasNewVersion()) {
@@ -74,8 +83,8 @@ def generate(xiaozhi, wifi, output):
         '        ESP_LOGI(TAG, "Setup HTTP, User-Agent: %s, Serial-Number: %s", user_agent.c_str(), serial_number_.c_str());',
         '        // Serial identity is sent only after explicit Start and never logged.')
     source = replace_once(source,
-        '        ESP_LOGE(TAG, "Failed to activate, code: %d, body: %s", status_code, http->ReadAll().c_str());',
-        '        ESP_LOGE(TAG, "Failed to activate, code: %d", status_code);')
+        '        ESP_LOGE(TAG, "Failed to activate, code: %d, body: %s", *status_code, http->ReadAll().c_str());',
+        '        ESP_LOGE(TAG, "Failed to activate, code: %d", *status_code);')
     source = '#include <apps/runtime_lifecycle/session.h>\n#include <apps/stock_services/firmware_install_policy.h>\n#include <apps/stock_services/firmware_install_ui.h>\n' + source
     source = replace_once(source,
         'bool Ota::Upgrade(const std::string& firmware_url, std::function<void(int progress, size_t speed)> callback) {',
@@ -86,15 +95,30 @@ def generate(xiaozhi, wifi, output):
     if (runtime_lifecycle::HomeRequested() || !stock_services::FirmwareInstallAllowed()) return false;''')
     source = replace_once(source, '    if (content_length == 0) {',
         '    if (content_length < sizeof(esp_image_header_t) + sizeof(esp_image_segment_header_t) + sizeof(esp_app_desc_t) || content_length > update_partition->size) {')
-    source = replace_once(source, '    auto http = network->CreateHttp(0);\n    if (!http->Open("GET", firmware_url)) {',
-        '    auto http = network->CreateHttp(0);\n    http->SetTimeout(4000);\n    if (!http->Open("GET", firmware_url)) {')
-    source = replace_once(source, '            heap_caps_free(buffer);\n            return false;\n        }\n\n        // Calculate speed',
-        '            if (image_header_checked) esp_ota_abort(update_handle);\n            heap_caps_free(buffer);\n            return false;\n        }\n        if (total_read + static_cast<size_t>(ret) > content_length || (ret == 0 && total_read != content_length)) {\n            if (image_header_checked) esp_ota_abort(update_handle);\n            heap_caps_free(buffer);\n            return false;\n        }\n\n        // Calculate speed')
+    source = replace_once(source, '    auto http = network->CreateHttp(0);\n    if (auto opened = http->Open("GET", firmware_url); !opened) {',
+        '    auto http = network->CreateHttp(0);\n    http->SetTimeout(4000);\n    if (auto opened = http->Open("GET", firmware_url); !opened) {')
+    source = replace_once(source, '''        if (!ret) {
+            ESP_LOGE(TAG, "Failed to read HTTP data: %s", ret.error().ToString().c_str());
+            heap_caps_free(buffer);
+            return false;
+        }
+        int n = *ret;
+''', '''        if (!ret) {
+            ESP_LOGE(TAG, "Failed to read HTTP data: %s", ret.error().ToString().c_str());
+            if (image_header_checked) esp_ota_abort(update_handle);
+            heap_caps_free(buffer);
+            return false;
+        }
+        int n = *ret;
+        if (total_read + static_cast<size_t>(n) > content_length || (n == 0 && total_read != content_length)) {
+            abort_download();
+            return false;
+        }
+''')
     source = replace_once(source, '    auto last_calc_time = esp_timer_get_time();\n    while (true) {',
         '    auto last_calc_time = esp_timer_get_time();\n    const auto install_deadline = last_calc_time + 180000000;\n    while (true) {\n        if (esp_timer_get_time() > install_deadline) {\n            if (image_header_checked) esp_ota_abort(update_handle);\n            heap_caps_free(buffer);\n            return false;\n        }')
     source = replace_once(source, '            image_header.append(buffer, buffer_offset);',
         '            image_header.assign(buffer, buffer_offset);')
-    source = source.replace('    auto http = network->CreateHttp(0);', '    auto http = network->CreateHttp(0);\n    http->SetTimeout(4000);')
     source = replace_once(source, '    size_t buffer_offset = 0;  // Current data size in buffer', '''    auto cancelled = [] { return runtime_lifecycle::HomeRequested() || !stock_services::FirmwareInstallAllowed(); };
     auto abort_download = [&] {
         if (image_header_checked) esp_ota_abort(update_handle);
@@ -104,8 +128,8 @@ def generate(xiaozhi, wifi, output):
     size_t buffer_offset = 0;  // Current data size in buffer''')
     source = replace_once(source, '        if (esp_timer_get_time() > install_deadline) {\n            if (image_header_checked) esp_ota_abort(update_handle);\n            heap_caps_free(buffer);\n            return false;\n        }',
         '        if (cancelled() || esp_timer_get_time() > install_deadline) { abort_download(); return false; }')
-    source = replace_once(source, '        if (ret < 0) {',
-        '        if (cancelled()) { abort_download(); return false; }\n        if (ret < 0) {')
+    source = replace_once(source, '        auto ret = http->Read(buffer + buffer_offset, PAGE_SIZE - buffer_offset);',
+        '        if (cancelled()) { abort_download(); return false; }\n        auto ret = http->Read(buffer + buffer_offset, PAGE_SIZE - buffer_offset);')
     source = replace_once(source, '        if (!image_header_checked) {',
         '        if (cancelled()) { abort_download(); return false; }\n        if (!image_header_checked) {')
     source = replace_once(source, '        if (buffer_offset == PAGE_SIZE || (is_last_chunk && buffer_offset > 0)) {',

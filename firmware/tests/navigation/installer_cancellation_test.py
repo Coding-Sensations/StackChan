@@ -57,10 +57,17 @@ bool FirmwareInstallAllowed(){return permission&&!home;}
 bool IsFirmwareImageUrl(const std::string&){return true;}
 bool PrepareOriginalFirmwareWifi(){if(mode==CancelPrepare)home=true;return true;}
 }
+struct HttpError{std::string ToString()const{return "error";}};
+template <typename T> struct Result {
+ bool ok=true; T value{}; HttpError err{};
+ explicit operator bool() const { return ok; }
+ T operator*() const { return value; }
+ const HttpError& error() const { return err; }
+};
 struct Http {
- int remaining=8192;void SetTimeout(int){}bool Open(const char*,const std::string&){++opens;return true;}
- int GetStatusCode(){return 200;}size_t GetBodyLength(){return mode==Oversize?70000:8192;}
- int Read(char* buffer,size_t capacity){++reads;if(mode==CancelRead)home=true;int amount=remaining<static_cast<int>(capacity)?remaining:capacity;memset(buffer,0,amount);remaining-=amount;return amount;}
+ int remaining=8192;void SetTimeout(int){}Result<bool> Open(const char*,const std::string&){++opens;return {true,true,{}};}
+ Result<int> GetStatusCode(){return {true,200,{}};}size_t GetBodyLength(){return mode==Oversize?70000:8192;}
+ Result<int> Read(char* buffer,size_t capacity){++reads;if(mode==CancelRead)home=true;int amount=remaining<static_cast<int>(capacity)?remaining:capacity;memset(buffer,0,amount);remaining-=amount;return {true,amount,{}};}
  void Close(){if(mode==CancelClose)home=true;}
 };
 struct Network{std::unique_ptr<Http>CreateHttp(int){return std::make_unique<Http>();}};
