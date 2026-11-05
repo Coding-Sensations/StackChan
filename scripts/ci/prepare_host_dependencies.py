@@ -28,8 +28,11 @@ SOURCES = [
          'device_state_machine.cc', 'protocols/websocket_protocol.cc',
          'protocols/mqtt_protocol.cc', 'application.cc', 'ota.cc', 'boards/common/wifi_board.cc')}),
     ('78/esp-wifi-connect', 'a7b34167750f0188486b489240268d0f7c306caf', 'managed_components/78__esp-wifi-connect',
-     {**{name: backend.PINNED[name] for name in (
-         'dns_server.cc', 'wifi_manager.cc', 'wifi_configuration_ap.cc', 'ssid_manager.cc')},
+     {
+      'dns_server.cc': '8e6f03dc39f7386a149e227c756a53e3f715454b1d024c7ce38b75cdf00045d1',
+      'wifi_manager.cc': '3346377f3595774d8a8d07b259f4860a9aabaf323e39fba6c1cac598e44d5d20',
+      'wifi_configuration_ap.cc': '05e2d1fe46ce57de433078f287accfc06df771c326a23b9eac894d6657a465c3',
+      'ssid_manager.cc': 'e3441e0fc84012b539bd08b680cdfbfdaca5eb55af55423400268d0a18d5daca',
       'include/ssid_manager.h': 'f45a0687170a30ba5592a9b3fde7c8f5da768dac7de185b256b2be56359d9e3f'}),
     ('78/esp-ml307', '39638f2a4e514e12ef5d8afc7241db5b9b394086', 'managed_components/78__esp-ml307',
      {('src/web_socket.cc' if name == 'web_socket.cc' else 'src/esp/' + name): digest

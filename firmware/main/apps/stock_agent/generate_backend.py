@@ -12,21 +12,38 @@ PINNED = {
     'application.cc': '449d5d387531c88fbf224f652a60d6a277fe72881501d47944582325cf276b82',
     'ota.cc': 'f9f0f19fefdf1aa0b0a9d49dbc09034882d6959fb06771b0480d251bd2433701',
     'boards/common/wifi_board.cc': '72e271e4065b92d069394556c4cb8a95879ac81329f11a6ba2670388f820341c',
-    'wifi_manager.cc': '3346377f3595774d8a8d07b259f4860a9aabaf323e39fba6c1cac598e44d5d20',
-    'wifi_configuration_ap.cc': '05e2d1fe46ce57de433078f287accfc06df771c326a23b9eac894d6657a465c3',
-    'ssid_manager.cc': 'e3441e0fc84012b539bd08b680cdfbfdaca5eb55af55423400268d0a18d5daca',
+    'wifi_manager.cc': (
+        '3346377f3595774d8a8d07b259f4860a9aabaf323e39fba6c1cac598e44d5d20',
+        '9910bc77682f4adf2c885a5a21ac6d75b8958fffac5ac4b72e058fa4393fe8f5',
+    ),
+    'wifi_configuration_ap.cc': (
+        '05e2d1fe46ce57de433078f287accfc06df771c326a23b9eac894d6657a465c3',
+        '3060e367880513d27e538b400aa08b2f2c2c087926ab8f3c921571a2e75d1e34',
+    ),
+    'ssid_manager.cc': (
+        'e3441e0fc84012b539bd08b680cdfbfdaca5eb55af55423400268d0a18d5daca',
+        '6fb63f421af53d846580ce232ca3feabd6c0aecfb84cbd35ff7b4844b1418253',
+    ),
 }
 
 def pinned(path, name):
     data = path.read_bytes()
-    if hashlib.sha256(data).hexdigest() != PINNED[name]:
+    digest = hashlib.sha256(data).hexdigest()
+    allowed = PINNED[name] if isinstance(PINNED[name], tuple) else (PINNED[name],)
+    if digest not in allowed:
         raise SystemExit(f'Unreviewed vendor source: {name}; re-review adapter before updating pin')
-    return data.decode()
+    return data.decode(), digest
 
 def replace_once(source, before, after):
     if source.count(before) != 1:
         raise SystemExit('Vendor adapter anchor did not match exactly once')
     return source.replace(before, after, 1)
+
+def replace_one_of(source, options, after):
+    matches = [option for option in options if option in source]
+    if len(matches) != 1:
+        raise SystemExit('Vendor adapter anchor did not match exactly once')
+    return source.replace(matches[0], after, 1)
 
 def replace_region(source, begin, end, replacement):
     start = source.index(begin)
@@ -35,18 +52,18 @@ def replace_region(source, begin, end, replacement):
 
 def generate(xiaozhi, wifi, output):
     output.mkdir(parents=True, exist_ok=True)
-    state = pinned(xiaozhi / 'device_state_machine.cc', 'device_state_machine.cc')
+    state, _ = pinned(xiaozhi / 'device_state_machine.cc', 'device_state_machine.cc')
     state = '#include <apps/runtime_lifecycle/session.h>\n' + state
     state = replace_once(state, '    DeviceState old_state = current_state_.load();',
         '    if(new_state==kDeviceStateStarting && runtime_lifecycle::ConsumeStateReset())current_state_=kDeviceStateUnknown;\n    DeviceState old_state = current_state_.load();')
     (output / 'stock_device_state_machine.cc').write_text(state)
-    source=pinned(xiaozhi/'protocols/websocket_protocol.cc','protocols/websocket_protocol.cc')
+    source, _ = pinned(xiaozhi/'protocols/websocket_protocol.cc','protocols/websocket_protocol.cc')
     source=replace_once(source,'WebsocketProtocol::~WebsocketProtocol() { vEventGroupDelete(event_group_handle_); }','''WebsocketProtocol::~WebsocketProtocol() {
     websocket_.reset(); // Join while callback state and event group are alive.
     vEventGroupDelete(event_group_handle_);
 }''')
     (output/'stock_websocket_protocol.cc').write_text(source)
-    source=pinned(xiaozhi/'protocols/mqtt_protocol.cc','protocols/mqtt_protocol.cc')
+    source, _ = pinned(xiaozhi/'protocols/mqtt_protocol.cc','protocols/mqtt_protocol.cc')
     source=replace_once(source,'    if (reconnect_timer_ != nullptr) {',
         '    if(mqtt_)mqtt_->Disconnect();\n    mqtt_.reset();\n    udp_.reset();\n    if (reconnect_timer_ != nullptr) {')
     source=replace_once(source,'''    std::shared_ptr<Udp> udp;
@@ -57,7 +74,7 @@ def generate(xiaozhi, wifi, output):
     udp.reset();
     mqtt_.reset();''','    // Transport callbacks have joined before timer and event-group destruction.')
     (output/'stock_mqtt_protocol.cc').write_text(source)
-    source = pinned(xiaozhi / 'application.cc', 'application.cc')
+    source, _ = pinned(xiaozhi / 'application.cc', 'application.cc')
     source = '#include <apps/stock_services/firmware_install_policy.h>\n#include <apps/stock_services/firmware_install_ui.h>\n#include <hal/hal.h>\n' + source
     source = replace_once(source, '''        if (ota_->HasNewVersion()) {
             if (UpgradeFirmware(ota_->GetFirmwareUrl(), ota_->GetFirmwareVersion())) {
@@ -78,7 +95,7 @@ def generate(xiaozhi, wifi, output):
     source = replace_once(source, '    esp_restart();', '    GetHAL().reboot();')
     (output / 'stock_application.cc').write_text(source)
 
-    source = pinned(xiaozhi / 'ota.cc', 'ota.cc')
+    source, _ = pinned(xiaozhi / 'ota.cc', 'ota.cc')
     source = replace_once(source,
         '        ESP_LOGI(TAG, "Setup HTTP, User-Agent: %s, Serial-Number: %s", user_agent.c_str(), serial_number_.c_str());',
         '        // Serial identity is sent only after explicit Start and never logged.')
@@ -146,7 +163,7 @@ def generate(xiaozhi, wifi, output):
     if (!staged) {''')
     (output / 'stock_ota.cc').write_text(source)
 
-    source = pinned(xiaozhi / 'boards/common/wifi_board.cc', 'boards/common/wifi_board.cc')
+    source, _ = pinned(xiaozhi / 'boards/common/wifi_board.cc', 'boards/common/wifi_board.cc')
     source = replace_once(source, '    wifi_manager.Initialize(config);', '''    if (!wifi_manager.Initialize(config)) {
         Application::GetInstance().Alert("Stock AI", "Wi-Fi failed. Stop / Home to return.", "triangle_exclamation");
         return;
@@ -161,7 +178,7 @@ def generate(xiaozhi, wifi, output):
         '            case WifiEvent::ConfigModeExit:\n                network_setup::EndStockWifiProvisioningSession();')
     (output / 'stock_wifi_board.cc').write_text(source)
 
-    source=pinned(wifi/'dns_server.cc','dns_server.cc')
+    source, _ = pinned(wifi/'dns_server.cc','dns_server.cc')
     source='''#include <mutex>
 #include <map>
 // These receipts outlive DNS objects; publication releases this mutex before
@@ -188,7 +205,7 @@ static bool home_dns_joined(void* owner){std::lock_guard<std::mutex> lock(home_d
     source=replace_once(source,'        // Simple DNS response:', '        if(len<12)continue; // Header and appended answer must fit.\n        // Simple DNS response:')
     (output/'stock_dns_server.cc').write_text(source)
 
-    source = pinned(wifi / 'wifi_manager.cc', 'wifi_manager.cc')
+    source, _ = pinned(wifi / 'wifi_manager.cc', 'wifi_manager.cc')
     source = '#include <companion/station_authority.hpp>\n' + source
     for signature in ['bool WifiManager::Initialize(const WifiManagerConfig& config) {','void WifiManager::StartStation() {','void WifiManager::StartConfigAp() {']:
         result='false' if signature.startswith('bool') else ''
@@ -204,7 +221,7 @@ static bool home_dns_joined(void* owner){std::lock_guard<std::mutex> lock(home_d
     if (ret != ESP_OK && ret != ESP_ERR_WIFI_INIT_STATE) {''')
     (output / 'stock_wifi_manager.cc').write_text(source)
 
-    source = pinned(wifi / 'wifi_configuration_ap.cc', 'wifi_configuration_ap.cc')
+    source, wifi_config_digest = pinned(wifi / 'wifi_configuration_ap.cc', 'wifi_configuration_ap.cc')
     source = '#include <apps/network_setup/wifi_credentials.hpp>\n#include <apps/network_setup/advanced_config.hpp>\n#include <apps/network_setup/persistence_gate.h>\n' + source
     source = replace_once(source,
         '        .uri = "/submit",\n        .method = HTTP_POST,\n        .handler = [](httpd_req_t *req) -> esp_err_t {',
@@ -212,14 +229,20 @@ static bool home_dns_joined(void* owner){std::lock_guard<std::mutex> lock(home_d
     source = replace_once(source, '            this_->Save(ssid_str, password_str);',
         '            this_->Save(ssid_str, password_str);\n            if (!network_setup::CredentialPersistenceAllowed() || !network_setup::CredentialSaveSucceeded()) { cJSON_Delete(json); httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Wi-Fi connected but could not be saved"); return ESP_OK; }')
 
-    source = replace_once(source, '    strlcpy((char *)wifi_config.sta.ssid, ssid.c_str(), 32);\n    strlcpy((char *)wifi_config.sta.password, password.c_str(), 64);',
-        '    if (!network_setup::Valid({ssid, password})) return false;\n    memcpy(wifi_config.sta.ssid, ssid.data(), ssid.size());\n    memcpy(wifi_config.sta.password, password.data(), password.size());')
+    if wifi_config_digest == PINNED['wifi_configuration_ap.cc'][0]:
+        source = replace_once(source, '    strlcpy((char *)wifi_config.sta.ssid, ssid.c_str(), 32);\n    strlcpy((char *)wifi_config.sta.password, password.c_str(), 64);',
+            '    if (!network_setup::Valid({ssid, password})) return false;\n    memcpy(wifi_config.sta.ssid, ssid.data(), ssid.size());\n    memcpy(wifi_config.sta.password, password.data(), password.size());')
+    else:
+        source = replace_once(source, '        size_t ssid_len = ssid.size();',
+            '    if (!network_setup::Valid({ssid, password})) return false;\n\n        size_t ssid_len = ssid.size();')
     source = replace_once(source, '            if (!this_->ConnectToWifi(ssid_str, password_str)) {',
         '            if (!network_setup::Valid({ssid_str, password_str}) || !this_->ConnectToWifi(ssid_str, password_str)) {')
     source = replace_once(source, '            std::string password_str = "";',
         '            if (!cJSON_IsString(password_item) || !password_item->valuestring || strlen(password_item->valuestring) > 64) { cJSON_Delete(json); httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid password"); return ESP_OK; }\n            std::string password_str = "";')
-    source = replace_once(source, '    ESP_LOGI(TAG, "Save SSID %s %d", ssid.c_str(), ssid.length());',
-        '    // No credential or network-name logging.')
+    source = replace_one_of(source, [
+        '    ESP_LOGI(TAG, "Save SSID %s %d", ssid.c_str(), ssid.length());',
+        '    ESP_LOGI(TAG, "Save SSID %s channel %u", ssid.c_str(), channel);',
+    ], '    // No credential or network-name logging.')
 
     begin = '    // Register the /advanced/submit URI'
     end = '    ESP_ERROR_CHECK(httpd_register_uri_handler(server_, &advanced_submit));'
@@ -329,7 +352,7 @@ static bool home_dns_joined(void* owner){std::lock_guard<std::mutex> lock(home_d
     source = ''.join(clean)
     (output / 'stock_wifi_configuration_ap.cc').write_text(source)
 
-    source = pinned(wifi / 'ssid_manager.cc', 'ssid_manager.cc')
+    source, ssid_manager_digest = pinned(wifi / 'ssid_manager.cc', 'ssid_manager.cc')
     source = '#include <apps/network_setup/persistence_gate.h>\n#include <apps/network_setup/wifi_credentials.hpp>\n' + source
     source = replace_once(source, '    ssid_list_.clear();\n\n    // Load ssid', """    ssid_list_.clear();
     nvs_handle_t saved = 0;
@@ -349,10 +372,34 @@ static bool home_dns_joined(void* owner){std::lock_guard<std::mutex> lock(home_d
     }
     // Legacy keys remain untouched and serve as a fallback after a damaged blob.
     // Load ssid""")
-    source = replace_once(source, '        ssid_list_.push_back({ssid, password});',
-        '        if (network_setup::Valid({ssid, password})) ssid_list_.push_back({ssid, password});')
+    add_ssid_signature = 'void SsidManager::AddSsid(const std::string& ssid, const std::string& password) {'
+    add_ssid_replacement = """void SsidManager::AddSsid(const std::string& ssid, const std::string& password) {
+    if (!network_setup::Valid({ssid, password})) { network_setup::NotifyCredentialsSaved(false); return; }
+    for (auto iter = ssid_list_.begin(); iter != ssid_list_.end(); ++iter) {
+        if (iter->ssid == ssid) { ssid_list_.erase(iter); break; }
+    }
+    if (ssid_list_.size() >= MAX_WIFI_SSID_COUNT) ssid_list_.pop_back();
+    ssid_list_.insert(ssid_list_.begin(), {ssid, password});
+    SaveToNvs();
+}"""
+    if ssid_manager_digest == PINNED['ssid_manager.cc'][1]:
+        source = replace_once(source, '        ssid_list_.push_back({ssid, password, channel});',
+            '        if (network_setup::Valid({ssid, password})) ssid_list_.push_back({ssid, password, channel});')
+        add_ssid_signature = 'void SsidManager::AddSsid(const std::string& ssid, const std::string& password, uint8_t channel) {'
+        add_ssid_replacement = """void SsidManager::AddSsid(const std::string& ssid, const std::string& password, uint8_t channel) {
+    if (!network_setup::Valid({ssid, password})) { network_setup::NotifyCredentialsSaved(false); return; }
+    for (auto iter = ssid_list_.begin(); iter != ssid_list_.end(); ++iter) {
+        if (iter->ssid == ssid) { ssid_list_.erase(iter); break; }
+    }
+    if (ssid_list_.size() >= MAX_WIFI_SSID_COUNT) ssid_list_.pop_back();
+    ssid_list_.insert(ssid_list_.begin(), {ssid, password, channel});
+    SaveToNvs();
+}"""
+    else:
+        source = replace_once(source, '        ssid_list_.push_back({ssid, password});',
+            '        if (network_setup::Valid({ssid, password})) ssid_list_.push_back({ssid, password});')
     source = replace_region(source, 'void SsidManager::SaveToNvs() {',
-        'void SsidManager::AddSsid(const std::string& ssid, const std::string& password) {',
+        add_ssid_signature,
         """void SsidManager::SaveToNvs() {
     if (!network_setup::CredentialPersistenceAllowed()) return;
     std::vector<network_setup::Credential> credentials;
@@ -371,16 +418,8 @@ static bool home_dns_joined(void* owner){std::lock_guard<std::mutex> lock(home_d
     // One atomic NVS blob update; legacy Wi-Fi, calibration and account keys stay intact.
     network_setup::NotifyCredentialsSaved(result == ESP_OK);
 }""")
-    source = replace_region(source, 'void SsidManager::AddSsid(const std::string& ssid, const std::string& password) {',
-        'void SsidManager::RemoveSsid(int index) {', """void SsidManager::AddSsid(const std::string& ssid, const std::string& password) {
-    if (!network_setup::Valid({ssid, password})) { network_setup::NotifyCredentialsSaved(false); return; }
-    for (auto iter = ssid_list_.begin(); iter != ssid_list_.end(); ++iter) {
-        if (iter->ssid == ssid) { ssid_list_.erase(iter); break; }
-    }
-    if (ssid_list_.size() >= MAX_WIFI_SSID_COUNT) ssid_list_.pop_back();
-    ssid_list_.insert(ssid_list_.begin(), {ssid, password});
-    SaveToNvs();
-}""")
+    source = replace_region(source, add_ssid_signature,
+        'void SsidManager::RemoveSsid(int index) {', add_ssid_replacement)
     (output / 'stock_ssid_manager.cc').write_text(source)
 
 if __name__ == '__main__':
