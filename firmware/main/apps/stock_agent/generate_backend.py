@@ -12,9 +12,9 @@ PINNED = {
     'application.cc': '449d5d387531c88fbf224f652a60d6a277fe72881501d47944582325cf276b82',
     'ota.cc': 'f9f0f19fefdf1aa0b0a9d49dbc09034882d6959fb06771b0480d251bd2433701',
     'boards/common/wifi_board.cc': '72e271e4065b92d069394556c4cb8a95879ac81329f11a6ba2670388f820341c',
-    'wifi_manager.cc': '9910bc77682f4adf2c885a5a21ac6d75b8958fffac5ac4b72e058fa4393fe8f5',
-    'wifi_configuration_ap.cc': '3060e367880513d27e538b400aa08b2f2c2c087926ab8f3c921571a2e75d1e34',
-    'ssid_manager.cc': '6fb63f421af53d846580ce232ca3feabd6c0aecfb84cbd35ff7b4844b1418253',
+    'wifi_manager.cc': '3346377f3595774d8a8d07b259f4860a9aabaf323e39fba6c1cac598e44d5d20',
+    'wifi_configuration_ap.cc': '05e2d1fe46ce57de433078f287accfc06df771c326a23b9eac894d6657a465c3',
+    'ssid_manager.cc': 'e3441e0fc84012b539bd08b680cdfbfdaca5eb55af55423400268d0a18d5daca',
 }
 
 def pinned(path, name):
@@ -212,13 +212,13 @@ static bool home_dns_joined(void* owner){std::lock_guard<std::mutex> lock(home_d
     source = replace_once(source, '            this_->Save(ssid_str, password_str);',
         '            this_->Save(ssid_str, password_str);\n            if (!network_setup::CredentialPersistenceAllowed() || !network_setup::CredentialSaveSucceeded()) { cJSON_Delete(json); httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Wi-Fi connected but could not be saved"); return ESP_OK; }')
 
-    source = replace_once(source, '        size_t ssid_len = ssid.size();',
-        '    if (!network_setup::Valid({ssid, password})) return false;\n\n        size_t ssid_len = ssid.size();')
+    source = replace_once(source, '    strlcpy((char *)wifi_config.sta.ssid, ssid.c_str(), 32);\n    strlcpy((char *)wifi_config.sta.password, password.c_str(), 64);',
+        '    if (!network_setup::Valid({ssid, password})) return false;\n    memcpy(wifi_config.sta.ssid, ssid.data(), ssid.size());\n    memcpy(wifi_config.sta.password, password.data(), password.size());')
     source = replace_once(source, '            if (!this_->ConnectToWifi(ssid_str, password_str)) {',
         '            if (!network_setup::Valid({ssid_str, password_str}) || !this_->ConnectToWifi(ssid_str, password_str)) {')
     source = replace_once(source, '            std::string password_str = "";',
         '            if (!cJSON_IsString(password_item) || !password_item->valuestring || strlen(password_item->valuestring) > 64) { cJSON_Delete(json); httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid password"); return ESP_OK; }\n            std::string password_str = "";')
-    source = replace_once(source, '    ESP_LOGI(TAG, "Save SSID %s channel %u", ssid.c_str(), channel);',
+    source = replace_once(source, '    ESP_LOGI(TAG, "Save SSID %s %d", ssid.c_str(), ssid.length());',
         '    // No credential or network-name logging.')
 
     begin = '    // Register the /advanced/submit URI'
@@ -331,7 +331,7 @@ static bool home_dns_joined(void* owner){std::lock_guard<std::mutex> lock(home_d
 
     source = pinned(wifi / 'ssid_manager.cc', 'ssid_manager.cc')
     source = '#include <apps/network_setup/persistence_gate.h>\n#include <apps/network_setup/wifi_credentials.hpp>\n' + source
-    source = replace_once(source, '    ssid_list_.clear();\n\n    // Load ssid / password / channel from NVS namespace "wifi"', """    ssid_list_.clear();
+    source = replace_once(source, '    ssid_list_.clear();\n\n    // Load ssid', """    ssid_list_.clear();
     nvs_handle_t saved = 0;
     if (nvs_open(NVS_NAMESPACE, NVS_READONLY, &saved) == ESP_OK) {
         size_t size = 0;
@@ -340,7 +340,7 @@ static bool home_dns_joined(void* owner){std::lock_guard<std::mutex> lock(home_d
             std::vector<network_setup::Credential> credentials;
             if (nvs_get_blob(saved, "config_v1", blob.data(), &size) == ESP_OK &&
                 network_setup::Decode(blob.data(), size, credentials)) {
-                for (const auto& item : credentials) ssid_list_.push_back({item.ssid, item.password, 0});
+                for (const auto& item : credentials) ssid_list_.push_back({item.ssid, item.password});
                 nvs_close(saved);
                 return;
             }
@@ -348,12 +348,11 @@ static bool home_dns_joined(void* owner){std::lock_guard<std::mutex> lock(home_d
         nvs_close(saved);
     }
     // Legacy keys remain untouched and serve as a fallback after a damaged blob.
-    // Load ssid / password / channel from NVS namespace "wifi"""
-)
-    source = replace_once(source, '        ssid_list_.push_back({ssid, password, channel});',
-        '        if (network_setup::Valid({ssid, password})) ssid_list_.push_back({ssid, password, channel});')
+    // Load ssid""")
+    source = replace_once(source, '        ssid_list_.push_back({ssid, password});',
+        '        if (network_setup::Valid({ssid, password})) ssid_list_.push_back({ssid, password});')
     source = replace_region(source, 'void SsidManager::SaveToNvs() {',
-        'void SsidManager::AddSsid(const std::string& ssid, const std::string& password, uint8_t channel) {',
+        'void SsidManager::AddSsid(const std::string& ssid, const std::string& password) {',
         """void SsidManager::SaveToNvs() {
     if (!network_setup::CredentialPersistenceAllowed()) return;
     std::vector<network_setup::Credential> credentials;
@@ -372,14 +371,14 @@ static bool home_dns_joined(void* owner){std::lock_guard<std::mutex> lock(home_d
     // One atomic NVS blob update; legacy Wi-Fi, calibration and account keys stay intact.
     network_setup::NotifyCredentialsSaved(result == ESP_OK);
 }""")
-    source = replace_region(source, 'void SsidManager::AddSsid(const std::string& ssid, const std::string& password, uint8_t channel) {',
-        'void SsidManager::RemoveSsid(int index) {', """void SsidManager::AddSsid(const std::string& ssid, const std::string& password, uint8_t channel) {
+    source = replace_region(source, 'void SsidManager::AddSsid(const std::string& ssid, const std::string& password) {',
+        'void SsidManager::RemoveSsid(int index) {', """void SsidManager::AddSsid(const std::string& ssid, const std::string& password) {
     if (!network_setup::Valid({ssid, password})) { network_setup::NotifyCredentialsSaved(false); return; }
     for (auto iter = ssid_list_.begin(); iter != ssid_list_.end(); ++iter) {
         if (iter->ssid == ssid) { ssid_list_.erase(iter); break; }
     }
     if (ssid_list_.size() >= MAX_WIFI_SSID_COUNT) ssid_list_.pop_back();
-    ssid_list_.insert(ssid_list_.begin(), {ssid, password, channel});
+    ssid_list_.insert(ssid_list_.begin(), {ssid, password});
     SaveToNvs();
 }""")
     (output / 'stock_ssid_manager.cc').write_text(source)
