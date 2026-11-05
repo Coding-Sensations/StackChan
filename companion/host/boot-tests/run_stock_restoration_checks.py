@@ -14,6 +14,8 @@ subprocess.run(["python3", str(tests / "verify_stock_menu_hierarchy.py")], check
 checks.append("menu_hierarchy")
 subprocess.run(["python3", str(tests / "test_pr1_review_regressions.py")], check=True)
 checks.append("pr1_review_regressions")
+subprocess.run(["python3", str(tests / "test_flash_wifi_compatibility.py")], check=True)
+checks.append("flash_wifi_compatibility")
 with tempfile.TemporaryDirectory(prefix="stackchan-stock-tests-") as temporary:
     temp = Path(temporary)
     generated = temp / "backend"

@@ -36,6 +36,7 @@ list(REMOVE_DUPLICATES STACK_CHAN_SOURCES)
 # Define source files
 set(SOURCES "audio/audio_codec.cc"
             "audio/audio_service.cc"
+            "audio/audio_failure_snapshot.cc"
             "audio/demuxer/ogg_demuxer.cc"
             "audio/codecs/no_audio_codec.cc"
             "audio/codecs/box_audio_codec.cc"

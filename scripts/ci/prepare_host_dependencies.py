@@ -28,8 +28,9 @@ SOURCES = [
          'device_state_machine.cc', 'protocols/websocket_protocol.cc',
          'protocols/mqtt_protocol.cc', 'application.cc', 'ota.cc', 'boards/common/wifi_board.cc')}),
     ('78/esp-wifi-connect', 'a7b34167750f0188486b489240268d0f7c306caf', 'managed_components/78__esp-wifi-connect',
-     {name: backend.PINNED[name] for name in (
-         'dns_server.cc', 'wifi_manager.cc', 'wifi_configuration_ap.cc', 'ssid_manager.cc')}),
+     {**{name: backend.PINNED[name] for name in (
+         'dns_server.cc', 'wifi_manager.cc', 'wifi_configuration_ap.cc', 'ssid_manager.cc')},
+      'include/ssid_manager.h': 'f45a0687170a30ba5592a9b3fde7c8f5da768dac7de185b256b2be56359d9e3f'}),
     ('78/esp-ml307', 'ab4de7c28c8b8f809eba2f56f38090d57fce984d', 'managed_components/78__esp-ml307',
      {('src/web_socket.cc' if name == 'web_socket.cc' else 'src/esp/' + name): digest
       for name, digest in teardown.items() if name != 'espnow.c'}),

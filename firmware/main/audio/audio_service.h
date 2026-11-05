@@ -21,6 +21,7 @@
 #include "esp_audio_types.h"
 
 #include "audio_codec.h"
+#include "audio_failure_snapshot.h"
 #include "audio_processor.h"
 #include "processors/audio_debugger.h"
 #include "wake_word.h"
@@ -150,12 +151,14 @@ private:
     std::atomic<unsigned> active_workers_{0};
     std::atomic<bool> initialized_{false};
     std::atomic<bool> checked_stopped_{true};
+    std::atomic<bool> failure_logged_{false};
     mutable std::mutex child_mutex_;
     bool audio_processor_bound_=false,wake_word_bound_=false;
     bool PrepareProcessorLocked();bool PrepareWakeWordLocked();
     std::atomic<unsigned> wake_readers_{0};
     bool LeaseCurrent()const;
     void RequestStop();
+    void LogFailureSnapshotOnce(const char* stage, int32_t status=0);
     void CloseSoftwareCodecs();
     AudioCodec* codec_ = nullptr;
     AudioServiceCallbacks callbacks_;

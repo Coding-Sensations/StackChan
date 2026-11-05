@@ -1,6 +1,8 @@
 # Apply after original configuration choices and Stock AI generation.
 list(REMOVE_ITEM SOURCES "${XIAOZHI_MAIN_DIR}/audio/audio_service.cc")
 list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/audio/audio_service.cc")
+list(REMOVE_ITEM SOURCES "${XIAOZHI_MAIN_DIR}/audio/audio_failure_snapshot.cc")
+list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/audio/audio_failure_snapshot.cc")
 list(REMOVE_ITEM SOURCES "${XIAOZHI_MAIN_DIR}/audio/processors/afe_audio_processor.cc")
 list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/audio/processors/afe_audio_processor.cc")
 list(REMOVE_ITEM SOURCES "${XIAOZHI_MAIN_DIR}/audio/wake_words/afe_wake_word.cc")
