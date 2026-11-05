@@ -38,7 +38,7 @@ SOURCES = [
      {('src/web_socket.cc' if name == 'web_socket.cc' else 'src/esp/' + name): digest
       for name, digest in teardown.items() if name != 'espnow.c'}),
     ('espressif/esp-now', 'c33383de97f3ed2fc52117f5ef04f71990432e5d', 'components/esp-now',
-     {'src/espnow/src/espnow.c': teardown['espnow.c']}),
+     {'src/espnow/src/espnow.c': '4db54a4cd22731a62009475eb8102eb460a247268e6791b0813178d7c808711c'}),
 ]
 
 

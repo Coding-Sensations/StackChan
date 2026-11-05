@@ -28,26 +28,28 @@ def generate(network,espnow,out):
  pins=json.loads((Path(__file__).with_name('teardown_pins.json')).read_text())
  def read(root,name,key):
   data=(root/name).read_bytes()
-  if hashlib.sha256(data).hexdigest()!=pins[key]:raise SystemExit('Unreviewed teardown dependency: '+key)
-  return data.decode()
+  digest=hashlib.sha256(data).hexdigest()
+  allowed=pins[key] if isinstance(pins[key],list) else [pins[key]]
+  if digest not in allowed:raise SystemExit('Unreviewed teardown dependency: '+key)
+  return data.decode(),digest
  # A receive task may already have set connected_=false while its callback is
  # still running. Join the task handle, not the connection-state boolean.
  for kind in ['tcp','udp']:
-  s=read(network,'src/esp/esp_'+kind+'.cc','esp_'+kind+'.cc');bit='ESP_'+kind.upper()+'_EVENT_RECEIVE_TASK_EXIT'
+  s,_=read(network,'src/esp/esp_'+kind+'.cc','esp_'+kind+'.cc');bit='ESP_'+kind.upper()+'_EVENT_RECEIVE_TASK_EXIT'
   s=receiver_exit_barrier(s,kind,bit)
   (out/('joined_esp_'+kind+'.cc')).write_text(s)
- s=read(network,'src/esp/esp_ssl.cc','esp_ssl.cc')
+ s,_=read(network,'src/esp/esp_ssl.cc','esp_ssl.cc')
  s=receiver_exit_barrier(s,'ssl','ESP_SSL_EVENT_RECEIVE_TASK_EXIT')
  (out/'joined_esp_ssl.cc').write_text(s)
- s=read(network,'src/web_socket.cc','web_socket.cc')
+ s,_=read(network,'src/web_socket.cc','web_socket.cc')
  (out/'joined_web_socket.cc').write_text(s)
- s=read(network,'src/esp/esp_mqtt.cc','esp_mqtt.cc')
+ s,_=read(network,'src/esp/esp_mqtt.cc','esp_mqtt.cc')
  s=replace(s,'''        esp_mqtt_client_stop(mqtt_client_handle_);
         esp_mqtt_client_destroy(mqtt_client_handle_);''','''        esp_err_t stopped;
         do{stopped=esp_mqtt_client_stop(mqtt_client_handle_);if(stopped!=ESP_OK&&stopped!=ESP_ERR_INVALID_STATE)vTaskDelay(pdMS_TO_TICKS(100));}while(stopped!=ESP_OK&&stopped!=ESP_ERR_INVALID_STATE);
         while(esp_mqtt_client_destroy(mqtt_client_handle_)!=ESP_OK)vTaskDelay(pdMS_TO_TICKS(100));''')
  (out/'joined_esp_mqtt.cc').write_text(s)
- s=read(espnow,'src/espnow/src/espnow.c','espnow.c')
+ s,espnow_digest=read(espnow,'src/espnow/src/espnow.c','espnow.c')
  s=s.replace('static void espnow_main_task(void *arg)','static EventGroupHandle_t home_join_group;\nstatic bool home_driver_started,home_events_registered,home_worker_started;\nstatic void espnow_main_task(void *arg)',1)
  s=replace(s,'    ESP_LOGI(TAG, "main task exit");\n    vTaskDelete(NULL);','    ESP_LOGI(TAG, "main task exit");\n    xEventGroupSetBits(home_join_group,BIT0);\n    vTaskDelete(NULL);')
  # Allocate the receipt before any startup side effect. Partial initialization
@@ -66,8 +68,13 @@ def generate(network,espnow,out):
  s=replace(s,'        g_espnow_sec = ESP_MALLOC(sizeof(espnow_sec_t));\n        g_espnow_dec = ESP_MALLOC(sizeof(espnow_sec_t));','''        g_espnow_sec=calloc(1,sizeof(espnow_sec_t));
         g_espnow_dec=calloc(1,sizeof(espnow_sec_t));
         if(!g_espnow_sec||!g_espnow_dec)return ESP_ERR_NO_MEM;''')
- s=replace(s,'    xTaskCreate(espnow_main_task, "espnow_main", 4096, NULL, tskIDLE_PRIORITY + 1, NULL);','''    xEventGroupClearBits(home_join_group,BIT0);
+ if espnow_digest==pins['espnow.c'][0]:
+  s=replace(s,'    xTaskCreate(espnow_main_task, "espnow_main", 4096, NULL, tskIDLE_PRIORITY + 1, NULL);','''    xEventGroupClearBits(home_join_group,BIT0);
     if(xTaskCreate(espnow_main_task,"espnow_main",4096,NULL,tskIDLE_PRIORITY+1,NULL)!=pdPASS)return ESP_ERR_NO_MEM;
+    home_worker_started=true;''')
+ else:
+  s=replace(s,'    xTaskCreate(espnow_main_task, "espnow_main", CONFIG_ESPNOW_TASK_STACK_SIZE, NULL, CONFIG_ESPNOW_TASK_PRIORITY, NULL);','''    xEventGroupClearBits(home_join_group,BIT0);
+    if(xTaskCreate(espnow_main_task,"espnow_main",CONFIG_ESPNOW_TASK_STACK_SIZE,NULL,CONFIG_ESPNOW_TASK_PRIORITY,NULL)!=pdPASS)return ESP_ERR_NO_MEM;
     home_worker_started=true;''')
  s=replace(s,'esp_err_t espnow_deinit(void)\n{\n    ESP_ERROR_RETURN(!g_espnow_config, ESP_ERR_ESPNOW_NOT_INIT, "ESPNOW is not initialized");',
             'esp_err_t espnow_deinit(void)\n{\n    if(!g_espnow_config)return ESP_OK;')
