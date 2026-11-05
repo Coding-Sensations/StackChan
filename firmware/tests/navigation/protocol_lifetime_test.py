@@ -12,8 +12,9 @@ with tempfile.TemporaryDirectory(prefix='stackchan-owner-test-') as tmp:
  tmp=pathlib.Path(tmp);backend.generate(xiaozhi,wifi,tmp)
  source=r'''
 #include <cassert>
-#include <memory>
 #include <functional>
+#include <memory>
+#include <mutex>
 #define ESP_LOGI(...) ((void)0)
 struct Group{bool alive=true;};
 void vEventGroupDelete(Group* g){assert(g&&g->alive);g->alive=false;}

@@ -29,7 +29,7 @@ The explicitly started Stock session now restores original camera, motor, head-p
 the status explicitly says so. StopListening is not advertised as microphone mute.
 
 `generate_backend.py` deterministically adapts pinned Xiaozhi commit
-`49b4380b3faa0ceadd28a3e78aaf0f311c46c57e` (repo tag `v2.5.2`) and reviewed esp-wifi-connect 3.1.1
+`49b4380b3faa0ceadd28a3e78aaf0f311c46c57e` (repo tag `v2.5.2`) and reviewed esp-wifi-connect 3.3.1
 files into the build directory. Hotspot advanced-settings writes are rejected;
 Stock-session Wi-Fi setup remains RAM-only. The dedicated Wi-Fi Setup app/Setup worker instead persists successfully tested choices to a bounded versioned CRC-protected atomic NVS blob; legacy keys remain a fallback. Both Stock and Companion read the same saved SSID manager. Acoustic and BLUFI build modes are rejected
 because this adapter supports the hotspot/browser flow only. SHA-256 pins fail closed on source drift.
@@ -45,7 +45,7 @@ Source generation can be checked without building or device access:
 python main/apps/stock_agent/generate_backend.py \
   --xiaozhi xiaozhi-esp32/main \
   --wifi managed_components/78__esp-wifi-connect \
-  --output /tmp/stock-agent-backend-check
+  --output .ci-scratch/stock-agent-backend-check
 ```
 
 On-device pairing, audio, network and UI behavior require separately authorized
