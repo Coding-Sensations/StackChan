@@ -29,7 +29,15 @@
 
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/entropy.h>
+#if defined(__has_include)
+#if __has_include(<mbedtls/gcm.h>)
 #include <mbedtls/gcm.h>
+#else
+#include <mbedtls/private/gcm.h>
+#endif
+#else
+#include <mbedtls/gcm.h>
+#endif
 #include <mbedtls/hkdf.h>
 #include <mbedtls/md.h>
 #include <mbedtls/platform_util.h>
