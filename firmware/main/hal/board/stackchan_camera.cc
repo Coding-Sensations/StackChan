@@ -9,6 +9,22 @@
 #include <esp_timer.h>
 #include <esp_log.h>
 #include "esp_video_device.h"
+// esp_video's linux/ioctl.h and linux/videodev2.h redefine ioctl and V4L2
+// macros that lwip/sockets.h and image_to_jpeg.h already define. Undefine the
+// conflicting ones so videodev2.h can provide its own (Linux-style) values.
+#undef _IO
+#undef _IOR
+#undef _IOW
+#undef _IOWR
+#undef V4L2_PIX_FMT_RGB565
+#undef V4L2_PIX_FMT_RGB565X
+#undef V4L2_PIX_FMT_RGB24
+#undef V4L2_PIX_FMT_GREY
+#undef V4L2_PIX_FMT_YUYV
+#undef V4L2_PIX_FMT_UYVY
+#undef V4L2_PIX_FMT_YUV420
+#undef V4L2_PIX_FMT_YUV422P
+#undef V4L2_PIX_FMT_JPEG
 #include "linux/videodev2.h"
 #define TAG "StackChanCamera"
 #define CAM_PRINT_FOURCC(format) (void)0
