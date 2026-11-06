@@ -149,7 +149,8 @@ else()
     )
 endif()
 list(APPEND SOURCES ${BOARD_SOURCES})
-list(APPEND SOURCES "${XIAOZHI_MAIN_DIR}/boards/m5stack/core-s3/cores3_audio_codec.cc")
+# StackChan owns the CoreS3 codec in hal/board; the fetched vendor copy is a
+# duplicate symbol source and must not be compiled alongside it.
 list(APPEND INCLUDE_DIRS "${XIAOZHI_MAIN_DIR}/boards/m5stack/core-s3")
 
 # ESP32-S3 shares one AFE engine between wake words and voice processing.

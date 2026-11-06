@@ -32,29 +32,19 @@
 #define MBEDTLS_DECLARE_PRIVATE_IDENTIFIERS
 #endif
 #if defined(__has_include)
-#if __has_include(<mbedtls/ctr_drbg.h>)
-#include <mbedtls/ctr_drbg.h>
-#else
-#include <mbedtls/private/ctr_drbg.h>
-#endif
-#if __has_include(<mbedtls/entropy.h>)
-#include <mbedtls/entropy.h>
-#else
-#include <mbedtls/private/entropy.h>
-#endif
 #if __has_include(<mbedtls/gcm.h>)
 #include <mbedtls/gcm.h>
 #else
 #include <mbedtls/private/gcm.h>
 #endif
 #else
-#include <mbedtls/ctr_drbg.h>
-#include <mbedtls/entropy.h>
 #include <mbedtls/gcm.h>
 #endif
 #include <mbedtls/md.h>
 #include <mbedtls/platform_util.h>
+#include <mbedtls/ssl.h>
 #pragma pop_macro("MBEDTLS_DECLARE_PRIVATE_IDENTIFIERS")
+#include <esp_random.h>
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -68,7 +58,6 @@ constexpr uint8_t kX25519HighByteClearMask = 0x7f;
 constexpr uint8_t kX25519HighByteSetMask = 0x40;
 constexpr unsigned int kAes256GcmKeyBits =
     static_cast<unsigned int>(CryptoBackend::kAes256GcmKeySize * 8);
-constexpr char kRandomPersonalization[] = "noise/core/mbedtls";
 
 bool IsValidInput(ConstByteSpan bytes) noexcept {
   return bytes.data() != nullptr || bytes.empty();
@@ -99,15 +88,8 @@ void SecureZeroize(std::array<uint8_t, kSize>& bytes) noexcept {
 
 class RandomState {
  public:
-  RandomState() noexcept {
-    mbedtls_entropy_init(&entropy_);
-    mbedtls_ctr_drbg_init(&ctrDrbg_);
-  }
-
-  ~RandomState() noexcept {
-    mbedtls_ctr_drbg_free(&ctrDrbg_);
-    mbedtls_entropy_free(&entropy_);
-  }
+  RandomState() noexcept = default;
+  ~RandomState() noexcept = default;
 
   RandomState(const RandomState&) = delete;
   RandomState& operator=(const RandomState&) = delete;
@@ -123,28 +105,14 @@ class RandomState {
     }
 
     std::lock_guard<std::mutex> lock(mutex_);
-    Status status = EnsureSeededLocked();
-    if (!status.ok()) {
-      return status;
-    }
-
-    size_t offset = 0;
-    while (offset < out.size()) {
-      const size_t chunk = std::min(
-          out.size() - offset,
-          static_cast<size_t>(MBEDTLS_CTR_DRBG_MAX_REQUEST));
-      if (mbedtls_ctr_drbg_random(&ctrDrbg_, out.data() + offset, chunk) != 0) {
-        return Status::Internal();
-      }
-      offset += chunk;
-    }
+    esp_fill_random(out.data(), out.size());
     return OkStatus();
   }
 
   static int
   Callback(void* pRng, unsigned char* output, size_t outputLen) noexcept {
     if (pRng == nullptr || (output == nullptr && outputLen != 0)) {
-      return MBEDTLS_ERR_CTR_DRBG_REQUEST_TOO_BIG;
+      return MBEDTLS_ERR_SSL_INTERNAL_ERROR;
     }
     return static_cast<RandomState*>(pRng)->FillForMbedtls(output, outputLen);
   }
@@ -156,45 +124,11 @@ class RandomState {
     }
 
     std::lock_guard<std::mutex> lock(mutex_);
-    if (!EnsureSeededLocked().ok()) {
-      return MBEDTLS_ERR_CTR_DRBG_ENTROPY_SOURCE_FAILED;
-    }
-
-    size_t offset = 0;
-    while (offset < outputLen) {
-      const size_t chunk = std::min(
-          outputLen - offset,
-          static_cast<size_t>(MBEDTLS_CTR_DRBG_MAX_REQUEST));
-      const int rc = mbedtls_ctr_drbg_random(&ctrDrbg_, output + offset, chunk);
-      if (rc != 0) {
-        return rc;
-      }
-      offset += chunk;
-    }
+    esp_fill_random(output, outputLen);
     return 0;
   }
 
-  Status EnsureSeededLocked() noexcept {
-    if (seeded_) {
-      return OkStatus();
-    }
-    const int rc = mbedtls_ctr_drbg_seed(
-        &ctrDrbg_,
-        mbedtls_entropy_func,
-        &entropy_,
-        reinterpret_cast<const unsigned char*>(kRandomPersonalization),
-        sizeof(kRandomPersonalization) - 1);
-    if (rc != 0) {
-      return Status::Unavailable();
-    }
-    seeded_ = true;
-    return OkStatus();
-  }
-
-  mbedtls_entropy_context entropy_{};
-  mbedtls_ctr_drbg_context ctrDrbg_{};
   std::mutex mutex_;
-  bool seeded_{false};
 };
 
 RandomState& GlobalRandomState() noexcept {

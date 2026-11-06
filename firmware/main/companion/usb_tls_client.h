@@ -4,21 +4,6 @@
 #include <cstdint>
 #include <mbedtls/ssl.h>
 #include <mbedtls/x509_crt.h>
-#if defined(__has_include)
-#if __has_include(<mbedtls/entropy.h>)
-#include <mbedtls/entropy.h>
-#else
-#include <mbedtls/private/entropy.h>
-#endif
-#if __has_include(<mbedtls/ctr_drbg.h>)
-#include <mbedtls/ctr_drbg.h>
-#else
-#include <mbedtls/private/ctr_drbg.h>
-#endif
-#else
-#include <mbedtls/entropy.h>
-#include <mbedtls/ctr_drbg.h>
-#endif
 namespace companion {
 // One serialized caller. The provider already owns the selected USB channel.
 // The provider and client must remain alive until Stop returns true.
@@ -59,7 +44,6 @@ private:
  UsbTlsState state_=UsbTlsState::Closed;int error_=0;
  std::array<uint8_t,MaxPlaintext> pending_{};size_t pending_size_=0,pending_offset_=0;
  mbedtls_ssl_context ssl_;mbedtls_ssl_config config_;mbedtls_x509_crt ca_;
- mbedtls_entropy_context entropy_;mbedtls_ctr_drbg_context random_;
  bool initialized_=false;
  void Init();void Free();bool Guard();int Fail(int);void ClearWrite();
  static int Send(void*,const unsigned char*,size_t);static int Receive(void*,unsigned char*,size_t);

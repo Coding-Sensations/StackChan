@@ -25,8 +25,8 @@ bool Pending(int n){return n==MBEDTLS_ERR_SSL_WANT_READ||n==MBEDTLS_ERR_SSL_WANT
 UsbTlsClient::UsbTlsClient(){Init();}
 bool UsbTlsClient::Verified()const{return state_==UsbTlsState::Ready&&owner_&&owner_->Owned()&&owner_->ChannelId()==channel_&&ClockReady();}
 UsbTlsClient::~UsbTlsClient(){if(owner_||state_!=UsbTlsState::Closed)std::terminate();Free();}
-void UsbTlsClient::Init(){mbedtls_ssl_init(&ssl_);mbedtls_ssl_config_init(&config_);mbedtls_x509_crt_init(&ca_);mbedtls_entropy_init(&entropy_);mbedtls_ctr_drbg_init(&random_);initialized_=true;}
-void UsbTlsClient::Free(){if(!initialized_)return;mbedtls_ssl_free(&ssl_);mbedtls_ssl_config_free(&config_);mbedtls_x509_crt_free(&ca_);mbedtls_ctr_drbg_free(&random_);mbedtls_entropy_free(&entropy_);initialized_=false;}
+void UsbTlsClient::Init(){mbedtls_ssl_init(&ssl_);mbedtls_ssl_config_init(&config_);mbedtls_x509_crt_init(&ca_);initialized_=true;}
+void UsbTlsClient::Free(){if(!initialized_)return;mbedtls_ssl_free(&ssl_);mbedtls_ssl_config_free(&config_);mbedtls_x509_crt_free(&ca_);initialized_=false;}
 void UsbTlsClient::ClearWrite(){Wipe(pending_.data(),pending_.size());pending_size_=pending_offset_=0;}
 bool UsbTlsClient::Guard(){return owner_&&owner_->Owned()&&owner_->ChannelId()==channel_&&ClockReady();}
 int UsbTlsClient::Fail(int error){error_=error;state_=UsbTlsState::Closing;ClearWrite();Free();if(owner_)owner_->DiscardPending(channel_);return -1;}
@@ -39,9 +39,7 @@ bool UsbTlsClient::Begin(UsbByteOwner& owner,const char* host){
  const auto now=Now();if(now>std::numeric_limits<uint64_t>::max()-IoBudgetMs)return false;
  owner_=&owner;channel_=owner.ChannelId();state_=UsbTlsState::Handshaking;error_=0;handshake_until_=now+IoBudgetMs;
  if(!initialized_)Init();
- static const unsigned char label[]="companion-owned-usb-tls";
- int ret=mbedtls_ctr_drbg_seed(&random_,mbedtls_entropy_func,&entropy_,label,sizeof(label)-1);
- if(!ret)ret=mbedtls_x509_crt_parse(&ca_,reinterpret_cast<const unsigned char*>(ca),std::strlen(ca)+1);
+ int ret=mbedtls_x509_crt_parse(&ca_,reinterpret_cast<const unsigned char*>(ca),std::strlen(ca)+1);
  if(!ret)ret=mbedtls_ssl_config_defaults(&config_,MBEDTLS_SSL_IS_CLIENT,MBEDTLS_SSL_TRANSPORT_STREAM,MBEDTLS_SSL_PRESET_DEFAULT);
  if(ret){Fail(ret);return false;}
  mbedtls_ssl_conf_authmode(&config_,MBEDTLS_SSL_VERIFY_REQUIRED);

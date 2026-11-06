@@ -394,6 +394,23 @@ static bool home_dns_joined(void* owner){std::lock_guard<std::mutex> lock(home_d
     if (ssid_list_.size() >= MAX_WIFI_SSID_COUNT) ssid_list_.pop_back();
     ssid_list_.insert(ssid_list_.begin(), {ssid, password, channel});
     SaveToNvs();
+}
+
+void SsidManager::UpdateSsidChannel(const std::string& ssid, uint8_t channel) {
+    if (channel == 0) {
+        return;
+    }
+    for (auto& item : ssid_list_) {
+        if (item.ssid != ssid) {
+            continue;
+        }
+        if (item.channel != channel) {
+            ESP_LOGI(TAG, "Updated channel for %s: %u -> %u", ssid.c_str(), item.channel, channel);
+            item.channel = channel;
+            SaveToNvs();
+        }
+        return;
+    }
 }"""
     else:
         source = replace_once(source, '        ssid_list_.push_back({ssid, password});',

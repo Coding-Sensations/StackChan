@@ -803,11 +803,11 @@ void AudioService::PlaySound(const std::string_view& ogg) {
     size_t size = ogg.size();
 
     auto demuxer = std::make_unique<OggDemuxer>();
-    demuxer->OnDemuxerFinished([this, lease=SnapshotLease()](const uint8_t* data, int sample_rate, size_t size){
+    demuxer->OnPacket([this, lease=SnapshotLease()](const uint8_t* data, int sample_rate, int frame_duration_ms, size_t size){
         if(service_stopped_ || !companion::CommonAudioAuthority().Current(lease))return;
         auto packet = std::make_unique<AudioStreamPacket>();
         packet->sample_rate = sample_rate;
-        packet->frame_duration = 60;
+        packet->frame_duration = frame_duration_ms;
         packet->payload.resize(size);
         std::memcpy(packet->payload.data(), data, size);
         PushPacketToDecodeQueue(std::move(packet), true);
