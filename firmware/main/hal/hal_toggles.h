@@ -3,6 +3,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <string_view>
 
 namespace hal_toggles {
 
@@ -51,8 +52,11 @@ inline bool is_app_enabled(int app_id, const ToggleStates& states)
     return true;
 }
 
+bool is_app_enabled(std::string_view app_name, const ToggleStates& states);
+
 // Load failures leave safe defaults. Saving never initializes or erases NVS.
 bool load_states(ToggleStates& states);
 bool save_states(const ToggleStates& states);
+bool is_app_enabled(std::string_view app_name);
 
 }  // namespace hal_toggles

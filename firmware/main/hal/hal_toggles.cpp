@@ -71,4 +71,21 @@ bool save_states(const ToggleStates& states)
     nvs_close(handle);
     return error == ESP_OK ? true : fail(error);
 }
+
+bool is_app_enabled(std::string_view app_name, const ToggleStates& states)
+{
+    if (app_name == "StackChan") return states[static_cast<size_t>(App::AiAgent)];
+
+    for (size_t i = 0; i < TOGGLE_COUNT; ++i) {
+        if (app_name == TOGGLE_LIST[i].display_name) return states[i];
+    }
+    return true;
+}
+
+bool is_app_enabled(std::string_view app_name)
+{
+    auto states = default_states();
+    load_states(states);
+    return is_app_enabled(app_name, states);
+}
 }  // namespace hal_toggles
