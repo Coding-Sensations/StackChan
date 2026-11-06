@@ -87,9 +87,11 @@ CONFIG_LV_USE_IMGFONT=y
 CONFIG_LV_BUILD_EXAMPLES=n
 CONFIG_LV_BUILD_DEMOS=n
 
-# Muse Noise key derivation calls mbedtls_hkdf directly.
-# Declare the primitive explicitly; it is already enabled in the qualified profile.
-CONFIG_MBEDTLS_HKDF_C=y
+# Muse Noise key derivation implements HKDF-SHA256 via the mbedTLS message
+# digest API (mbedtls_md_hmac). ESP-IDF v6.1 / Mbed TLS 4.x removed the
+# MBEDTLS_HKDF_C config symbol; the required primitives are MD and SHA-256.
+CONFIG_MBEDTLS_MD_C=y
+CONFIG_MBEDTLS_SHA256_C=y
 
 # ESP-NOW security responder still uses protocomm security version 1.
 CONFIG_ESP_PROTOCOMM_SUPPORT_SECURITY_VERSION_1=y

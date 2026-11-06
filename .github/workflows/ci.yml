@@ -130,7 +130,7 @@ jobs:
           python3 fetch_repos.py
           # Source-only RAM profile; no runtime or real binding is activated.
           idf.py -DSTACKCHAN_BUILD_PROFILE=custom -DSTACKCHAN_FEATURE_MANIFEST="$PWD/profiles/muse-ram.json" -DSTACKCHAN_MUSE_RAM_ONLY=ON -DSTACKCHAN_ENABLE_LOCAL_PORTRAITS=OFF build
-          grep -Fx "CONFIG_MBEDTLS_HKDF_C=y" sdkconfig
+          grep -Fx "CONFIG_MBEDTLS_SHA256_C=y" sdkconfig
           sha256sum repos.json main/idf_component.yml dependencies.lock build/stack-chan.bin
 
   companion-app:
