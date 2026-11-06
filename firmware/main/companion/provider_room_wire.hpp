@@ -29,23 +29,17 @@ inline bool Digest(const std::string &s) {
 inline std::string Mac(const unsigned char *key, size_t size,
                        const char *domain, const std::string &body) {
   unsigned char output[32]{};
-  mbedtls_md_context_t context;
-  mbedtls_md_init(&context);
-  auto info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
-  int result = info ? mbedtls_md_setup(&context, info, 1) : -1;
-  if (!result)
-    result = mbedtls_md_hmac_starts(&context, key, size);
-  if (!result)
-    result = mbedtls_md_hmac_update(
-        &context, reinterpret_cast<const unsigned char *>(domain),
-        std::strlen(domain) + 1);
-  if (!result)
-    result = mbedtls_md_hmac_update(
-        &context, reinterpret_cast<const unsigned char *>(body.data()),
-        body.size());
-  if (!result)
-    result = mbedtls_md_hmac_finish(&context, output);
-  mbedtls_md_free(&context);
+  const auto info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+  if (!info)
+    return {};
+  // Concatenate the domain (with its null terminator) and body into one
+  // buffer so the one-shot HMAC API can cover both segments.
+  const size_t domain_len = std::strlen(domain) + 1;
+  std::string input(domain, domain_len);
+  input.append(body);
+  const int result = mbedtls_md_hmac(
+      info, key, size, reinterpret_cast<const unsigned char *>(input.data()),
+      input.size(), output);
   if (result)
     return {};
   const char *digits = "0123456789abcdef";
