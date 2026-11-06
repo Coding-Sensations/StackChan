@@ -1,6 +1,6 @@
 #include "persistent_pairing.hpp"
 #include <nvs.h>
-#include <mbedtls/sha256.h>
+#include <mbedtls/md.h>
 #include <ctime>
 extern "C" const char* companion_local_ca_pem();
 extern "C" uint32_t companion_local_pair_expiry_unix();
@@ -23,7 +23,7 @@ PairPolicy CurrentPairPolicy(){
  PairPolicy p;p.device=PairDevice;p.uri=PairUri;p.expiry=companion_local_pair_expiry_unix();
  const auto now=std::time(nullptr);if(now>0&&uint64_t(now)<=UINT32_MAX)p.now=uint32_t(now);
  const char* pem=companion_local_ca_pem();unsigned char hash[32]={};
- if(pem&&*pem&&mbedtls_sha256(reinterpret_cast<const unsigned char*>(pem),std::strlen(pem),hash,0)==0){static const char hex[]="0123456789abcdef";for(auto byte:hash){p.ca.push_back(hex[byte>>4]);p.ca.push_back(hex[byte&15]);}}
+ if(pem&&*pem){const mbedtls_md_info_t* md=mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);if(md&&mbedtls_md(md,reinterpret_cast<const unsigned char*>(pem),std::strlen(pem),hash)==0){static const char hex[]="0123456789abcdef";for(auto byte:hash){p.ca.push_back(hex[byte>>4]);p.ca.push_back(hex[byte&15]);}}}
  return p;
 }
 bool RememberedPairStoreEmpty(){NvsPairStorage nvs(true);return nvs.Empty();}

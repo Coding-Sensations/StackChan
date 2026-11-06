@@ -2,6 +2,7 @@
 #include "sdkconfig.h"
 #ifndef CONFIG_IDF_TARGET_ESP32
 #include <vector>
+#include <mutex>
 #include "camera.h"
 #include "jpg/image_to_jpeg.h"
 #include "esp_video_init.h"
@@ -33,8 +34,13 @@ public:
     bool CopyBGRA(Binding,uint8_t*,size_t,uint64_t& sequence,uint64_t& captured_ns);
     bool Capture() override {return false;} // legacy unbound ingress fails closed
     bool StreamCaptures() {return false;}
+    // Legacy raw readers cannot hold an owned frame and are deliberately closed.
+    // Return a non-owning lock so callers that gate on owns_lock() skip video.
+    std::unique_lock<std::mutex> TryLockFrame() {
+        return std::unique_lock<std::mutex>(producer_.mutex, std::defer_lock);
+    }
     void SetExplainUrl(const std::string&,const std::string&) override {}
-    std::string Explain(const std::string&) override;
+    std::expected<std::string,std::string> Explain(const std::string&) override;
     bool SetHMirror(bool) override {return false;}
     bool SetVFlip(bool) override {return false;}
     // Legacy raw readers cannot hold an owned frame and are deliberately closed.

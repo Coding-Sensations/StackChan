@@ -27,12 +27,24 @@
 #include <mbedtls/ecp.h>
 #pragma pop_macro("MBEDTLS_ALLOW_PRIVATE_ACCESS")
 
-#include <mbedtls/ctr_drbg.h>
-#include <mbedtls/entropy.h>
+#pragma push_macro("MBEDTLS_DECLARE_PRIVATE_IDENTIFIERS")
+#ifndef MBEDTLS_DECLARE_PRIVATE_IDENTIFIERS
+#define MBEDTLS_DECLARE_PRIVATE_IDENTIFIERS
+#endif
+#if defined(__has_include)
+#if __has_include(<mbedtls/gcm.h>)
 #include <mbedtls/gcm.h>
-#include <mbedtls/hkdf.h>
+#else
+#include <mbedtls/private/gcm.h>
+#endif
+#else
+#include <mbedtls/gcm.h>
+#endif
 #include <mbedtls/md.h>
 #include <mbedtls/platform_util.h>
+#include <mbedtls/ssl.h>
+#pragma pop_macro("MBEDTLS_DECLARE_PRIVATE_IDENTIFIERS")
+#include <esp_random.h>
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -46,7 +58,6 @@ constexpr uint8_t kX25519HighByteClearMask = 0x7f;
 constexpr uint8_t kX25519HighByteSetMask = 0x40;
 constexpr unsigned int kAes256GcmKeyBits =
     static_cast<unsigned int>(CryptoBackend::kAes256GcmKeySize * 8);
-constexpr char kRandomPersonalization[] = "noise/core/mbedtls";
 
 bool IsValidInput(ConstByteSpan bytes) noexcept {
   return bytes.data() != nullptr || bytes.empty();
@@ -77,15 +88,8 @@ void SecureZeroize(std::array<uint8_t, kSize>& bytes) noexcept {
 
 class RandomState {
  public:
-  RandomState() noexcept {
-    mbedtls_entropy_init(&entropy_);
-    mbedtls_ctr_drbg_init(&ctrDrbg_);
-  }
-
-  ~RandomState() noexcept {
-    mbedtls_ctr_drbg_free(&ctrDrbg_);
-    mbedtls_entropy_free(&entropy_);
-  }
+  RandomState() noexcept = default;
+  ~RandomState() noexcept = default;
 
   RandomState(const RandomState&) = delete;
   RandomState& operator=(const RandomState&) = delete;
@@ -101,28 +105,14 @@ class RandomState {
     }
 
     std::lock_guard<std::mutex> lock(mutex_);
-    Status status = EnsureSeededLocked();
-    if (!status.ok()) {
-      return status;
-    }
-
-    size_t offset = 0;
-    while (offset < out.size()) {
-      const size_t chunk = std::min(
-          out.size() - offset,
-          static_cast<size_t>(MBEDTLS_CTR_DRBG_MAX_REQUEST));
-      if (mbedtls_ctr_drbg_random(&ctrDrbg_, out.data() + offset, chunk) != 0) {
-        return Status::Internal();
-      }
-      offset += chunk;
-    }
+    esp_fill_random(out.data(), out.size());
     return OkStatus();
   }
 
   static int
   Callback(void* pRng, unsigned char* output, size_t outputLen) noexcept {
     if (pRng == nullptr || (output == nullptr && outputLen != 0)) {
-      return MBEDTLS_ERR_CTR_DRBG_REQUEST_TOO_BIG;
+      return MBEDTLS_ERR_SSL_INTERNAL_ERROR;
     }
     return static_cast<RandomState*>(pRng)->FillForMbedtls(output, outputLen);
   }
@@ -134,45 +124,11 @@ class RandomState {
     }
 
     std::lock_guard<std::mutex> lock(mutex_);
-    if (!EnsureSeededLocked().ok()) {
-      return MBEDTLS_ERR_CTR_DRBG_ENTROPY_SOURCE_FAILED;
-    }
-
-    size_t offset = 0;
-    while (offset < outputLen) {
-      const size_t chunk = std::min(
-          outputLen - offset,
-          static_cast<size_t>(MBEDTLS_CTR_DRBG_MAX_REQUEST));
-      const int rc = mbedtls_ctr_drbg_random(&ctrDrbg_, output + offset, chunk);
-      if (rc != 0) {
-        return rc;
-      }
-      offset += chunk;
-    }
+    esp_fill_random(output, outputLen);
     return 0;
   }
 
-  Status EnsureSeededLocked() noexcept {
-    if (seeded_) {
-      return OkStatus();
-    }
-    const int rc = mbedtls_ctr_drbg_seed(
-        &ctrDrbg_,
-        mbedtls_entropy_func,
-        &entropy_,
-        reinterpret_cast<const unsigned char*>(kRandomPersonalization),
-        sizeof(kRandomPersonalization) - 1);
-    if (rc != 0) {
-      return Status::Unavailable();
-    }
-    seeded_ = true;
-    return OkStatus();
-  }
-
-  mbedtls_entropy_context entropy_{};
-  mbedtls_ctr_drbg_context ctrDrbg_{};
   std::mutex mutex_;
-  bool seeded_{false};
 };
 
 RandomState& GlobalRandomState() noexcept {
@@ -544,28 +500,70 @@ Status MbedtlsCryptoBackend::HkdfSha256(
     return Status::Internal();
   }
 
+  std::array<uint8_t, kSha256DigestSize> prk{};
+  std::array<uint8_t, kSha256DigestSize> block{};
+  std::array<uint8_t, kSha256DigestSize> zeroSalt{};
   std::array<uint8_t, kSha256DigestSize * kMaxHkdfSha256Outputs> okm{};
   const size_t okmLen = outputs.size() * kSha256DigestSize;
-  if (mbedtls_hkdf(
+  const unsigned char* saltData = salt.empty() ? zeroSalt.data() : MbedtlsData(salt);
+  const size_t saltLen = salt.empty() ? zeroSalt.size() : salt.size();
+  if (mbedtls_md_hmac(
           md,
-          MbedtlsData(salt),
-          salt.size(),
+          saltData,
+          saltLen,
           MbedtlsData(ikm),
           ikm.size(),
-          MbedtlsData(info),
-          info.size(),
-          okm.data(),
-          okmLen) != 0) {
+          prk.data()) != 0) {
+    SecureZeroize(prk);
+    SecureZeroize(block);
+    SecureZeroize(zeroSalt);
     SecureZeroize(okm);
     return Status::Internal();
   }
 
+  mbedtls_md_context_t hmac;
+  mbedtls_md_init(&hmac);
+  if (mbedtls_md_setup(&hmac, md, 1) != 0) {
+    mbedtls_md_free(&hmac);
+    SecureZeroize(prk);
+    SecureZeroize(block);
+    SecureZeroize(zeroSalt);
+    SecureZeroize(okm);
+    return Status::Internal();
+  }
+
+  size_t offset = 0;
+  for (uint8_t counter = 1; offset < okmLen; ++counter) {
+    if (mbedtls_md_hmac_starts(&hmac, prk.data(), prk.size()) != 0 ||
+        (offset != 0 &&
+         mbedtls_md_hmac_update(&hmac, block.data(), block.size()) != 0) ||
+        (!info.empty() &&
+         mbedtls_md_hmac_update(&hmac, MbedtlsData(info), info.size()) != 0) ||
+        mbedtls_md_hmac_update(&hmac, &counter, 1) != 0 ||
+        mbedtls_md_hmac_finish(&hmac, block.data()) != 0) {
+      mbedtls_md_free(&hmac);
+      SecureZeroize(prk);
+      SecureZeroize(block);
+      SecureZeroize(zeroSalt);
+      SecureZeroize(okm);
+      return Status::Internal();
+    }
+
+    const size_t chunk = std::min(kSha256DigestSize, okmLen - offset);
+    std::copy_n(block.data(), chunk, okm.data() + offset);
+    offset += chunk;
+  }
+
+  mbedtls_md_free(&hmac);
   for (size_t i = 0; i < outputs.size(); ++i) {
     std::copy_n(
         okm.data() + (i * kSha256DigestSize),
         kSha256DigestSize,
         outputs[i].data());
   }
+  SecureZeroize(prk);
+  SecureZeroize(block);
+  SecureZeroize(zeroSalt);
   SecureZeroize(okm);
   return OkStatus();
 }

@@ -5,7 +5,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
-#include <mbedtls/md.h>
+#include <psa/crypto.h>
 #include <string>
 namespace companion::room {
 inline bool Id(const std::string &s) {
@@ -29,24 +29,28 @@ inline bool Digest(const std::string &s) {
 inline std::string Mac(const unsigned char *key, size_t size,
                        const char *domain, const std::string &body) {
   unsigned char output[32]{};
-  mbedtls_md_context_t context;
-  mbedtls_md_init(&context);
-  auto info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
-  int result = info ? mbedtls_md_setup(&context, info, 1) : -1;
-  if (!result)
-    result = mbedtls_md_hmac_starts(&context, key, size);
-  if (!result)
-    result = mbedtls_md_hmac_update(
-        &context, reinterpret_cast<const unsigned char *>(domain),
-        std::strlen(domain) + 1);
-  if (!result)
-    result = mbedtls_md_hmac_update(
-        &context, reinterpret_cast<const unsigned char *>(body.data()),
-        body.size());
-  if (!result)
-    result = mbedtls_md_hmac_finish(&context, output);
-  mbedtls_md_free(&context);
-  if (result)
+  // Concatenate the domain (with its null terminator) and body into one
+  // buffer so the single-part PSA MAC API can cover both segments.
+  const size_t domain_len = std::strlen(domain) + 1;
+  std::string input(domain, domain_len);
+  input.append(body);
+  psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+  psa_set_key_type(&attributes, PSA_KEY_TYPE_HMAC);
+  psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_SIGN_MESSAGE);
+  psa_set_key_algorithm(&attributes, PSA_ALG_HMAC(PSA_ALG_SHA_256));
+  psa_key_id_t key_id = 0;
+  psa_status_t status = psa_crypto_init();
+  if (status == PSA_SUCCESS)
+    status = psa_import_key(&attributes, key, size, &key_id);
+  size_t mac_length = 0;
+  if (status == PSA_SUCCESS)
+    status = psa_mac_compute(
+        key_id, PSA_ALG_HMAC(PSA_ALG_SHA_256),
+        reinterpret_cast<const uint8_t *>(input.data()), input.size(), output,
+        sizeof(output), &mac_length);
+  if (key_id != 0)
+    psa_destroy_key(key_id);
+  if (status != PSA_SUCCESS || mac_length != sizeof(output))
     return {};
   const char *digits = "0123456789abcdef";
   std::string out(64, '0');

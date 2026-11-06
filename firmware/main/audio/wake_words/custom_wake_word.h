@@ -32,6 +32,7 @@ public:
     bool EncodeWakeWordDataChecked() override;
     bool Initialize(AudioCodec* codec, srmodel_list_t* models_list) override;
     void Feed(const std::vector<int16_t>& data) override;
+    void FeedMono(const int16_t* data, size_t samples);
     void OnWakeWordDetected(std::function<void(const std::string& wake_word)> callback) override;
     void Start() override;
     void Stop() override;
@@ -76,6 +77,7 @@ private:
 
     void StoreWakeWordData(const std::vector<int16_t>& data);
     void ParseWakenetModelConfig();
+    void FeedSamples(const int16_t* data, size_t samples, bool mono);
 };
 
 #endif

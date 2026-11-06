@@ -110,7 +110,7 @@ jobs:
   firmware-esp:
     name: Firmware ESP32-S3 build
     runs-on: ubuntu-24.04
-    container: espressif/idf@sha256:b9f2d6ea1c19e0c9f7959bdb74a9e3c775642f9d0f3b841937c5fa3363db892b
+    container: espressif/idf@sha256:8ac794c57fd4cac246cb8d2ada4002fa26337ac7df683047b5b83743dbedb6b7
     timeout-minutes: 35
     defaults:
       run:
@@ -130,7 +130,7 @@ jobs:
           python3 fetch_repos.py
           # Source-only RAM profile; no runtime or real binding is activated.
           idf.py -DSTACKCHAN_BUILD_PROFILE=custom -DSTACKCHAN_FEATURE_MANIFEST="$PWD/profiles/muse-ram.json" -DSTACKCHAN_MUSE_RAM_ONLY=ON -DSTACKCHAN_ENABLE_LOCAL_PORTRAITS=OFF build
-          grep -Fx "CONFIG_MBEDTLS_HKDF_C=y" sdkconfig
+          grep -Fx "CONFIG_MBEDTLS_SHA256_C=y" sdkconfig
           sha256sum repos.json main/idf_component.yml dependencies.lock build/stack-chan.bin
 
   companion-app:

@@ -23,18 +23,22 @@ backend = module(FIRMWARE / 'main/apps/stock_agent/generate_backend.py')
 teardown = json.loads((FIRMWARE / 'main/apps/runtime_lifecycle/teardown_pins.json').read_text())
 # Exact revisions from firmware/repos.json and IDF component registry provenance.
 SOURCES = [
-    ('78/xiaozhi-esp32', 'e77dedb1309153bb63fed285772962c920c97dd4', 'xiaozhi-esp32',
+    ('78/xiaozhi-esp32', '49b4380b3faa0ceadd28a3e78aaf0f311c46c57e', 'xiaozhi-esp32',
      {'main/' + name: backend.PINNED[name] for name in (
          'device_state_machine.cc', 'protocols/websocket_protocol.cc',
          'protocols/mqtt_protocol.cc', 'application.cc', 'ota.cc', 'boards/common/wifi_board.cc')}),
     ('78/esp-wifi-connect', 'a7b34167750f0188486b489240268d0f7c306caf', 'managed_components/78__esp-wifi-connect',
-     {name: backend.PINNED[name] for name in (
-         'dns_server.cc', 'wifi_manager.cc', 'wifi_configuration_ap.cc', 'ssid_manager.cc')}),
-    ('78/esp-ml307', 'ab4de7c28c8b8f809eba2f56f38090d57fce984d', 'managed_components/78__esp-ml307',
+     {
+      'dns_server.cc': '8e6f03dc39f7386a149e227c756a53e3f715454b1d024c7ce38b75cdf00045d1',
+      'wifi_manager.cc': '3346377f3595774d8a8d07b259f4860a9aabaf323e39fba6c1cac598e44d5d20',
+      'wifi_configuration_ap.cc': '05e2d1fe46ce57de433078f287accfc06df771c326a23b9eac894d6657a465c3',
+      'ssid_manager.cc': 'e3441e0fc84012b539bd08b680cdfbfdaca5eb55af55423400268d0a18d5daca',
+      'include/ssid_manager.h': 'f45a0687170a30ba5592a9b3fde7c8f5da768dac7de185b256b2be56359d9e3f'}),
+    ('78/esp-ml307', '39638f2a4e514e12ef5d8afc7241db5b9b394086', 'managed_components/78__esp-ml307',
      {('src/web_socket.cc' if name == 'web_socket.cc' else 'src/esp/' + name): digest
       for name, digest in teardown.items() if name != 'espnow.c'}),
     ('espressif/esp-now', 'c33383de97f3ed2fc52117f5ef04f71990432e5d', 'components/esp-now',
-     {'src/espnow/src/espnow.c': teardown['espnow.c']}),
+     {'src/espnow/src/espnow.c': '4db54a4cd22731a62009475eb8102eb460a247268e6791b0813178d7c808711c'}),
 ]
 
 
@@ -53,7 +57,7 @@ def main():
                 # Only these patched units are consumed by these fixtures. Other
                 # firmware patch units are deliberately not fetched or built.
                 subprocess.run(['git', 'apply', '--include=main/application.cc', '--include=main/ota.cc',
-                                str(FIRMWARE / 'patches/xiaozhi-e77dedb.patch')],
+                                str(FIRMWARE / 'patches/xiaozhi-esp32.patch')],
                                cwd=stage / destination, check=True)
             for relative, expected in files.items():
                 source = stage / destination / relative

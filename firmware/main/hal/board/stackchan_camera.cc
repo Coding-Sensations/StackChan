@@ -5,11 +5,26 @@
 #include <unistd.h>
 #include <errno.h>
 #include <cstring>
-#include <stdexcept>
 #include <esp_heap_caps.h>
 #include <esp_timer.h>
 #include <esp_log.h>
 #include "esp_video_device.h"
+// esp_video's linux/ioctl.h and linux/videodev2.h redefine ioctl and V4L2
+// macros that lwip/sockets.h and image_to_jpeg.h already define. Undefine the
+// conflicting ones so videodev2.h can provide its own (Linux-style) values.
+#undef _IO
+#undef _IOR
+#undef _IOW
+#undef _IOWR
+#undef V4L2_PIX_FMT_RGB565
+#undef V4L2_PIX_FMT_RGB565X
+#undef V4L2_PIX_FMT_RGB24
+#undef V4L2_PIX_FMT_GREY
+#undef V4L2_PIX_FMT_YUYV
+#undef V4L2_PIX_FMT_UYVY
+#undef V4L2_PIX_FMT_YUV420
+#undef V4L2_PIX_FMT_YUV422P
+#undef V4L2_PIX_FMT_JPEG
 #include "linux/videodev2.h"
 #define TAG "StackChanCamera"
 #define CAM_PRINT_FOURCC(format) (void)0
@@ -391,11 +406,11 @@ bool StackChanCamera::CopyLV01(Binding binding,uint8_t* out,size_t capacity,size
     return adapter_.CopyLV01(view,held,binding,producer_.StampLocked(),
         [](){return uint64_t(esp_timer_get_time()/1000);},current,out,capacity,written);
 }
-std::string StackChanCamera::Explain(const std::string&)
+std::expected<std::string,std::string> StackChanCamera::Explain(const std::string&)
 {
     // No physical consent-bound, cancellation-safe HTTP worker exists. All old
     // capture/encode/upload ingress must remain closed, including MCP callers.
-    throw std::runtime_error("camera upload unavailable: no bound transport worker");
+    return std::unexpected("camera upload unavailable: no bound transport worker");
 }
 
 bool StackChanCamera::CopyBGRA(Binding binding,uint8_t* out,size_t capacity,uint64_t& sequence,uint64_t& captured_ns)

@@ -30,7 +30,15 @@
 #include "mbedtls/bignum.h"
 #include "mbedtls/ecp.h"
 #include "mbedtls/md.h"
+#if defined(__has_include)
+#if __has_include("mbedtls/gcm.h")
 #include "mbedtls/gcm.h"
+#else
+#include "mbedtls/private/gcm.h"
+#endif
+#else
+#include "mbedtls/gcm.h"
+#endif
 #include "mbedtls/platform_util.h"
 
 #if defined(CONFIG_HOMEHUB_PAIRING_EFUSE_AUTH)

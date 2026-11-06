@@ -40,7 +40,7 @@ class PreparationTests(unittest.TestCase):
         # Reconstruct raw pinned inputs from the checked fixture copies. The
         # real selected patch must be applied again by production preparation.
         REAL_RUN(['git', 'apply', '-R', '--include=main/application.cc', '--include=main/ota.cc',
-                  str(ROOT / 'firmware/patches/xiaozhi-e77dedb.patch')],
+                  str(ROOT / 'firmware/patches/xiaozhi-esp32.patch')],
                  cwd=raw / 'xiaozhi-esp32', check=True)
         for repository, revision, destination, files in prepare.SOURCES:
             for relative in files:
@@ -48,8 +48,8 @@ class PreparationTests(unittest.TestCase):
                 self.downloads[url] = (raw / destination / relative).read_bytes()
         self.target = self.directory / 'target'
         (self.target / 'patches').mkdir(parents=True)
-        shutil.copyfile(ROOT / 'firmware/patches/xiaozhi-e77dedb.patch',
-                        self.target / 'patches/xiaozhi-e77dedb.patch')
+        shutil.copyfile(ROOT / 'firmware/patches/xiaozhi-esp32.patch',
+                        self.target / 'patches/xiaozhi-esp32.patch')
         self.fetches = []
 
     def run_preparation(self):

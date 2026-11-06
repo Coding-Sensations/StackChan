@@ -6,7 +6,7 @@
 #include "local_tls.h"
 #include <esp_timer.h>
 #include <esp_mac.h>
-#include <mbedtls/sha256.h>
+#include <mbedtls/md.h>
 #include <ctime>
 #include <cstring>
 #include <cstdio>
@@ -38,7 +38,7 @@ void Publish(){
     if(!PersonalBindingAvailable()||b.device!=STACKCHAN_PIN_DEVICE||b.ca_sha256!=STACKCHAN_PIN_CA_SHA256||!ca||!*ca||!host||std::strcmp(host,STACKCHAN_PIN_HOST)||b.uri!=STACKCHAN_PIN_URI)return false;
     uint8_t mac[6];if(esp_read_mac(mac,ESP_MAC_WIFI_STA)!=ESP_OK)return false;
     char device[32];std::snprintf(device,sizeof(device),"stackchan-%02x%02x%02x%02x%02x%02x",mac[0],mac[1],mac[2],mac[3],mac[4],mac[5]);if(b.device!=device)return false;
-    uint8_t digest[32];if(mbedtls_sha256(reinterpret_cast<const unsigned char*>(ca),std::strlen(ca),digest,0))return false;
+    uint8_t digest[32];const mbedtls_md_info_t* md=mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);if(!md||mbedtls_md(md,reinterpret_cast<const unsigned char*>(ca),std::strlen(ca),digest))return false;
     const char* hex="0123456789abcdef";std::string hash;for(auto byte:digest){hash+=hex[byte>>4];hash+=hex[byte&15];}return hash==b.ca_sha256;
 }
 }

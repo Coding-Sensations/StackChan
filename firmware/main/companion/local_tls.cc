@@ -34,61 +34,61 @@ LocalTls::~LocalTls() {
     }
 }
 
-bool LocalTls::Connect(const std::string& host, int port) {
+NetworkResult<> LocalTls::Connect(const std::string& host, int port) {
     configASSERT(xTaskGetCurrentTaskHandle()==owner_task_);
-    if(!event_group_)return false;
+    if(!event_group_)return Fail(NetworkError::NotInitialized());
     const char* ca=companion_local_ca_pem(); const char* expected=companion_local_tls_host();
-    if(!ca || !expected || SelectTlsRoute(ca,expected,host)!=TlsRoute::Local || port<1 || port>65535)return false;
+    if(!ca || !expected || SelectTlsRoute(ca,expected,host)!=TlsRoute::Local || port<1 || port>65535)return Fail(NetworkError::InvalidArgument());
 #ifndef MBEDTLS_HAVE_TIME_DATE
-    return false; // Local profile requires actual certificate expiry checks.
+    return Fail(NetworkError::TlsFailed()); // Local profile requires actual certificate expiry checks.
 #endif
-    if(std::time(nullptr)<1735689600)return false; // Never verify against an unset clock.
+    if(std::time(nullptr)<1735689600)return Fail(NetworkError::TlsFailed()); // Never verify against an unset clock.
 
     if (tls_client_ != nullptr) {
         ESP_LOGE(TAG, "tls client has been initialized");
-        return false;
+        return Fail(NetworkError::TlsFailed());
     }
 
     tls_client_ = esp_tls_init();
     if (tls_client_ == nullptr) {
         ESP_LOGE(TAG, "Failed to initialize TLS");
-        return false;
+        return Fail(NetworkError::TlsFailed());
     }
 
     esp_tls_cfg_t cfg = {};
-    if(!ConfigureLocalTls(cfg,ca,expected,host,port)){esp_tls_conn_destroy(tls_client_);tls_client_=nullptr;return false;}
+    if(!ConfigureLocalTls(cfg,ca,expected,host,port)){esp_tls_conn_destroy(tls_client_);tls_client_=nullptr;return Fail(NetworkError::TlsFailed());}
     // Explicit CA only: no public bundle or global trust fallback.
 
     int ret = esp_tls_conn_new_sync(host.c_str(), host.length(), port, &cfg, tls_client_);
     if (ret != 1) {
         esp_tls_error_handle_t last_error;
+        NetworkError err = NetworkError::TlsFailed();
         if (esp_tls_get_error_handle(tls_client_, &last_error) == ESP_OK) {
             int error_code, error_flags;
-            esp_err_t err = esp_tls_get_and_clear_last_error(last_error, &error_code, &error_flags);
-            last_error_ = err;
-            ESP_LOGE(TAG, "Failed to connect to %s:%d, code=0x%x", host.c_str(), port, err);
+            esp_err_t esp_err = esp_tls_get_and_clear_last_error(last_error, &error_code, &error_flags);
+            err = NetworkError::FromEsp(esp_err);
+            ESP_LOGE(TAG, "Failed to connect to %s:%d, code=0x%x", host.c_str(), port, esp_err);
         } else {
-            last_error_ = -1;
             ESP_LOGE(TAG, "Failed to get error handle");
         }
         esp_tls_conn_destroy(tls_client_);
         tls_client_ = nullptr;
-        return false;
+        return Fail(err);
     }
 
     // Finish the synchronous handshake first. Thereafter a context lock must
     // never span a socket wait: idle reads must release it for heartbeat writes.
     int fd=-1;
     if(esp_tls_get_conn_sockfd(tls_client_,&fd)!=ESP_OK || fd<0){
-        last_error_=-1;esp_tls_conn_destroy(tls_client_);tls_client_=nullptr;return false;
+        esp_tls_conn_destroy(tls_client_);tls_client_=nullptr;return Fail(NetworkError::TlsFailed());
     }
     const int flags=fcntl(fd,F_GETFL,0);
     if(flags<0 || fcntl(fd,F_SETFL,flags|O_NONBLOCK)<0){
-        last_error_=-1;esp_tls_conn_destroy(tls_client_);tls_client_=nullptr;return false;
+        esp_tls_conn_destroy(tls_client_);tls_client_=nullptr;return Fail(NetworkError::FromErrno(errno));
     }
     const int configured=fcntl(fd,F_GETFL,0);
     if(configured<0 || !(configured&O_NONBLOCK)){
-        last_error_=-1;esp_tls_conn_destroy(tls_client_);tls_client_=nullptr;return false;
+        esp_tls_conn_destroy(tls_client_);tls_client_=nullptr;return Fail(NetworkError::TlsFailed());
     }
     socket_fd_=fd;
     active_=true;
@@ -101,9 +101,9 @@ bool LocalTls::Connect(const std::string& host, int port) {
         xEventGroupSetBits(ssl->event_group_, BIT0);
         vTaskDelete(NULL);
     }, "companion_tls", 4096, this, 1, &receive_task_handle_)!=pdPASS) {
-        active_=false;connected_=false;esp_tls_conn_destroy(tls_client_);tls_client_=nullptr;socket_fd_=-1;return false;
+        active_=false;connected_=false;esp_tls_conn_destroy(tls_client_);tls_client_=nullptr;socket_fd_=-1;return Fail(NetworkError::FromErrno(ENOMEM));
     }
-    return true;
+    return {};
 }
 
 void LocalTls::Disconnect() {
@@ -216,10 +216,6 @@ void LocalTls::ReceiveTask() {
     }
     diagnostic::Sample(diagnostic_role_);
     diagnostic_receive_task_.store(nullptr);
-}
-
-int LocalTls::GetLastError() {
-    return last_error_;
 }
 
 } // namespace companion

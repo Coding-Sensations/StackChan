@@ -1,8 +1,8 @@
 {
   "description": "Pinned composed Muse exclusion guards; source identity only, no runtime authority",
   "guard_hashes": {
-    "components/muse_direct_protocol/CMakeLists.txt": "6aeec330cbcd94d94a555a49727200f43fd5efeee25f557a39cfe98029452103",
-    "main/CMakeLists.txt": "ec62a02bfd6e3ea7e78cf4a7257c7a0b012af71868e2a0129e443ce09942f3b6",
+    "components/muse_direct_protocol/CMakeLists.txt": "a35a5bf54ddd98adf02784a62c641a7601084b906bafc6cd4f4ade609e6b29aa",
+    "main/CMakeLists.txt": "c7e271d04841fec9a68cdec0e6df808eae3416c71d2a6f85e4c424c31deda095",
     "main/apps/stock_shell/provider_companion_app.cc": "b339df7452f4e699174cb2af5ee3c14dca1772f913ad6a453463f8cf83ed37aa",
     "main/companion/provider_room_view.hpp": "fc0cd15b5d375035d2fc703423330b8f29c1d9c128dbdbe8d9c3ea188a724cdc",
     "main/feature_profiles/muse_disabled_boundary.cc": "e2668d445a50201784e0ac99e3f2419c1739120d491ce2d13cd72af1853aa70e",

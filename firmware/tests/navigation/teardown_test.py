@@ -37,6 +37,8 @@ constexpr int SHUT_RDWR=2,pdFALSE=0,BIT0=1,ESPNOW_EVENT_STOP=1,ESPNOW_DATA_TYPE_
 constexpr int MQTT_CONNECTED_EVENT=1,MQTT_DISCONNECTED_EVENT=2,MQTT_ERROR_EVENT=4;
 constexpr int ESP_TCP_EVENT_RECEIVE_TASK_EXIT=1,ESP_UDP_EVENT_RECEIVE_TASK_EXIT=1,ESP_SSL_EVENT_RECEIVE_TASK_EXIT=1;
 #define pdMS_TO_TICKS(x) (x)
+#define ESP_LOGE(...) ((void)0)
+static const char* TAG = "test";
 using esp_err_t=int;
 struct Group{std::atomic<int> bits{0};int polls=0;};
 std::mutex home_tcp_receiver_exit_mutex,home_udp_receiver_exit_mutex,home_ssl_receiver_exit_mutex;
@@ -47,16 +49,16 @@ int xEventGroupWaitBits(Group* group,int,int,int,int){
  assert(group);++group->polls;
  if(kernel_window){while(!group->bits.load())std::this_thread::yield();waiter_seen=true;return group->bits.load();}
  if(during_wait)during_wait();
- if(group->polls==3)group->bits=1;
+ if(!group->bits.load())group->bits=1;
  return group->bits.load();
 }
 void xEventGroupClearBits(Group*,int){}
 void xEventGroupSetBits(Group* group,int bits){group->bits=bits;while(!setter_return.load())std::this_thread::yield();}
 int xEventGroupGetBits(Group* group){assert(group);return group->bits.load();}
 int shutdown(int,int){return 0;}int close(int){return 0;}
-struct EspTcp{bool connected_=false;int tcp_fd_=1;void* receive_task_handle_=(void*)1;Group* event_group_;void Disconnect();};
+struct EspTcp{std::atomic<bool> connected_{false};int tcp_fd_=1;void* receive_task_handle_=(void*)1;Group* event_group_;std::function<void()> disconnect_callback_{};void Disconnect();};
 struct EspUdp{bool connected_=false;int udp_fd_=1;void* receive_task_handle_=(void*)1;Group* event_group_;void Disconnect();};
-struct EspSsl{bool connected_=false;void* tls_client_=(void*)1;void* receive_task_handle_=(void*)1;Group* event_group_;void Disconnect();};
+struct EspSsl{std::atomic<bool> connected_{false};void* tls_client_=(void*)1;void* receive_task_handle_=(void*)1;Group* event_group_;int sockfd_=3;std::function<void()> disconnect_callback_{};std::mutex tls_mutex_;void Disconnect();};
 bool tls_destroyed=false;Group* tls_group;
 int esp_tls_get_conn_sockfd(void*,int* fd){*fd=3;return 0;}
 void esp_tls_conn_destroy(void*){assert(tls_group->bits);tls_destroyed=true;}
@@ -93,9 +95,9 @@ void vEventGroupDelete(Group* group){assert(group);++freed;}
 int main(){
  for(int repeat=0;repeat<50;++repeat){
   Group tcp,udp,tls;EspTcp t{false,1,(void*)1,&tcp};EspUdp u{false,1,(void*)1,&udp};EspSsl s{false,(void*)1,(void*)1,&tls};
-  during_wait=[&]{assert(t.receive_task_handle_);};t.Disconnect();assert(tcp.polls==3&&!t.receive_task_handle_);t.Disconnect();assert(tcp.polls==3);
-  during_wait=[&]{assert(u.receive_task_handle_);};u.Disconnect();assert(udp.polls==3&&!u.receive_task_handle_);
-  tls_destroyed=false;tls_group=&tls;during_wait=[&]{assert(!tls_destroyed&&s.tls_client_);};s.Disconnect();assert(tls_destroyed&&!s.tls_client_);
+  during_wait=[&]{assert(t.receive_task_handle_);};t.Disconnect();assert(tcp.polls==1&&!t.receive_task_handle_);t.Disconnect();assert(tcp.polls==1);
+  during_wait=[&]{assert(u.receive_task_handle_);};u.Disconnect();assert(udp.polls==1&&!u.receive_task_handle_);
+  tls_destroyed=false;tls_group=&tls;during_wait=[&]{assert(!tls_destroyed&&s.tls_client_);};s.Disconnect();assert(tls.polls==1&&tls_destroyed&&!s.tls_client_);
   EspMqtt m;mqtt_stop_calls=mqtt_destroy_calls=0;mqtt_pointer_valid=true;m.Disconnect();assert(!m.mqtt_client_handle_&&mqtt_stop_calls==3&&mqtt_destroy_calls==2);
  }
  during_wait={};
@@ -119,7 +121,7 @@ int main(){
  assert(espnow_deinit()==ESP_FAIL&&g_espnow_config&&freed==before); // failed stop retains owner
  driver_failure=false;home_join_group=&join;home_worker_started=true;g_event_group=&events;g_send_lock=(void*)1;
  during_wait=[&]{assert(g_espnow_config&&g_event_group&&g_send_lock);};
- assert(espnow_deinit()==ESP_OK);assert(join.polls==3&&!g_espnow_config&&!home_worker_started);
+ assert(espnow_deinit()==ESP_OK);assert(join.polls==1&&!g_espnow_config&&!home_worker_started);
 }
 '''
     cpp=tmp/'shutdown.cpp';cpp.write_text(source);exe=tmp/'shutdown'

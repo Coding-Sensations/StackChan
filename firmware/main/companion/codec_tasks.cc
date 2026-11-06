@@ -31,13 +31,11 @@ bool CodecTasks::StageBorrowedPhysicalProof(AudioLease lease,uint32_t media,wake
 }
 bool CodecTasks::Input(bool enable){
     if(!(enable?CommonAudioAuthority().Current(lease_):CommonAudioAuthority().Holds(lease_)))return false;
-    if(codec_->EnableInputChecked(enable))return true;
-    codec_fault(enable?diagnostic::FaultCode::DriverInputOpen:diagnostic::FaultCode::DriverInputClose);return false;
+    codec_->EnableInput(enable);return true;
 }
 bool CodecTasks::Output(bool enable){
     if(!(enable?CommonAudioAuthority().Current(lease_):CommonAudioAuthority().Holds(lease_)))return false;
-    if(codec_->EnableOutputChecked(enable))return true;
-    codec_fault(enable?diagnostic::FaultCode::DriverOutputOpen:diagnostic::FaultCode::DriverOutputClose);return false;
+    codec_->EnableOutput(enable);return true;
 }
 bool CodecTasks::CloseDirections(){
     // Attempt both closes, even if the first fails. Neither failure proves silence.
@@ -186,9 +184,10 @@ void CodecTasks::Run(){
             if(!Output(true)){failed=true;break;}
             for(std::size_t i=0;i<playback.size() && playing_ && Current(epoch);i+=480){
                 std::copy_n(playback.data()+i,480,slice.data());
-                if(!Current(epoch) || !codec_->OutputDataChecked(slice)){
+                if(!Current(epoch)){
                     codec_fault(diagnostic::FaultCode::Write);failed=true;break;
                 }
+                codec_->OutputData(slice);
                 ObserveLevel(epoch,slice,true);
             }
             if(failed)break;
@@ -201,7 +200,7 @@ void CodecTasks::Run(){
         if(playing_){if(!Input(false)){failed=true;break;}WipePending();vTaskDelay(pdMS_TO_TICKS(10));continue;}
         if(!Current(epoch) || playing_)continue;
         if(!Input(true)){failed=true;break;}
-        if(!Current(epoch) || !codec_->InputDataChecked(hardware)){codec_fault(diagnostic::FaultCode::InputRead);failed=true;break;}
+        if(!Current(epoch) || !codec_->InputData(hardware)){codec_fault(diagnostic::FaultCode::InputRead);failed=true;break;}
         if(!Current(epoch) || playing_)continue;
         for(std::size_t i=0;i<480;++i)mono[i]=hardware[i*codec_->input_channels()];
         ObserveLevel(epoch,mono,false);

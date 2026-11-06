@@ -6,7 +6,7 @@
 #include "local_tls_lifecycle.hpp"
 #include "transport_write.hpp"
 #include <esp_random.h>
-#include <mbedtls/sha1.h>
+#include <mbedtls/md.h>
 #include "websocket_handshake.hpp"
 #include "network_interface.h"
 #include <esp_log.h>
@@ -140,7 +140,8 @@ bool BoundedWebSocket::Connect(const char* uri) {
     SetHeader("Sec-WebSocket-Key", base64_key.c_str());
     auto accept_input=base64_key+"258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
     unsigned char digest[20];
-    if(mbedtls_sha1(reinterpret_cast<const unsigned char*>(accept_input.data()),accept_input.size(),digest)!=0)return false;
+    const mbedtls_md_info_t* md=mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);
+    if(!md||mbedtls_md(md,reinterpret_cast<const unsigned char*>(accept_input.data()),accept_input.size(),digest)!=0)return false;
     expected_accept_=base64_encode(digest,sizeof(digest));
     handshake_completed_=false;failed_=false;receive_buffer_.clear();current_message_.clear();
 
@@ -178,8 +179,8 @@ bool BoundedWebSocket::Connect(const char* uri) {
     });
 
     // 使用 tcp 建立连接
-    if (!tcp_->Connect(host, port_number)) {
-        ESP_LOGE(TAG, "Failed to connect to server");
+    if (auto result = tcp_->Connect(host, port_number); !result) {
+        ESP_LOGE(TAG, "Failed to connect to server: %s", result.error().ToString().c_str());
         return false;
     }
 
@@ -308,13 +309,6 @@ void BoundedWebSocket::OnData(std::function<void(const char*, size_t, bool binar
 
 void BoundedWebSocket::OnError(std::function<void(int)> callback) {
     on_error_ = callback;
-}
-
-int BoundedWebSocket::GetLastError() {
-    if (tcp_) {
-        return tcp_->GetLastError();
-    }
-    return 0;  // No error if TCP connection doesn't exist
 }
 
 void BoundedWebSocket::OnTcpData(const std::string& data) {

@@ -173,8 +173,14 @@ bool CommitFirmwareInstall(const std::function<bool()>& action){if(cancel_at_com
 }
 namespace mclog {template<class...T>void tagError(T...){}template<class...T>void tagInfo(T...){} }
 std::string_view _tag="test";
+struct CheckResult {
+ bool ok=true;
+ explicit operator bool() const { return ok; }
+ struct Error { const char* Name() const { return "test error"; } };
+ Error error() const { return {}; }
+};
 struct Ota {std::string url="https://example.invalid/fw.bin",version="test";
- int CheckVersion(){return 0;}bool HasNewVersion(){return new_version;}void MarkCurrentVersionValid(){}
+ CheckResult CheckVersion(){return {};}bool HasNewVersion(){return new_version;}void MarkCurrentVersionValid(){}
  const std::string& GetFirmwareUrl(){return url;}const std::string& GetFirmwareVersion(){return version;}
  static bool Upgrade(const std::string&,std::function<void(int,size_t)> progress){if(cancel_in_upgrade)home=true;progress(50,2000);return upgrade_ok;}};
 struct Hal{void reboot(){assert(!home);++reboots;}bool updateFirmware(std::function<void(std::string_view)>);};

@@ -5,7 +5,7 @@
 #include <esp_random.h>
 #include <esp_timer.h>
 #include <mbedtls/base64.h>
-#include <mbedtls/sha1.h>
+#include <mbedtls/md.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -82,7 +82,8 @@ bool NativeWebSocketEntropy::Nonce(char key[25],char expected[29]){
  for(volatile uint8_t& c:random)c=0;
  if(!encoded)return false;
  const std::string input=std::string(key,24)+"258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
- const bool hashed=mbedtls_sha1(reinterpret_cast<const unsigned char*>(input.data()),input.size(),digest)==0;
+ const mbedtls_md_info_t* md=mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);
+ const bool hashed=md&&mbedtls_md(md,reinterpret_cast<const unsigned char*>(input.data()),input.size(),digest)==0;
  const bool accepted=hashed&&mbedtls_base64_encode(reinterpret_cast<unsigned char*>(expected),29,&written,digest,sizeof(digest))==0&&written==28;
  for(volatile uint8_t& c:digest)c=0;
  return accepted;

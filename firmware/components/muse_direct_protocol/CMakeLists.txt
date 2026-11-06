@@ -23,7 +23,7 @@ idf_component_register(
       "noise_core/src/Status.cpp" "noise_core/src/Transport.cpp"
       "noise_core/src/TransportFrameCodec.cpp" ${muse_voice_protocol_sources}
  INCLUDE_DIRS "." "pairing" "noise_core/include"
- PRIV_REQUIRES mbedtls json esp_timer esp_system efuse
+ PRIV_REQUIRES mbedtls espressif__cjson esp_timer esp_system efuse
  WHOLE_ARCHIVE)
 target_compile_features(${COMPONENT_LIB} PUBLIC cxx_std_17)
 

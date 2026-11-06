@@ -126,8 +126,8 @@ public:
         SetBrightness(0);
     }
 
-    esp_err_t ReadSdControl(uint8_t& value){return TryReadRegs(0x90,&value,1,100);}
-    esp_err_t ReadSdVoltage(uint8_t& value){return TryReadRegs(0x95,&value,1,100);}
+    esp_err_t ReadSdControl(uint8_t& value){return TryReadRegs(0x90,&value,1);}
+    esp_err_t ReadSdVoltage(uint8_t& value){return TryReadRegs(0x95,&value,1);}
 
     void SetBrightness(uint8_t brightness)
     {
@@ -240,7 +240,7 @@ public:
         WriteReg(0x13, 0b11111111);  // LEDMODE_P1
     }
 
-    esp_err_t ReadSdSwitch(uint8_t& value){return TryReadRegs(0x00,&value,1,100);}
+    esp_err_t ReadSdSwitch(uint8_t& value){return TryReadRegs(0x00,&value,1);}
 
     // Checked RMW of one P0 output bit (logic and tests: aw9523_p0.hpp). Never uses WriteReg, which aborts
     // on bus error. p0_mutex_ covers the two-step RMW; individual transfers are serialized by the I2C bus.
@@ -248,7 +248,7 @@ public:
     {
         struct Io {
             Aw9523& d;
-            int Read(uint8_t reg, uint8_t& v) { return d.TryReadRegs(reg, &v, 1, 100); }
+            int Read(uint8_t reg, uint8_t& v) { return d.TryReadRegs(reg, &v, 1); }
             int Write(uint8_t reg, uint8_t v)
             {
                 const uint8_t tx[2] = {reg, v};

@@ -20,7 +20,6 @@
 #include <cJSON.h>
 #include <driver/gpio.h>
 #include <arpa/inet.h>
-#include <font_awesome.h>
 
 // Narrow declaration avoids importing camera-driver types for this UI mode query.
 namespace hal_bridge { bool is_xiaozhi_mode(); }
@@ -48,7 +47,7 @@ static void ReportAudioStartupFailure(Display* display,bool initialized,bool clo
 }
 
 
-Application::Application() {
+Application::Application() : notify_player_(audio_service_) {
     event_group_ = xEventGroupCreate();
 
 #if CONFIG_USE_DEVICE_AEC && CONFIG_USE_SERVER_AEC
@@ -468,16 +467,17 @@ void Application::CheckNewVersion() {
         auto display = board.GetDisplay();
         display->SetStatus(Lang::Strings::CHECKING_NEW_VERSION);
 
-        esp_err_t err = ota_->CheckVersion();
-        if (err != ESP_OK) {
+        auto check = ota_->CheckVersion();
+        if (!check) {
             retry_count++;
             if (retry_count >= MAX_RETRY) {
                 ESP_LOGE(TAG, "Too many retries, exit version check");
                 return;
             }
 
+            const auto& err = check.error();
             char error_message[128];
-            snprintf(error_message, sizeof(error_message), "code=%d, url=%s", err, ota_->GetCheckVersionUrl().c_str());
+            snprintf(error_message, sizeof(error_message), "%s, url=%s", err.ToString().c_str(), ota_->GetCheckVersionUrl().c_str());
             char buffer[256];
             snprintf(buffer, sizeof(buffer), Lang::Strings::CHECK_NEW_VERSION_FAILED, retry_delay, error_message);
             Alert(Lang::Strings::ERROR, buffer, "cloud_slash", Lang::Sounds::OGG_EXCLAMATION);
@@ -764,7 +764,10 @@ void Application::ContinueOpenAudioChannel(ListeningMode mode) {
 
     if (!protocol_->IsAudioChannelOpened()) {
         if (!protocol_->OpenAudioChannel()) {
+            // Return to idle so the device is not stuck in the connecting
+            // state (not every failure path reports a network error)
             board.SetPowerSaveLevel(PowerSaveLevel::LOW_POWER);
+            SetDeviceState(kDeviceStateIdle);
             return;
         }
     }
@@ -878,8 +881,11 @@ void Application::ContinueWakeWordInvoke(const std::string& wake_word) {
 
     if (!protocol_->IsAudioChannelOpened()) {
         if (!protocol_->OpenAudioChannel()) {
+            // Return to idle so the device is not stuck in the connecting
+            // state (not every failure path reports a network error), and
+            // wake word detection is re-enabled by the idle state handler.
             board.SetPowerSaveLevel(PowerSaveLevel::LOW_POWER);
-            audio_service_.EnableWakeWordDetection(true);
+            SetDeviceState(kDeviceStateIdle);
             return;
         }
     }
