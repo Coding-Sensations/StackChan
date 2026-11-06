@@ -258,13 +258,13 @@ public:
             lv_label_set_text(result_, std::string(message).c_str());
         });
         Ota ota;
-        auto error = ota.CheckVersion();
+        const auto error = ota.CheckVersion();
         std::string result = "Current: " + std::string(esp_app_get_description()->version) + "\n";
-        if (error != ESP_OK) result += "Could not check for updates. Try again later.";
+        if (!error) result += "Could not check for updates. Try again later.";
         else if (ota.HasNewVersion()) result += "Available: " + ota.GetFirmwareVersion().substr(0, 128) +
             "\nInstalling vendor firmware replaces this custom build.";
         else result += "No newer vendor firmware is listed.";
-        if (error == ESP_OK && ota.HasNewVersion() && IsFirmwareImageUrl(ota.GetFirmwareUrl())) {
+        if (error.has_value() && ota.HasNewVersion() && IsFirmwareImageUrl(ota.GetFirmwareUrl())) {
             firmware_url_ = ota.GetFirmwareUrl(); firmware_version_ = ota.GetFirmwareVersion();
         }
         result += "\nInstallation requires confirmation.";
@@ -409,7 +409,7 @@ void RunFeature(Feature feature)
         auto& session=runtime_lifecycle::Session();
         if(session.Poll(uint64_t(esp_timer_get_time()/1000),[]{companion::RevokeAudio(runtime_audio_lease);runtime_lifecycle::QuietHardware();},
             [&]{return runtime_lifecycle::PollSourcesStopped(&shell);},
-            []{runtime_lifecycle::QuietHardware();auto& audio=Application::GetInstance().GetAudioService();if(!audio.Stop(10))return false;auto* codec=Board::GetInstance().GetAudioCodec();if(!codec)return false;const bool input=codec->EnableInputChecked(false),output=codec->EnableOutputChecked(false);return input&&output;},
+            []{runtime_lifecycle::QuietHardware();auto& audio=Application::GetInstance().GetAudioService();if(!audio.Stop(10))return false;auto* codec=Board::GetInstance().GetAudioCodec();if(!codec)return false;codec->EnableInput(false);codec->EnableOutput(false);return true;},
             [&]{
                 if(!ui_closed){
                     runtime_lifecycle::FinalizeNativeUi(true);
