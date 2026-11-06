@@ -27,6 +27,10 @@
 #include <mbedtls/ecp.h>
 #pragma pop_macro("MBEDTLS_ALLOW_PRIVATE_ACCESS")
 
+#pragma push_macro("MBEDTLS_DECLARE_PRIVATE_IDENTIFIERS")
+#ifndef MBEDTLS_DECLARE_PRIVATE_IDENTIFIERS
+#define MBEDTLS_DECLARE_PRIVATE_IDENTIFIERS
+#endif
 #if defined(__has_include)
 #if __has_include(<mbedtls/ctr_drbg.h>)
 #include <mbedtls/ctr_drbg.h>
@@ -48,9 +52,9 @@
 #include <mbedtls/entropy.h>
 #include <mbedtls/gcm.h>
 #endif
-#include <mbedtls/hkdf.h>
 #include <mbedtls/md.h>
 #include <mbedtls/platform_util.h>
+#pragma pop_macro("MBEDTLS_DECLARE_PRIVATE_IDENTIFIERS")
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -562,28 +566,70 @@ Status MbedtlsCryptoBackend::HkdfSha256(
     return Status::Internal();
   }
 
+  std::array<uint8_t, kSha256DigestSize> prk{};
+  std::array<uint8_t, kSha256DigestSize> block{};
+  std::array<uint8_t, kSha256DigestSize> zeroSalt{};
   std::array<uint8_t, kSha256DigestSize * kMaxHkdfSha256Outputs> okm{};
   const size_t okmLen = outputs.size() * kSha256DigestSize;
-  if (mbedtls_hkdf(
+  const unsigned char* saltData = salt.empty() ? zeroSalt.data() : MbedtlsData(salt);
+  const size_t saltLen = salt.empty() ? zeroSalt.size() : salt.size();
+  if (mbedtls_md_hmac(
           md,
-          MbedtlsData(salt),
-          salt.size(),
+          saltData,
+          saltLen,
           MbedtlsData(ikm),
           ikm.size(),
-          MbedtlsData(info),
-          info.size(),
-          okm.data(),
-          okmLen) != 0) {
+          prk.data()) != 0) {
+    SecureZeroize(prk);
+    SecureZeroize(block);
+    SecureZeroize(zeroSalt);
     SecureZeroize(okm);
     return Status::Internal();
   }
 
+  mbedtls_md_context_t hmac;
+  mbedtls_md_init(&hmac);
+  if (mbedtls_md_setup(&hmac, md, 1) != 0) {
+    mbedtls_md_free(&hmac);
+    SecureZeroize(prk);
+    SecureZeroize(block);
+    SecureZeroize(zeroSalt);
+    SecureZeroize(okm);
+    return Status::Internal();
+  }
+
+  size_t offset = 0;
+  for (uint8_t counter = 1; offset < okmLen; ++counter) {
+    if (mbedtls_md_hmac_starts(&hmac, prk.data(), prk.size()) != 0 ||
+        (offset != 0 &&
+         mbedtls_md_hmac_update(&hmac, block.data(), block.size()) != 0) ||
+        (!info.empty() &&
+         mbedtls_md_hmac_update(&hmac, MbedtlsData(info), info.size()) != 0) ||
+        mbedtls_md_hmac_update(&hmac, &counter, 1) != 0 ||
+        mbedtls_md_hmac_finish(&hmac, block.data()) != 0) {
+      mbedtls_md_free(&hmac);
+      SecureZeroize(prk);
+      SecureZeroize(block);
+      SecureZeroize(zeroSalt);
+      SecureZeroize(okm);
+      return Status::Internal();
+    }
+
+    const size_t chunk = std::min(kSha256DigestSize, okmLen - offset);
+    std::copy_n(block.data(), chunk, okm.data() + offset);
+    offset += chunk;
+  }
+
+  mbedtls_md_free(&hmac);
   for (size_t i = 0; i < outputs.size(); ++i) {
     std::copy_n(
         okm.data() + (i * kSha256DigestSize),
         kSha256DigestSize,
         outputs[i].data());
   }
+  SecureZeroize(prk);
+  SecureZeroize(block);
+  SecureZeroize(zeroSalt);
   SecureZeroize(okm);
   return OkStatus();
 }
