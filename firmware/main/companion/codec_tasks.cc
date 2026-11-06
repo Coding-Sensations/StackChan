@@ -31,11 +31,13 @@ bool CodecTasks::StageBorrowedPhysicalProof(AudioLease lease,uint32_t media,wake
 }
 bool CodecTasks::Input(bool enable){
     if(!(enable?CommonAudioAuthority().Current(lease_):CommonAudioAuthority().Holds(lease_)))return false;
-    codec_->EnableInput(enable);return true;
+    if(codec_->EnableInputChecked(enable))return true;
+    codec_fault(enable?diagnostic::FaultCode::DriverInputOpen:diagnostic::FaultCode::DriverInputClose);return false;
 }
 bool CodecTasks::Output(bool enable){
     if(!(enable?CommonAudioAuthority().Current(lease_):CommonAudioAuthority().Holds(lease_)))return false;
-    codec_->EnableOutput(enable);return true;
+    if(codec_->EnableOutputChecked(enable))return true;
+    codec_fault(enable?diagnostic::FaultCode::DriverOutputOpen:diagnostic::FaultCode::DriverOutputClose);return false;
 }
 bool CodecTasks::CloseDirections(){
     // Attempt both closes, even if the first fails. Neither failure proves silence.
