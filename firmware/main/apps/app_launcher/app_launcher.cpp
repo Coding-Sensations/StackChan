@@ -19,6 +19,22 @@
 
 using namespace mooncake;
 
+namespace {
+
+hal_toggles::ToggleStates load_toggle_states()
+{
+    auto states = hal_toggles::default_states();
+    hal_toggles::load_states(states);
+    return states;
+}
+
+bool is_app_visible(const mooncake::AppProps_t& props, const hal_toggles::ToggleStates& states)
+{
+    return hal_toggles::is_app_enabled(props.appID, states);
+}
+
+}  // namespace
+
 void AppLauncher::onLauncherCreate()
 {
     mclog::tagInfo(getAppInfo().name, "on create");
@@ -96,16 +112,30 @@ void AppLauncher::onLauncherDestroy()
 void AppLauncher::create_launcher_view(int preferredAppID)
 {
     _launcher_screen=lv_screen_active();
-    const auto installed=getAppProps();
+    const auto installed = getAppProps();
+    const auto states    = load_toggle_states();
     std::vector<mooncake::AppProps_t> shown;
-    if(_category){
-        for(const auto& props:installed)if(hal_toggles::is_app_enabled(props.info.name)&&launcher_categories::Assign(props.info.name)==*_category)shown.push_back(props);
-        if(!installed.empty()){auto back=installed.front();back.appID=launcher_categories::Back;back.info.name="Back to categories";shown.push_back(back);}
-    }else{
-        for(size_t index=0;index<launcher_categories::Titles.size();++index){
-            const auto group=static_cast<launcher_categories::Group>(index);
-            for(const auto& props:installed)if(hal_toggles::is_app_enabled(props.info.name)&&launcher_categories::Assign(props.info.name)==group){
-                auto category=props;category.appID=launcher_categories::Token(group);category.info.name=std::string(launcher_categories::Titles[index]);shown.push_back(category);break;
+    if (_category) {
+        for (const auto& props : installed) {
+            if (is_app_visible(props, states) && launcher_categories::Assign(props.info.name) == *_category) shown.push_back(props);
+        }
+        if (!installed.empty()) {
+            auto back      = installed.front();
+            back.appID     = launcher_categories::Back;
+            back.info.name = "Back to categories";
+            shown.push_back(back);
+        }
+    } else {
+        for (size_t index = 0; index < launcher_categories::Titles.size(); ++index) {
+            const auto group = static_cast<launcher_categories::Group>(index);
+            for (const auto& props : installed) {
+                if (is_app_visible(props, states) && launcher_categories::Assign(props.info.name) == group) {
+                    auto category      = props;
+                    category.appID     = launcher_categories::Token(group);
+                    category.info.name = std::string(launcher_categories::Titles[index]);
+                    shown.push_back(category);
+                    break;
+                }
             }
         }
     }
@@ -120,21 +150,44 @@ void AppLauncher::create_launcher_view(int preferredAppID)
 void AppLauncher::handle_category_navigation()
 {
     // Called after LauncherView::update returns; never destroy its view in a callback.
-    const int action=_pending_navigation;_pending_navigation=-1;
-    if(action==-1)return;
-    if(action==launcher_categories::Back){
-        const auto focus=_category?launcher_categories::Token(*_category):launcher_categories::Token(launcher_categories::Group::Companions);
-        _category.reset();create_launcher_view(focus);return;
+    const int action = _pending_navigation;
+    _pending_navigation = -1;
+    if (action == -1) return;
+    if (action == launcher_categories::Back) {
+        const auto focus = _category ? launcher_categories::Token(*_category)
+                                     : launcher_categories::Token(launcher_categories::Group::Companions);
+        _category.reset();
+        create_launcher_view(focus);
+        return;
     }
-    if(launcher_categories::IsGroup(action)){
-        const auto group=launcher_categories::Decode(action);int only=-1;unsigned count=0;
-        for(const auto& props:getAppProps())if(hal_toggles::is_app_enabled(props.info.name)&&launcher_categories::Assign(props.info.name)==group){only=props.appID;++count;}
-        if(count==1){openApp(only);return;}
-        _category=group;create_launcher_view();return;
+    const auto states = load_toggle_states();
+    if (launcher_categories::IsGroup(action)) {
+        const auto group = launcher_categories::Decode(action);
+        int only         = -1;
+        unsigned count   = 0;
+        for (const auto& props : getAppProps()) {
+            if (is_app_visible(props, states) && launcher_categories::Assign(props.info.name) == group) {
+                only = props.appID;
+                ++count;
+            }
+        }
+        if (count == 1) {
+            openApp(only);
+            return;
+        }
+        _category = group;
+        create_launcher_view();
+        return;
     }
-    bool installed=false;
-    for(const auto& props:getAppProps())if(hal_toggles::is_app_enabled(props.info.name)&&props.appID==action&&(!_category||launcher_categories::Assign(props.info.name)==*_category)){installed=true;break;}
-    if(installed)openApp(action);
+    bool installed = false;
+    for (const auto& props : getAppProps()) {
+        if (is_app_visible(props, states) && props.appID == action &&
+            (!_category || launcher_categories::Assign(props.info.name) == *_category)) {
+            installed = true;
+            break;
+        }
+    }
+    if (installed) openApp(action);
 }
 
 void AppLauncher::screensaver_update()
