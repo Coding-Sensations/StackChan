@@ -17,6 +17,10 @@
 #include "esp_cam_ctlr_spi.h"
 #include "linux/videodev2.h"
 
+#ifndef CAM_CTLR_COLOR_YUV422
+#define CAM_CTLR_COLOR_YUV422 CAM_CTLR_COLOR_YUV422_YUYV
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
