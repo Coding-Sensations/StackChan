@@ -4,8 +4,21 @@
 #include <cstdint>
 #include <mbedtls/ssl.h>
 #include <mbedtls/x509_crt.h>
+#if defined(__has_include)
+#if __has_include(<mbedtls/entropy.h>)
+#include <mbedtls/entropy.h>
+#else
+#include <mbedtls/private/entropy.h>
+#endif
+#if __has_include(<mbedtls/ctr_drbg.h>)
+#include <mbedtls/ctr_drbg.h>
+#else
+#include <mbedtls/private/ctr_drbg.h>
+#endif
+#else
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
+#endif
 namespace companion {
 // One serialized caller. The provider already owns the selected USB channel.
 // The provider and client must remain alive until Stop returns true.

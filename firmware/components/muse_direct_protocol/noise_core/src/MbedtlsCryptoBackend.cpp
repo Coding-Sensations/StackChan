@@ -27,15 +27,25 @@
 #include <mbedtls/ecp.h>
 #pragma pop_macro("MBEDTLS_ALLOW_PRIVATE_ACCESS")
 
-#include <mbedtls/ctr_drbg.h>
-#include <mbedtls/entropy.h>
 #if defined(__has_include)
+#if __has_include(<mbedtls/ctr_drbg.h>)
+#include <mbedtls/ctr_drbg.h>
+#else
+#include <mbedtls/private/ctr_drbg.h>
+#endif
+#if __has_include(<mbedtls/entropy.h>)
+#include <mbedtls/entropy.h>
+#else
+#include <mbedtls/private/entropy.h>
+#endif
 #if __has_include(<mbedtls/gcm.h>)
 #include <mbedtls/gcm.h>
 #else
 #include <mbedtls/private/gcm.h>
 #endif
 #else
+#include <mbedtls/ctr_drbg.h>
+#include <mbedtls/entropy.h>
 #include <mbedtls/gcm.h>
 #endif
 #include <mbedtls/hkdf.h>
