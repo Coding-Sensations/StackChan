@@ -166,8 +166,16 @@ bool CustomWakeWord::PauseChecked(uint32_t timeout_ms){
 void CustomWakeWord::Stop(){(void)StopChecked();}
 
 void CustomWakeWord::Feed(const std::vector<int16_t>& data) {
+    FeedSamples(data.data(), data.size(), false);
+}
+
+void CustomWakeWord::FeedMono(const int16_t* data, size_t samples) {
+    FeedSamples(data, samples, true);
+}
+
+void CustomWakeWord::FeedSamples(const int16_t* data, size_t samples, bool mono) {
     checked_audio_child::Lifecycle::Operation operation(life_);
-    if(!operation||data.size()>8192)return;
+    if(!operation||samples>8192||data==nullptr)return;
     if (multinet_model_data_ == nullptr) {
         return;
     }
@@ -178,13 +186,14 @@ void CustomWakeWord::Feed(const std::vector<int16_t>& data) {
         return;
     }
 
-    // If input channels is 2, we need to fetch the left channel data
-    if (codec_->input_channels() == 2) {
-        for (size_t i = 0; i < data.size(); i += 2) {
+    // Interleaved stereo sources need the left channel extracted; mono sources
+    // (e.g. AFE output) are fed directly.
+    if (!mono && codec_->input_channels() == 2) {
+        for (size_t i = 0; i < samples; i += 2) {
             input_buffer_.push_back(data[i]);
         }
     } else {
-        input_buffer_.insert(input_buffer_.end(), data.begin(), data.end());
+        input_buffer_.insert(input_buffer_.end(), data, data + samples);
     }
     
     int chunksize = multinet_->get_samp_chunksize(multinet_model_data_);

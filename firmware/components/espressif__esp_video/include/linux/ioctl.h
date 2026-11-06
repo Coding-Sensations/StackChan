@@ -51,6 +51,13 @@ extern "C" {
 
 #define _IOC_TYPECHECK(t) (sizeof(t))
 
+/* lwIP's sockets.h (pulled in via sys/socket.h) defines _IO/_IOR/_IOW with a
+ * different, incompatible ioctl encoding. Undefine them so the Linux V4L2
+ * encodings below always win; otherwise VIDIOC_* ioctl numbers would be wrong. */
+#undef _IO
+#undef _IOR
+#undef _IOW
+#undef _IOWR
 #define _IO(type,nr)        _IOC(_IOC_NONE,(type),(nr),0)
 #define _IOR(type,nr,size)  _IOC(_IOC_READ,(type),(nr),(_IOC_TYPECHECK(size)))
 #define _IOW(type,nr,size)  _IOC(_IOC_WRITE,(type),(nr),(_IOC_TYPECHECK(size)))
