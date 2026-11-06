@@ -48,7 +48,7 @@
 #include <esp_system.h>
 #include <esp_timer.h>
 #include <cstdio>
-#include <mbedtls/sha256.h>
+#include <mbedtls/md.h>
 #ifndef STACKCHAN_COMPANION_TRUSTED_USB_PROVISIONING
 #define STACKCHAN_COMPANION_TRUSTED_USB_PROVISIONING 0
 #endif
@@ -173,7 +173,8 @@ public:
         if(!numeric_)return false;
         if(numeric_){
             unsigned char digest[32];
-            if(mbedtls_sha256(reinterpret_cast<const unsigned char*>(ca),std::strlen(ca),digest,0))return false;
+            const mbedtls_md_info_t* md=mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+            if(!md||mbedtls_md(md,reinterpret_cast<const unsigned char*>(ca),std::strlen(ca),digest))return false;
             char hash[65];const char* hex="0123456789abcdef";
             for(unsigned i=0;i<32;++i){hash[2*i]=hex[digest[i]>>4];hash[2*i+1]=hex[digest[i]&15];}hash[64]=0;
             if(std::strcmp(hash,STACKCHAN_PIN_CA_SHA256))return false;
