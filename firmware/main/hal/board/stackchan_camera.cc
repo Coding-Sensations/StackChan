@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <errno.h>
 #include <cstring>
-#include <stdexcept>
 #include <esp_heap_caps.h>
 #include <esp_timer.h>
 #include <esp_log.h>
@@ -391,11 +390,11 @@ bool StackChanCamera::CopyLV01(Binding binding,uint8_t* out,size_t capacity,size
     return adapter_.CopyLV01(view,held,binding,producer_.StampLocked(),
         [](){return uint64_t(esp_timer_get_time()/1000);},current,out,capacity,written);
 }
-std::string StackChanCamera::Explain(const std::string&)
+std::expected<std::string,std::string> StackChanCamera::Explain(const std::string&)
 {
     // No physical consent-bound, cancellation-safe HTTP worker exists. All old
     // capture/encode/upload ingress must remain closed, including MCP callers.
-    throw std::runtime_error("camera upload unavailable: no bound transport worker");
+    return std::unexpected("camera upload unavailable: no bound transport worker");
 }
 
 bool StackChanCamera::CopyBGRA(Binding binding,uint8_t* out,size_t capacity,uint64_t& sequence,uint64_t& captured_ns)

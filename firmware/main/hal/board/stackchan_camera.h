@@ -34,7 +34,7 @@ public:
     bool Capture() override {return false;} // legacy unbound ingress fails closed
     bool StreamCaptures() {return false;}
     void SetExplainUrl(const std::string&,const std::string&) override {}
-    std::string Explain(const std::string&) override;
+    std::expected<std::string,std::string> Explain(const std::string&) override;
     bool SetHMirror(bool) override {return false;}
     bool SetVFlip(bool) override {return false;}
     // Legacy raw readers cannot hold an owned frame and are deliberately closed.
