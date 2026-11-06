@@ -179,8 +179,8 @@ bool BoundedWebSocket::Connect(const char* uri) {
     });
 
     // 使用 tcp 建立连接
-    if (!tcp_->Connect(host, port_number)) {
-        ESP_LOGE(TAG, "Failed to connect to server");
+    if (auto result = tcp_->Connect(host, port_number); !result) {
+        ESP_LOGE(TAG, "Failed to connect to server: %s", result.error().ToString().c_str());
         return false;
     }
 
@@ -309,13 +309,6 @@ void BoundedWebSocket::OnData(std::function<void(const char*, size_t, bool binar
 
 void BoundedWebSocket::OnError(std::function<void(int)> callback) {
     on_error_ = callback;
-}
-
-int BoundedWebSocket::GetLastError() {
-    if (tcp_) {
-        return tcp_->GetLastError();
-    }
-    return 0;  // No error if TCP connection doesn't exist
 }
 
 void BoundedWebSocket::OnTcpData(const std::string& data) {

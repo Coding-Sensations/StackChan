@@ -84,13 +84,14 @@ public:
         if(!owner_.HoldsMiraLease(b)||!owner_.Current(b,purpose)) {
             stopped_=true;Stop(b);return false;
         }
-        if(!codec_.EnableInputChecked(true)||!owner_.Current(b,purpose)) {Stop(b);return false;}
+        codec_.EnableInput(true);
+        if(!owner_.Current(b,purpose)) {Stop(b);return false;}
         ready_=true;return true;
     }
     bool Stop(AudioBinding b) {
         if(!leased_||!(b==binding_)||!owner_.HoldsMiraLease(b))return false;
         ready_=false;owner_.RevokeMira(b);Wipe();
-        if(!stopped_){if(!codec_.EnableInputChecked(false))return false;stopped_=true;}
+        if(!stopped_){codec_.EnableInput(false);stopped_=true;}
         if(!resampler_.Reset()||!owner_.ReleaseMira(b))return false;
         leased_=false;binding_={};return true;
     }
@@ -107,7 +108,7 @@ public:
         const int channels=codec_.input_channels();
         if(codec_.input_sample_rate()!=24000||(channels!=1&&channels!=2)){Stop(b);return fail();}
         raw_.resize(480*static_cast<size_t>(channels));
-        if(!codec_.InputDataChecked(raw_)||raw_.size()!=480*static_cast<size_t>(channels)||
+        if(!codec_.InputData(raw_)||raw_.size()!=480*static_cast<size_t>(channels)||
            !owner_.Current(b,purpose_)){Stop(b);return fail();}
         for(size_t i=0;i<480;++i)mono_[i]=raw_[i*static_cast<size_t>(channels)];
         if(!resampler_.Convert(mono_.data(),out,capacity,written)||!owner_.Current(b,purpose_)) {

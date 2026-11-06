@@ -15,17 +15,15 @@ class LocalTls final : public Tcp {
 public:
     explicit LocalTls(diagnostic::Task role=diagnostic::Task::AudioTls);
     ~LocalTls() override;
-    bool Connect(const std::string& host,int port) override;
+    NetworkResult<> Connect(const std::string& host,int port) override;
     void Disconnect() override;
     int Send(const std::string& data) override;
-    int GetLastError() override;
 private:
     esp_tls_t* tls_client_=nullptr;
     EventGroupHandle_t event_group_=nullptr;
     TaskHandle_t receive_task_handle_=nullptr;
     TaskHandle_t owner_task_=nullptr;
     std::atomic<bool> active_{false};
-    int last_error_=0;
     std::mutex send_mutex_; // Preserve whole-write ordering, including retries.
     std::mutex context_mutex_; // One nonblocking SDK read/write at a time.
     int socket_fd_=-1; // Established once; owner closes only after receive/writer join.
