@@ -23,7 +23,7 @@
 #include "audio_codec.h"
 #include "audio_failure_snapshot.h"
 #include "audio_processor.h"
-#include "processors/audio_debugger.h"
+#include "audio_debugger.h"
 #include "wake_word.h"
 #include "protocol.h"
 #include "ogg_demuxer.h"
