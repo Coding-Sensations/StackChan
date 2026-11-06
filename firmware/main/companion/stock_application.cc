@@ -20,7 +20,6 @@
 #include <cJSON.h>
 #include <driver/gpio.h>
 #include <arpa/inet.h>
-#include <font_awesome.h>
 
 // Narrow declaration avoids importing camera-driver types for this UI mode query.
 namespace hal_bridge { bool is_xiaozhi_mode(); }

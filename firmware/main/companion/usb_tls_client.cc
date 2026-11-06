@@ -46,7 +46,6 @@ bool UsbTlsClient::Begin(UsbByteOwner& owner,const char* host){
  if(ret){Fail(ret);return false;}
  mbedtls_ssl_conf_authmode(&config_,MBEDTLS_SSL_VERIFY_REQUIRED);
  mbedtls_ssl_conf_ca_chain(&config_,&ca_,nullptr);
- mbedtls_ssl_conf_rng(&config_,mbedtls_ctr_drbg_random,&random_);
  mbedtls_ssl_conf_min_tls_version(&config_,MBEDTLS_SSL_VERSION_TLS1_2);
  ret=mbedtls_ssl_setup(&ssl_,&config_);
  if(!ret)ret=mbedtls_ssl_set_hostname(&ssl_,expected);
